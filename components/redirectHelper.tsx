@@ -1,0 +1,34 @@
+import React from "react";
+import { StyleSheet, View, TouchableOpacity, Text } from "react-native";
+import { useRouter } from "expo-router";
+
+export default function ButtonHelper() {
+  const router = useRouter();
+
+  const handlePress = () => {
+    router.push("/(tabs)/queue"); // Replace with your target route
+  };
+
+  return (
+    <TouchableOpacity style={styles.button} onPress={handlePress}>
+      <Text style={styles.buttonText}>Go</Text>
+    </TouchableOpacity>
+  );
+}
+
+const styles = StyleSheet.create({
+  button: {
+    position: "absolute",
+    bottom: 76, // Margin from bottom
+    right: 16, // Margin from right
+    backgroundColor: "#007AFF",
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+});
