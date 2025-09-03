@@ -38,6 +38,7 @@ export default function RootLayout() {
             options={{ headerShown: false }}
           />
           <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+          <Stack.Screen name="qrcode" options={{ headerShown: false }} />
           <Stack.Screen name="+not-found" />
         </Stack>
         <StatusBar style={isDark ? "light" : "auto"} />
