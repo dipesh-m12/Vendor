@@ -17,17 +17,23 @@ import {
   User,
   Info,
   BarChart3,
+  X,
 } from "lucide-react-native";
 import { PieChart } from "react-native-chart-kit";
 import { Dimensions } from "react-native";
+import { translations } from "@/translations/tabsTranslations/statsTransaltions";
 
 const screenWidth = Dimensions.get("window").width;
 
 export default function StatisticsPage() {
   const router = useRouter();
-  const { isDark } = useThemeStore();
+  const { isDark, language } = useThemeStore();
   const [selectedTimeRange, setSelectedTimeRange] = useState("Last 7 Days");
   const [showTimeRangeModal, setShowTimeRangeModal] = useState(false);
+  const [showCustomerInsightsModal, setShowCustomerInsightsModal] =
+    useState(false);
+
+  const languageSet = translations[language];
 
   const timeRangeOptions = [
     "Last 7 Days",
@@ -53,21 +59,21 @@ export default function StatisticsPage() {
 
   const pieData = [
     {
-      name: "Served",
+      name: languageSet.served,
       population: 253,
       color: "#4285F4",
       legendFontColor: isDark ? "#F9FAFB" : "#374151",
       legendFontSize: 12,
     },
     {
-      name: "Skipped",
+      name: languageSet.skipped,
       population: 47,
       color: "#FB923C",
       legendFontColor: isDark ? "#F9FAFB" : "#374151",
       legendFontSize: 12,
     },
     {
-      name: "Left",
+      name: languageSet.left,
       population: 30,
       color: "#EF4444",
       legendFontColor: isDark ? "#F9FAFB" : "#374151",
@@ -80,6 +86,7 @@ export default function StatisticsPage() {
     { time: "2:00 PM - 3:00 PM", traffic: "High Traffic" },
     { time: "12:00 PM - 1:00 PM", traffic: "High Traffic" },
   ];
+  // languageSet.highTraffic
 
   const containerBg = isDark ? "#1F2937" : "#F1F5F9";
   const cardBg = isDark ? "#374151" : "#FFFFFF";
@@ -246,7 +253,7 @@ export default function StatisticsPage() {
               color: textPrimary,
             }}
           >
-            Statistics
+            {languageSet.statistics}
           </Text>
         </View>
       </View>
@@ -286,7 +293,7 @@ export default function StatisticsPage() {
                 flex: 1,
               }}
             >
-              Time Range
+              {languageSet.timeRange}
             </Text>
             <TouchableOpacity
               onPress={() => setShowTimeRangeModal(true)}
@@ -316,12 +323,13 @@ export default function StatisticsPage() {
             flexDirection: "row",
             flexWrap: "wrap",
             justifyContent: "space-between",
+            alignItems: "stretch",
           }}
         >
           <View style={{ width: "48%" }}>
             <StatCard
               icon={<Users size={20} color="#4285F4" />}
-              title="Customers Served"
+              title={languageSet.customersServed}
               value="253"
               subtitle="Last 7 Days"
               color="#4285F4"
@@ -330,7 +338,7 @@ export default function StatisticsPage() {
           <View style={{ width: "48%" }}>
             <StatCard
               icon={<Clock size={20} color="#4285F4" />}
-              title="Avg. Wait Time"
+              title={languageSet.avgWaitTime}
               value="15 min"
               subtitle="Last 7 Days"
               color="#4285F4"
@@ -339,7 +347,7 @@ export default function StatisticsPage() {
           <View style={{ width: "48%" }}>
             <StatCard
               icon={<UserX size={20} color="#FB923C" />}
-              title="Customers Skipped"
+              title={languageSet.customersSkipped}
               value="47"
               subtitle="Last 7 Days"
               color="#FB923C"
@@ -348,7 +356,7 @@ export default function StatisticsPage() {
           <View style={{ width: "48%" }}>
             <StatCard
               icon={<TrendingDown size={20} color="#EF4444" />}
-              title="Customers Left"
+              title={languageSet.customersLeft}
               value="30"
               subtitle="Last 7 Days"
               color="#EF4444"
@@ -387,7 +395,7 @@ export default function StatisticsPage() {
                   marginLeft: 8,
                 }}
               >
-                Customer Distribution
+                {languageSet.customerDistribution}
               </Text>
             </View>
             <Text style={{ color: "#4285F4", fontSize: 14 }}>330 total</Text>
@@ -468,9 +476,11 @@ export default function StatisticsPage() {
                 flex: 1,
               }}
             >
-              Customer Insights
+              {languageSet.customerInsights}
             </Text>
-            <TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setShowCustomerInsightsModal(true)}
+            >
               <Info size={20} color={textSecondary} />
             </TouchableOpacity>
           </View>
@@ -581,15 +591,12 @@ export default function StatisticsPage() {
             <Text
               style={{ color: "#4285F4", fontWeight: "500", marginBottom: 4 }}
             >
-              What is Conversion Rate?
+              {languageSet.whatIsConversionRate}
             </Text>
             <Text
-              style={{ color: textSecondary, fontSize: 12, lineHeight: 16 }}
+              style={{ color: textSecondary, fontSize: 13, lineHeight: 16 }}
             >
-              Conversion rate shows what percentage of customers who visited
-              were actually served. It's calculated as (Customers Served ÷
-              Customers Visited) × 100%. A higher conversion rate means you're
-              efficiently serving most of the customers who visit.
+              {languageSet.conversionRateDefinition}
             </Text>
           </View>
 
@@ -607,23 +614,23 @@ export default function StatisticsPage() {
                 marginBottom: 8,
               }}
             >
-              Key Insights
+              {languageSet.keyInsights}
             </Text>
             <InsightCard
               icon={<TrendingDown size={16} color="white" />}
-              title="Traffic trend:"
+              title={languageSet.trafficTrend}
               description="Customer visits are down by 28% compared to the previous period. Review your marketing strategy to attract more customers."
               color="#EF4444"
             />
             <InsightCard
               icon={<User size={16} color="white" />}
-              title="Customer retention:"
+              title={languageSet.customerRetention}
               description="39% of your customers are returning visitors."
               color="#4285F4"
             />
             <InsightCard
               icon={<Calendar size={16} color="white" />}
-              title="Best performing day:"
+              title={languageSet.bestPerformanceDay}
               description="Sun has your highest conversion rate. Consider studying what makes Sun successful and apply those practices to other days."
               color="#8B5CF6"
             />
@@ -659,7 +666,7 @@ export default function StatisticsPage() {
                 marginLeft: 8,
               }}
             >
-              Peak Hours
+              {languageSet.peakHours}
             </Text>
           </View>
 
@@ -714,7 +721,7 @@ export default function StatisticsPage() {
                 marginLeft: 8,
               }}
             >
-              Service Completion
+              {languageSet.serviceCompletion}
             </Text>
           </View>
 
@@ -751,12 +758,70 @@ export default function StatisticsPage() {
                 fontSize: 16,
               }}
             >
-              85% Completed
+              85% {languageSet.completed}
             </Text>
             <Text style={{ color: textSecondary, fontSize: 14 }}>100%</Text>
           </View>
         </View>
       </ScrollView>
+
+      <Modal
+        visible={showCustomerInsightsModal}
+        animationType="fade"
+        transparent={true}
+        onRequestClose={() => setShowCustomerInsightsModal(false)}
+      >
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: cardBg,
+              borderRadius: 12,
+              padding: 20,
+              width: "90%",
+              maxWidth: 400,
+            }}
+          >
+            <View
+              className="flex flex-row-reverse"
+              style={{ marginBottom: 20 }}
+            >
+              <X
+                color={isDark ? "white" : "black"}
+                onPress={() => setShowCustomerInsightsModal(false)}
+              />
+            </View>
+
+            {/* Description */}
+            <Text
+              style={{
+                fontSize: 14,
+                color: isDark ? "#9CA3AF" : "#6B7280",
+                lineHeight: 20,
+                marginBottom: 12,
+              }}
+            >
+              {languageSet.chartDescription}
+            </Text>
+            <Text
+              style={{
+                fontSize: 14,
+                color: isDark ? "#9CA3AF" : "#6B7280",
+                lineHeight: 20,
+                marginBottom: 24,
+              }}
+            >
+              {languageSet.trendsDescription}
+            </Text>
+          </View>
+        </View>
+      </Modal>
 
       {/* Time Range Modal */}
       <Modal
@@ -791,7 +856,7 @@ export default function StatisticsPage() {
                 textAlign: "center",
               }}
             >
-              Select Time Range
+              {languageSet.selectTimeRange}
             </Text>
             {timeRangeOptions.map((option) => (
               <TouchableOpacity

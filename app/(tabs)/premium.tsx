@@ -20,45 +20,48 @@ import {
   Settings,
   LogOut,
 } from "lucide-react-native";
+import { translations } from "@/translations/tabsTranslations/premiumPageTranslations";
 
 export default function PremiumPage() {
   const router = useRouter();
-  const { isDark } = useThemeStore();
+  const { isDark, language } = useThemeStore();
+
+  const languageSet = translations[language];
   const [selectedPlan, setSelectedPlan] = useState("monthly");
 
   const plans = {
     monthly: {
       price: "$9.99",
-      period: "month",
+      period: languageSet.periodMonthly,
       savings: "",
     },
     yearly: {
       price: "$89.99",
-      period: "year",
-      savings: "Save 25%",
+      period: languageSet.periodYearly,
+      savings: languageSet.savingsYearly,
     },
   };
 
   const features = [
     {
       icon: <Shield color="#4285F4" size={18} />,
-      title: "Unlimited Customers",
-      description: "No limits on queue size",
+      title: languageSet.feature1Title,
+      description: languageSet.feature1Description,
     },
     {
       icon: <Zap color="#4285F4" size={18} />,
-      title: "Priority Support",
-      description: "Get help when you need it",
+      title: languageSet.feature2Title,
+      description: languageSet.feature2Description,
     },
     {
       icon: <Clock color="#4285F4" size={18} />,
-      title: "Advanced Analytics",
-      description: "Detailed insights and reports",
+      title: languageSet.feature3Title,
+      description: languageSet.feature3Description,
     },
     {
       icon: <Users color="#4285F4" size={18} />,
-      title: "Team Access",
-      description: "Add up to 5 team members",
+      title: languageSet.feature4Title,
+      description: languageSet.feature4Description,
     },
   ];
 
@@ -120,7 +123,7 @@ export default function PremiumPage() {
               <ArrowLeft size={20} color="#4285F4" />
             </TouchableOpacity>
             <Text style={[styles.headerTitle, { color: textPrimary }]}>
-              Premium Plans
+              {languageSet.premiumPlans}
             </Text>
           </View>
         </View>
@@ -137,12 +140,12 @@ export default function PremiumPage() {
             <View style={styles.premiumHeader}>
               <Star color="#F59E0B" size={24} />
               <Text style={[styles.premiumTitle, { color: textPrimary }]}>
-                QVuew Premium
+                {languageSet.premiumTitle}
               </Text>
             </View>
 
             <Text style={[styles.premiumSubtitle, { color: textSecondary }]}>
-              Upgrade to Premium for advanced features and unlimited access
+              {languageSet.premiumSubtitle}
             </Text>
 
             {/* Plan Toggle */}
@@ -183,7 +186,7 @@ export default function PremiumPage() {
                       },
                     ]}
                   >
-                    Monthly
+                    {languageSet.monthly}
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -210,7 +213,7 @@ export default function PremiumPage() {
                       },
                     ]}
                   >
-                    Yearly
+                    {languageSet.yearly}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -247,15 +250,16 @@ export default function PremiumPage() {
               onPress={handleUpgrade}
               style={styles.upgradeButton}
             >
-              <Text style={styles.upgradeButtonText}>Upgrade Now</Text>
+              <Text style={styles.upgradeButtonText}>
+                {languageSet.upgradeButton}
+              </Text>
             </TouchableOpacity>
           </View>
 
           {/* Testimonial */}
           <View style={[styles.testimonialCard, { backgroundColor: cardBg }]}>
             <Text style={[styles.testimonialText, { color: textSecondary }]}>
-              "QVuew Premium has transformed how we manage our salon. The
-              advanced analytics alone are worth the price!"
+              {`"${languageSet.testimonialText}"`}
             </Text>
             <View style={styles.testimonialAuthor}>
               <View
