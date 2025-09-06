@@ -1116,12 +1116,12 @@ export default function QVuewScreen() {
 
       <UndoSystem />
 
-      <ThemeWidget isDark={isDark} toggleTheme={toggleTheme} />
+      {/* <ThemeWidget isDark={isDark} toggleTheme={toggleTheme} />
       <LanguageWidget
         setLanguage={setLanguage}
         isDark={isDark}
         language={language}
-      />
+      /> */}
     </LinearGradient>
   );
 }
