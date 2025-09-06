@@ -22,8 +22,12 @@ import {
   Shield,
   EyeOff,
   ChevronDown,
+  Users,
 } from "lucide-react-native";
-import { signupTranslations } from "@/translations/signupTranslations";
+import {
+  signupTranslations,
+  translations,
+} from "@/translations/signupTranslations";
 import { z } from "zod";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -138,6 +142,10 @@ const signUpSchemas = [
         (val) => /^[A-Za-z0-9\s,.]+$/.test(val),
         "Only alphanumeric characters, commas, dots, and spaces allowed"
       ),
+    seatsNumber: z
+      .number()
+      .min(1, "Must have at least 1 seat")
+      .max(1000, "Maximum 1000 seats allowed"),
   }),
   z
     .object({
@@ -186,12 +194,14 @@ type FormData = {
   password: string;
   confirmPassword: string;
   agreeToTerms: boolean;
+  seatsNumber: number;
 };
 
 export default function SignUpScreen() {
   const router = useRouter();
   const { isDark, language, toggleTheme, setLanguage } = useThemeStore();
   const languageSet = signupTranslations[language];
+  const numseatsLanguageSet = translations[language];
   const [step, setStep] = useState(1);
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [isDetectingLocation, setIsDetectingLocation] = useState(false);
@@ -224,6 +234,7 @@ export default function SignUpScreen() {
       password: "",
       confirmPassword: "",
       agreeToTerms: false,
+      seatsNumber: null,
     },
   });
 
@@ -259,10 +270,7 @@ export default function SignUpScreen() {
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
-        Alert.alert(
-          "Permission Denied",
-          "Location permission denied. Please allow location access or enter your address manually."
-        );
+        Alert.alert("Permission Denied", "Location permission denied...");
         setIsDetectingLocation(false);
         return;
       }
@@ -271,16 +279,15 @@ export default function SignUpScreen() {
         accuracy: Location.Accuracy.High,
       });
       const { latitude, longitude } = location.coords;
-      setValue(
-        "businessAddress",
-        `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`
-      );
+      // Convert to proper address string
+      const addressString = `Lat: ${latitude.toFixed(
+        6
+      )}, Lng: ${longitude.toFixed(6)}`;
+      setValue("businessAddress", addressString);
+      clearErrors("businessAddress");
     } catch (error) {
       console.error("Location error:", error);
-      Alert.alert(
-        "Error",
-        "Could not detect your location. Please try again or enter your address manually."
-      );
+      Alert.alert("Error", "Could not detect your location...");
     } finally {
       setIsDetectingLocation(false);
     }
@@ -729,6 +736,7 @@ export default function SignUpScreen() {
       >
         {languageSet.tellUsAboutBusiness}
       </Text>
+
       {/* Business Name Input */}
       <View style={{ width: "100%", marginBottom: 8 }}>
         <View
@@ -764,7 +772,7 @@ export default function SignUpScreen() {
                 }}
                 placeholder={languageSet.businessName}
                 placeholderTextColor={isDark ? "#9CA3AF" : "#6B7280"}
-                value={value}
+                value={value || ""}
                 onChangeText={(text) => {
                   onChange(text);
                   clearErrors("businessName");
@@ -788,6 +796,7 @@ export default function SignUpScreen() {
           ) : null}
         </View>
       </View>
+
       {/* Business Type Picker */}
       <View style={{ width: "100%", marginBottom: 8 }}>
         <TouchableOpacity
@@ -837,6 +846,157 @@ export default function SignUpScreen() {
           ) : null}
         </View>
       </View>
+
+      {/* Business Address Input */}
+      <View style={{ width: "100%", marginBottom: 8 }}>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            backgroundColor: isDark ? "#374151" : "white",
+            borderRadius: 12,
+            paddingVertical: 8,
+            borderWidth: 1,
+            borderColor: isDark ? "#4B5563" : "#E5E7EB",
+          }}
+        >
+          <MapPin size={20} color="#3B82F6" style={{ marginHorizontal: 16 }} />
+          <Controller
+            control={control}
+            name="businessAddress"
+            rules={{
+              required: "Business address is required",
+            }}
+            render={({ field: { onChange, value } }) => (
+              <TextInput
+                style={{
+                  flex: 1,
+                  fontSize: 16,
+                  color: isDark ? "#F9FAFB" : "#111827",
+                }}
+                placeholder={languageSet.businessAddress}
+                placeholderTextColor={isDark ? "#9CA3AF" : "#6B7280"}
+                value={value || ""}
+                onChangeText={(text) => {
+                  onChange(text);
+                  clearErrors("businessAddress");
+                }}
+                editable={!isDetectingLocation}
+              />
+            )}
+          />
+          <TouchableOpacity
+            style={{
+              backgroundColor: isDetectingLocation ? "#E5E7EB" : "#DBEAFE",
+              paddingHorizontal: 12,
+              paddingVertical: 6,
+              borderRadius: 8,
+              flexDirection: "row",
+              alignItems: "center",
+              marginRight: 16,
+            }}
+            onPress={() => setShowLocationModal(true)}
+            disabled={isDetectingLocation}
+          >
+            <MapPin size={14} color="#3B82F6" />
+            <Text
+              style={{
+                color: isDetectingLocation ? "#6B7280" : "#3B82F6",
+                fontSize: 12,
+                fontWeight: "500",
+                marginLeft: 4,
+              }}
+            >
+              {isDetectingLocation
+                ? "Getting address..."
+                : languageSet.detectLocation}
+            </Text>
+          </TouchableOpacity>
+        </View>
+        <View style={{ height: 20 }}>
+          {errors.businessAddress ? (
+            <Text
+              style={{
+                color: "red",
+                fontSize: 11,
+                textAlign: "left",
+                marginTop: 4,
+              }}
+            >
+              {errors.businessAddress.message}
+            </Text>
+          ) : null}
+        </View>
+      </View>
+
+      {/* Number of Seats Input */}
+      <View style={{ width: "100%", marginBottom: 8 }}>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            backgroundColor: isDark ? "#374151" : "white",
+            borderRadius: 12,
+            paddingHorizontal: 16,
+            paddingVertical: 8,
+            borderWidth: 1,
+            borderColor: isDark ? "#4B5563" : "#E5E7EB",
+          }}
+        >
+          <Users size={20} color="#3B82F6" />
+          <Controller
+            control={control}
+            name="seatsNumber"
+            rules={{
+              required: "Number of seats is required",
+              min: {
+                value: 1,
+                message: "Must have at least 1 seat",
+              },
+              max: {
+                value: 1000,
+                message: "Maximum 1000 seats allowed",
+              },
+            }}
+            render={({ field: { onChange, value } }) => (
+              <TextInput
+                style={{
+                  flex: 1,
+                  marginLeft: 12,
+                  fontSize: 16,
+                  color: isDark ? "#F9FAFB" : "#111827",
+                }}
+                placeholder={numseatsLanguageSet.numberOfSeats}
+                placeholderTextColor={isDark ? "#9CA3AF" : "#6B7280"}
+                value={value ? value.toString() : ""}
+                onChangeText={(text) => {
+                  // Only allow numbers
+                  const numericValue = text.replace(/[^0-9]/g, "");
+                  onChange(numericValue ? parseInt(numericValue, 10) : "");
+                  clearErrors("seatsNumber");
+                }}
+                keyboardType="numeric"
+              />
+            )}
+          />
+        </View>
+        <View style={{ height: 20 }}>
+          {errors.seatsNumber ? (
+            <Text
+              style={{
+                color: "red",
+                fontSize: 11,
+                textAlign: "left",
+                marginTop: 4,
+              }}
+            >
+              {errors.seatsNumber.message}
+            </Text>
+          ) : null}
+        </View>
+      </View>
+
+      {/* Business Type Modal */}
       <Modal
         visible={showBusinessTypePicker}
         transparent={true}
@@ -918,87 +1078,8 @@ export default function SignUpScreen() {
           </View>
         </View>
       </Modal>
-      {/* Business Address Input */}
-      <View style={{ width: "100%", marginBottom: 8 }}>
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            backgroundColor: isDark ? "#374151" : "white",
-            borderRadius: 12,
-            paddingVertical: 8,
-            borderWidth: 1,
-            borderColor: isDark ? "#4B5563" : "#E5E7EB",
-          }}
-        >
-          <MapPin size={20} color="#3B82F6" style={{ marginHorizontal: 16 }} />
-          <Controller
-            control={control}
-            name="businessAddress"
-            rules={{
-              required: "Business address is required",
-            }}
-            render={({ field: { onChange, value } }) => (
-              <TextInput
-                style={{
-                  flex: 1,
-                  fontSize: 16,
-                  color: isDark ? "#F9FAFB" : "#111827",
-                }}
-                placeholder={languageSet.businessAddress}
-                placeholderTextColor={isDark ? "#9CA3AF" : "#6B7280"}
-                value={value}
-                onChangeText={(text) => {
-                  onChange(text);
-                  clearErrors("businessAddress");
-                }}
-                editable={!isDetectingLocation}
-              />
-            )}
-          />
-          <TouchableOpacity
-            style={{
-              backgroundColor: isDetectingLocation ? "#E5E7EB" : "#DBEAFE",
-              paddingHorizontal: 12,
-              paddingVertical: 6,
-              borderRadius: 8,
-              flexDirection: "row",
-              alignItems: "center",
-              marginRight: 16,
-            }}
-            onPress={() => setShowLocationModal(true)}
-            disabled={isDetectingLocation}
-          >
-            <MapPin size={14} color="#3B82F6" />
-            <Text
-              style={{
-                color: isDetectingLocation ? "#6B7280" : "#3B82F6",
-                fontSize: 12,
-                fontWeight: "500",
-                marginLeft: 4,
-              }}
-            >
-              {isDetectingLocation
-                ? "Getting address..."
-                : languageSet.detectLocation}
-            </Text>
-          </TouchableOpacity>
-        </View>
-        <View style={{ height: 20 }}>
-          {errors.businessAddress ? (
-            <Text
-              style={{
-                color: "red",
-                fontSize: 11,
-                textAlign: "left",
-                marginTop: 4,
-              }}
-            >
-              {errors.businessAddress.message}
-            </Text>
-          ) : null}
-        </View>
-      </View>
+
+      {/* Location Permission Modal */}
       <Modal
         visible={showLocationModal}
         transparent={true}
@@ -1019,7 +1100,6 @@ export default function SignUpScreen() {
             style={{
               backgroundColor: isDark ? "#374151" : "white",
               borderRadius: 12,
-              // maxWidth: 300,
               width: "90%",
               padding: 16,
               zIndex: 1000,
@@ -1096,6 +1176,7 @@ export default function SignUpScreen() {
           </View>
         </View>
       </Modal>
+
       {/* Continue Button */}
       <TouchableOpacity
         style={{ width: "100%", marginBottom: 24 }}

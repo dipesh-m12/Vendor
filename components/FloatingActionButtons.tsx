@@ -34,7 +34,7 @@ export default function FloatingActionButtons({
           position: "absolute",
           right: 16,
           bottom,
-          zIndex: 1000,
+          zIndex: 900,
         }}
       >
         {/* Users/People Button */}

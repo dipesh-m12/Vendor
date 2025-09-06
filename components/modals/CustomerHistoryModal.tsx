@@ -17,6 +17,11 @@ import {
   FileText,
   FileSpreadsheet,
 } from "lucide-react-native";
+import {
+  translations,
+  CusDettranslations,
+} from "@/translations/tabsTranslations/queue/modal_cusHis";
+import useThemeStore from "@/store/themeStore";
 
 const CustomerHistoryModal = ({
   showDownloadHistoryModal,
@@ -28,6 +33,9 @@ const CustomerHistoryModal = ({
   setMaskSensitiveData,
 }: any) => {
   const [showChart, setShowChart] = useState(true);
+  const { language } = useThemeStore();
+  const langaugeSet = translations[language];
+  const cusDetLanguageSet = CusDettranslations[language];
   const screenWidth = Dimensions.get("window").width;
 
   // Process data for line chart
@@ -103,12 +111,6 @@ const CustomerHistoryModal = ({
     return data;
   };
 
-  // Simplified table data for mobile view
-  const mobileTableData = customerHistoryData.map((customer) => ({
-    ...customer,
-    displayName: customer.name.split(" ")[0], // Show only first name
-  }));
-
   return (
     <Modal
       visible={showDownloadHistoryModal}
@@ -157,7 +159,7 @@ const CustomerHistoryModal = ({
                   color: isDark ? "#F8FAFC" : "#1E3A8A",
                 }}
               >
-                Download Customer History
+                {langaugeSet.downloadCustomerHistory}
               </Text>
             </View>
             <TouchableOpacity
@@ -178,7 +180,7 @@ const CustomerHistoryModal = ({
                   marginBottom: 8,
                 }}
               >
-                Select Time Range
+                {langaugeSet.selectTimeRange}
               </Text>
               <TouchableOpacity
                 style={{
@@ -245,7 +247,7 @@ const CustomerHistoryModal = ({
                   color: isDark ? "#F8FAFC" : "#1E3A8A",
                 }}
               >
-                Mask sensitive data (phone/email)
+                {langaugeSet.maskSensitiveData}
               </Text>
             </View>
 
@@ -266,7 +268,7 @@ const CustomerHistoryModal = ({
                     color: isDark ? "#F8FAFC" : "#1E3A8A",
                   }}
                 >
-                  Customer Flow Trend
+                  {langaugeSet.customerFlowTrend}
                 </Text>
                 <TouchableOpacity
                   onPress={() => setShowChart(!showChart)}
@@ -286,7 +288,7 @@ const CustomerHistoryModal = ({
                       fontSize: 14,
                     }}
                   >
-                    {showChart ? "Hide Chart" : "Show Chart"}
+                    {showChart ? langaugeSet.hideChart : langaugeSet.showChart}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -333,7 +335,11 @@ const CustomerHistoryModal = ({
                         color: isDark ? "#9CA3AF" : "#6B7280",
                       }}
                     >
-                      Total: {customerHistoryData.length} customers
+                      {langaugeSet.totalCustomers.replace(
+                        "{X}",
+                        customerHistoryData.length
+                      )}
+                      {/* Total: {customerHistoryData.length} customers */}
                     </Text>
                     <View
                       style={{ flexDirection: "row", alignItems: "center" }}
@@ -353,7 +359,7 @@ const CustomerHistoryModal = ({
                           color: isDark ? "#9CA3AF" : "#6B7280",
                         }}
                       >
-                        Daily customer count
+                        {langaugeSet.dailyCustomerCount}
                       </Text>
                     </View>
                   </View>
@@ -371,7 +377,7 @@ const CustomerHistoryModal = ({
                   marginBottom: 12,
                 }}
               >
-                Customer Details
+                {cusDetLanguageSet.customerDetails}
               </Text>
 
               {/* Mobile Card View */}
@@ -601,7 +607,10 @@ const CustomerHistoryModal = ({
             >
               <TouchableOpacity
                 onPress={() => {
-                  Alert.alert("Download PDF", "PDF download started");
+                  Alert.alert(
+                    langaugeSet.downloadPdf,
+                    langaugeSet.pdfDownloadStarted
+                  );
                 }}
                 style={{
                   flex: 1,
@@ -622,8 +631,8 @@ const CustomerHistoryModal = ({
               <TouchableOpacity
                 onPress={() => {
                   Alert.alert(
-                    "Download Excel",
-                    "Excel download started (Premium feature)"
+                    langaugeSet.downloadExcel,
+                    langaugeSet.excelDownloadStarted
                   );
                 }}
                 style={{
@@ -656,7 +665,7 @@ const CustomerHistoryModal = ({
                       fontWeight: "600",
                     }}
                   >
-                    Premium
+                    {langaugeSet.premium}
                   </Text>
                 </View>
                 <FileSpreadsheet

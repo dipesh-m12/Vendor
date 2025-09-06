@@ -1257,3 +1257,51 @@ export const signupTranslations: any = {
     termsRequired: "ᱟᱯᱱᱟᱨ ᱥᱟᱦᱟᱣ ᱨᱮᱱ ᱢᱮᱱᱟᱜ ᱥᱮᱫ ᱢᱮᱱᱟᱜ",
   },
 };
+
+export const translations: any = {
+  English: {
+    numberOfSeats: "Number of Seats",
+  },
+  हिन्दी: {
+    numberOfSeats: "सीटों की संख्या",
+  },
+  বাংলা: {
+    numberOfSeats: "আসনের সংখ্যা",
+  },
+  తెలుగు: {
+    numberOfSeats: "సీట్ల సంఖ్య",
+  },
+  मराठी: {
+    numberOfSeats: "जागांची संख्या",
+  },
+  தமிழ்: {
+    numberOfSeats: "இருக்கைகளின் எண்ணிக்கை",
+  },
+  اردو: {
+    numberOfSeats: "نشستوں کی تعداد",
+  },
+  ગુજરાતી: {
+    numberOfSeats: "બેઠકોની સંખ્યા",
+  },
+  ಕನ್ನಡ: {
+    numberOfSeats: "ಆಸನಗಳ ಸಂಖ್ಯೆ",
+  },
+  ଓଡ଼ିଆ: {
+    numberOfSeats: "ଆସନ ସଂଖ୍ୟା",
+  },
+  മലയാളം: {
+    numberOfSeats: "സീറ്റുകളുടെ എണ്ണം",
+  },
+  ਪੰਜਾਬੀ: {
+    numberOfSeats: "ਸੀਟਾਂ ਦੀ ਗਿਣਤੀ",
+  },
+  অসমীয়া: {
+    numberOfSeats: "আসনৰ সংখ্যা",
+  },
+  मैथिली: {
+    numberOfSeats: "सीटक संख्या",
+  },
+  ᱥᱟᱱᱛᱟᱲᱤ: {
+    numberOfSeats: "ᱥᱤᱴᱠᱚᱢᱟᱱ ᱮᱞ",
+  },
+};

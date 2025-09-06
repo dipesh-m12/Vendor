@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Modal, View, Text, TouchableOpacity, Animated } from "react-native";
 import { Info, RotateCcw, X } from "lucide-react-native";
 import useThemeStore from "@/store/themeStore";
+import { translations } from "@/translations/tabsTranslations/queue/modal_undo";
 
 // First Modal - Notification Banner
 const UndoNotificationBanner = ({
@@ -12,132 +13,139 @@ const UndoNotificationBanner = ({
   customerName = "Customer",
   message = "Customer removed from queue",
 }: any) => {
-  const { isDark } = useThemeStore();
+  const { isDark, language } = useThemeStore();
+  const languageSet = translations[language];
   if (!visible) return null;
 
   return (
-    <View
-      style={{
-        position: "absolute",
-        bottom: 240,
-        left: 20,
-        right: 20,
-        zIndex: 1001,
-      }}
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      onRequestClose={onClose}
     >
       <View
         style={{
-          backgroundColor: "#3B82F6",
-          borderRadius: 12,
-          padding: 16,
-          flexDirection: "column",
-          alignItems: "stretch",
-          shadowColor: "#000",
-          shadowOffset: {
-            width: 0,
-            height: 4,
-          },
-          shadowOpacity: 0.3,
-          shadowRadius: 8,
-          elevation: 8,
+          flex: 1,
+          justifyContent: "flex-end",
+          paddingBottom: 20,
+          paddingHorizontal: 20,
         }}
       >
-        {/* Info Icon and Content */}
         <View
           style={{
-            flexDirection: "row",
-            alignItems: "center",
-            marginBottom: 12,
+            backgroundColor: "#3B82F6",
+            borderRadius: 12,
+            padding: 16,
+            flexDirection: "column",
+            alignItems: "stretch",
+            shadowColor: "#000",
+            shadowOffset: {
+              width: 0,
+              height: 4,
+            },
+            shadowOpacity: 0.3,
+            shadowRadius: 8,
+            elevation: 8,
           }}
         >
+          {/* Info Icon and Content */}
           <View
-            style={{
-              width: 24,
-              height: 24,
-              borderRadius: 12,
-              backgroundColor: "rgba(255,255,255,0.2)",
-              justifyContent: "center",
-              alignItems: "center",
-              marginRight: 12,
-            }}
-          >
-            <Info size={16} color="white" />
-          </View>
-
-          <View style={{ flex: 1 }}>
-            <Text
-              style={{
-                color: "white",
-                fontSize: 16,
-                fontWeight: "600",
-                marginBottom: 2,
-              }}
-            >
-              {message}
-            </Text>
-            <Text
-              style={{
-                color: "rgba(255,255,255,0.8)",
-                fontSize: 13,
-              }}
-            >
-              Undo available
-            </Text>
-          </View>
-        </View>
-
-        {/* Action Buttons */}
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "flex-end",
-            gap: 16,
-          }}
-        >
-          <TouchableOpacity
-            onPress={onUndo}
             style={{
               flexDirection: "row",
               alignItems: "center",
-              paddingVertical: 6,
-              paddingHorizontal: 12,
-              backgroundColor: "rgba(255,255,255,0.15)",
-              borderRadius: 6,
+              marginBottom: 12,
             }}
           >
-            <RotateCcw size={14} color="white" style={{ marginRight: 4 }} />
-            <Text
+            <View
               style={{
-                color: "white",
-                fontSize: 14,
-                fontWeight: "500",
+                width: 24,
+                height: 24,
+                borderRadius: 12,
+                backgroundColor: "rgba(255,255,255,0.2)",
+                justifyContent: "center",
+                alignItems: "center",
+                marginRight: 12,
               }}
             >
-              Undo
-            </Text>
-          </TouchableOpacity>
+              <Info size={16} color="white" />
+            </View>
 
-          <TouchableOpacity
-            onPress={onMore}
+            <View style={{ flex: 1 }}>
+              <Text
+                style={{
+                  color: "white",
+                  fontSize: 16,
+                  fontWeight: "600",
+                  marginBottom: 2,
+                }}
+              >
+                {message}
+              </Text>
+              <Text
+                style={{
+                  color: "rgba(255,255,255,0.8)",
+                  fontSize: 13,
+                }}
+              >
+                {languageSet.undo_available}
+              </Text>
+            </View>
+          </View>
+
+          {/* Action Buttons */}
+          <View
             style={{
-              paddingVertical: 6,
-              paddingHorizontal: 8,
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "flex-end",
+              gap: 16,
             }}
           >
-            <Text
+            <TouchableOpacity
+              onPress={onUndo}
               style={{
-                color: "white",
-                fontSize: 14,
-                fontWeight: "500",
+                flexDirection: "row",
+                alignItems: "center",
+                paddingVertical: 6,
+                paddingHorizontal: 12,
+                backgroundColor: "rgba(255,255,255,0.15)",
+                borderRadius: 6,
               }}
             >
-              More
-            </Text>
-          </TouchableOpacity>
+              <RotateCcw size={14} color="white" style={{ marginRight: 4 }} />
+              <Text
+                style={{
+                  color: "white",
+                  fontSize: 14,
+                  fontWeight: "500",
+                }}
+              >
+                {languageSet.undo}
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={onMore}
+              style={{
+                paddingVertical: 6,
+                paddingHorizontal: 8,
+              }}
+            >
+              <Text
+                style={{
+                  color: "white",
+                  fontSize: 14,
+                  fontWeight: "500",
+                }}
+              >
+                {languageSet.more}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
-    </View>
+    </Modal>
   );
 };
 
@@ -164,7 +172,8 @@ const UndoRecentActionsModal = ({ visible, onClose, onUndoAction }: any) => {
       time: "02:17",
     },
   ];
-  const { isDark } = useThemeStore();
+  const { isDark, language } = useThemeStore();
+  const languageSet = translations[language];
   return (
     <Modal
       visible={visible}
@@ -216,7 +225,7 @@ const UndoRecentActionsModal = ({ visible, onClose, onUndoAction }: any) => {
                 color: isDark ? "#F8FAFC" : "#1E40AF",
               }}
             >
-              Undo Recent Actions
+              {languageSet.undo_recent_actions}
             </Text>
             <TouchableOpacity
               onPress={onClose}
@@ -278,7 +287,7 @@ const UndoRecentActionsModal = ({ visible, onClose, onUndoAction }: any) => {
                       fontWeight: "500",
                     }}
                   >
-                    Undo
+                    {languageSet.undo}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -302,7 +311,7 @@ const UndoRecentActionsModal = ({ visible, onClose, onUndoAction }: any) => {
                   fontWeight: "600",
                 }}
               >
-                Close
+                {languageSet.close}
               </Text>
             </TouchableOpacity>
           </View>
@@ -313,9 +322,10 @@ const UndoRecentActionsModal = ({ visible, onClose, onUndoAction }: any) => {
 };
 // Combined Component Example
 const UndoSystem = () => {
-  const [showNotification, setShowNotification] = useState(true);
+  const [showNotification, setShowNotification] = useState(false);
   const [showRecentActions, setShowRecentActions] = useState(false);
-
+  const { language } = useThemeStore();
+  const languageSet = translations[language];
   const handleUndo = () => {
     console.log("Undo action triggered");
     setShowNotification(false);
@@ -324,6 +334,7 @@ const UndoSystem = () => {
 
   const handleMore = () => {
     setShowRecentActions(true);
+    setShowNotification(false);
     // Keep notification visible or hide based on your preference
     // setShowNotification(false);
   };
@@ -350,7 +361,7 @@ const UndoSystem = () => {
         onClose={handleCloseNotification}
         onUndo={handleUndo}
         onMore={handleMore}
-        message="Customer removed from queue"
+        message={languageSet.customer_removed_from_queue}
       />
 
       {/* Recent Actions Modal */}
