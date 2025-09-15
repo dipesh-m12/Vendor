@@ -601,3 +601,66 @@ export const workingHoursTranslations: Record<string, WorkingHoursTranslation> =
       saveHours: "ᱚᱠᱛᱚ ᱥᱟᱸᱪᱟᱣ",
     },
   };
+
+export const manageTranslations: any = {
+  English: {
+    manageEmployer: "Manage Employer",
+    manageEmployee: "Manage Employee",
+  },
+  हिन्दी: {
+    manageEmployer: "नियोक्ता प्रबंधन",
+    manageEmployee: "कर्मचारी प्रबंधन",
+  },
+  বাংলা: {
+    manageEmployer: "নিয়োগকর্তা পরিচালনা",
+    manageEmployee: "কর্মচারী পরিচালনা",
+  },
+  తెలుగు: {
+    manageEmployer: "ఉద్యోగదాతను నిర్వహించు",
+    manageEmployee: "ఉద్యోగిని నిర్వహించు",
+  },
+  मराठी: {
+    manageEmployer: "नियोक्ता व्यवस्थापन",
+    manageEmployee: "कर्मचारी व्यवस्थापन",
+  },
+  தமிழ்: {
+    manageEmployer: "முதலாளியை நிர்வகி",
+    manageEmployee: "பணியாளரை நிர்வகி",
+  },
+  اردو: {
+    manageEmployer: "آجر کا انتظام",
+    manageEmployee: "ملازم کا انتظام",
+  },
+  ગુજરાતી: {
+    manageEmployer: "નોકરીદાતાનું સંચાલન",
+    manageEmployee: "કર્મચારીનું સંચાલન",
+  },
+  ಕನ್ನಡ: {
+    manageEmployer: "ಉದ್ಯೋಗದಾತನನ್ನು ನಿರ್ವಹಿಸಿ",
+    manageEmployee: "ಉದ್ಯೋಗಿಯನ್ನು ನಿರ್ವಹಿಸಿ",
+  },
+  ଓଡ଼ିଆ: {
+    manageEmployer: "ନିଯୁକ୍ତିଦାତା ପରିଚାଳନା",
+    manageEmployee: "କର୍ମଚାରୀ ପରିଚାଳନା",
+  },
+  മലയാളം: {
+    manageEmployer: "തൊഴിലുടമയെ നിർവഹിക്കുക",
+    manageEmployee: "ജീവനക്കാരനെ നിർവഹിക്കുക",
+  },
+  ਪੰਜਾਬੀ: {
+    manageEmployer: "ਨਿਯੋਕਤਾ ਪ੍ਰਬੰਧਨ",
+    manageEmployee: "ਕਰਮਚਾਰੀ ਪ੍ਰਬੰਧਨ",
+  },
+  অসমীয়া: {
+    manageEmployer: "নিয়োগকৰ্তা পৰিচালনা",
+    manageEmployee: "কৰ্মচাৰী পৰিচালনা",
+  },
+  मैथिली: {
+    manageEmployer: "नियोक्ता प्रबंधन",
+    manageEmployee: "कर्मचारी प्रबंधन",
+  },
+  ᱥᱟᱱᱛᱟᱲᱤ: {
+    manageEmployer: "ᱱᱤᱭᱚᱜᱮᱛ ᱢᱮᱱᱮᱡ",
+    manageEmployee: "ᱠᱟᱨᱢᱤᱪᱟᱹᱨᱤ ᱢᱮᱱᱮᱡ",
+  },
+};

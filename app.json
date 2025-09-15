@@ -23,7 +23,7 @@
         "android.permission.ACCESS_COARSE_LOCATION",
         "android.permission.ACCESS_FINE_LOCATION"
       ],
-      "package": "com.dipeshmishra.VendorApp"
+      "package": "com.qvuew.vendorapp"
     },
     "web": {
       "bundler": "metro",
@@ -47,7 +47,9 @@
         {
           "locationAlwaysAndWhenInUsePermission": "This app uses location to detect your business address automatically."
         }
-      ]
+      ],
+      "expo-font",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true

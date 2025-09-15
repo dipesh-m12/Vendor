@@ -1,9 +1,9 @@
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import React from "react";
+import { Pressable, StyleSheet, Text } from "react-native";
 
 const ThemeWidget = ({ isDark, toggleTheme }: any) => {
   return (
-    <TouchableOpacity
+    <Pressable
       onPress={toggleTheme}
       style={{
         position: "absolute",
@@ -15,7 +15,7 @@ const ThemeWidget = ({ isDark, toggleTheme }: any) => {
       }}
     >
       <Text>{isDark ? "🌙" : "☀️"}</Text>
-    </TouchableOpacity>
+    </Pressable>
   );
 };
 

@@ -1,12 +1,12 @@
-import React from "react";
-import { StyleSheet, View, TouchableOpacity, Text } from "react-native";
 import { useRouter } from "expo-router";
+import React from "react";
+import { StyleSheet, Text, TouchableOpacity } from "react-native";
 
 export default function ButtonHelper() {
   const router = useRouter();
 
   const handlePress = () => {
-    router.push("/(tabs)/queue"); // Replace with your target route
+    router.push("/(auth)/(signupflows)/code_helper"); // Replace with your target route
   };
 
   return (

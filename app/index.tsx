@@ -1,14 +1,14 @@
-import React, { useEffect } from "react";
-import { View, TouchableOpacity, Text } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
-import { Box } from "@gluestack-ui/themed";
-import { useRouter } from "expo-router";
-import useThemeStore from "../store/themeStore";
-import ThemeWidget from "@/components/ThemeWidget";
-import { Award, Shield } from "lucide-react-native";
 import LanguageWidget from "@/components/LanguageWidget";
-import { translations } from "../translations/index";
 import ButtonHelper from "@/components/redirectHelper";
+import ThemeWidget from "@/components/ThemeWidget";
+import { Box } from "@gluestack-ui/themed";
+import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
+import { Award, Shield } from "lucide-react-native";
+import React from "react";
+import { Text, TouchableOpacity, View } from "react-native";
+import useThemeStore from "../store/themeStore";
+import { translations } from "../translations/index";
 
 const QVuewLogo = ({ isDark }: { isDark: boolean }) => (
   <Box alignItems="center" justifyContent="center" width={96} height={96}>
@@ -150,7 +150,7 @@ export default function Index() {
             alignItems: "center",
             justifyContent: "center",
           }}
-          onPress={() => router.push("/(auth)/signup")}
+          onPress={() => router.push("/(auth)/(signupflows)/choose")}
         >
           <Text
             style={{

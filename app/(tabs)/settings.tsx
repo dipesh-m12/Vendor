@@ -1,69 +1,70 @@
-import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  TextInput,
-  ScrollView,
-  Modal,
-  Alert,
-  Switch,
-  ActivityIndicator,
-  Image,
-  Platform,
-} from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
-import { useRouter } from "expo-router";
-import { Picker } from "@react-native-picker/picker";
-import DateTimePicker from "@react-native-community/datetimepicker";
-import * as ImagePicker from "expo-image-picker";
-import * as Location from "expo-location";
-import useThemeStore from "@/store/themeStore";
-import {
-  ArrowLeft,
-  Bell,
-  Clock,
-  Moon,
-  Globe,
-  Shield,
-  Star,
-  BarChart2,
-  LogOut,
-  Settings as SettingsIcon,
-  User,
-  Mail,
-  Phone,
-  MapPin,
-  Edit2,
-  Save,
-  X,
-  Navigation,
-  Monitor,
-  Info,
-  HelpCircle,
-  Calendar,
-  ChevronRight,
-  Eye,
-  EyeOff,
-  Lock,
-  Trash2,
-  Camera,
-  Users,
-} from "lucide-react-native";
-import { z } from "zod";
 import AccountModals from "@/components/modals/AccountModals";
 import SecurityModals from "@/components/modals/SecurityModals";
+import useRegTypeStore from "@/store/regTypeStore";
+import useThemeStore from "@/store/themeStore";
+import { accountTranslations } from "@/translations/tabsTranslations/settings/accountTranslations";
 import {
-  workingHoursTranslations,
-  translations,
-} from "@/translations/tabsTranslations/settings/profileTranslations";
-import {
-  generalSettingsTranslations,
   displayDeviceTranslations,
+  generalSettingsTranslations,
 } from "@/translations/tabsTranslations/settings/generalSettingsTranslations";
+import {
+  manageTranslations,
+  translations,
+  workingHoursTranslations,
+} from "@/translations/tabsTranslations/settings/profileTranslations";
 import { queueSettingsTranslations } from "@/translations/tabsTranslations/settings/queueSettingsTranslations";
 import { securityTranslations } from "@/translations/tabsTranslations/settings/securityTranslations";
-import { accountTranslations } from "@/translations/tabsTranslations/settings/accountTranslations";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import { Picker } from "@react-native-picker/picker";
+import * as ImagePicker from "expo-image-picker";
+import { LinearGradient } from "expo-linear-gradient";
+import * as Location from "expo-location";
+import { useRouter } from "expo-router";
+import {
+  ArrowLeft,
+  BarChart2,
+  Bell,
+  Calendar,
+  Camera,
+  ChevronRight,
+  Clock,
+  Edit2,
+  Eye,
+  Globe,
+  HelpCircle,
+  Info,
+  Lock,
+  LogOut,
+  Mail,
+  MapPin,
+  Monitor,
+  Moon,
+  Navigation,
+  Phone,
+  QrCode,
+  Save,
+  Shield,
+  Star,
+  Trash2,
+  User,
+  Users,
+  X,
+} from "lucide-react-native";
+import React, { useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  Modal,
+  Platform,
+  ScrollView,
+  Switch,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { z } from "zod";
 
 // Validation schemas
 const profileSchema = z.object({
@@ -93,6 +94,7 @@ const profileSchema = z.object({
 export default function SettingsScreen() {
   const router = useRouter();
   const { isDark, toggleTheme, language, setLanguage } = useThemeStore();
+  const { regType } = useRegTypeStore();
   const profileLanguageSet = translations[language];
   const profileModalLanguageSet = workingHoursTranslations[language];
   const generalLanguageSet = generalSettingsTranslations[language];
@@ -100,6 +102,7 @@ export default function SettingsScreen() {
   const queueLanguageSet = queueSettingsTranslations[language];
   const settingLanguageSet = securityTranslations[language];
   const accountLanguageSet = accountTranslations[language];
+  const manageLanguageSet = manageTranslations[language];
 
   // State management
   const [isLoading, setIsLoading] = useState(false);
@@ -111,7 +114,7 @@ export default function SettingsScreen() {
   });
 
   const [isEditingProfile, setIsEditingProfile] = useState(false);
-  const [profileData, setProfileData] = useState({
+  const [profileData, setProfileData] = useState<any>({
     fullName: "John Doe",
     email: "john@example.com",
     businessName: "My Business",
@@ -131,7 +134,7 @@ export default function SettingsScreen() {
     },
   });
 
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState<any>({});
 
   // Modal states
   const [modals, setModals] = useState({
@@ -222,7 +225,7 @@ export default function SettingsScreen() {
       setErrors({});
       return true;
     } catch (error: any) {
-      const newErrors = {};
+      const newErrors: any = {};
 
       // Check if it's a ZodError
       if (error.name === "ZodError") {
@@ -274,7 +277,7 @@ export default function SettingsScreen() {
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
         setProfileData(
-          (prev) =>
+          (prev: any) =>
             ({
               ...prev,
               avatar: result.assets[0].uri,
@@ -309,7 +312,7 @@ export default function SettingsScreen() {
         const fullAddress = `${addr.name || ""} ${addr.street || ""} ${
           addr.city || ""
         } ${addr.region || ""} ${addr.country || ""}`.trim();
-        setProfileData((prev) => ({
+        setProfileData((prev: any) => ({
           ...prev,
           businessAddress: fullAddress,
         }));
@@ -324,7 +327,7 @@ export default function SettingsScreen() {
 
   // Working hours handling
   const handleWorkingHoursChange = (day: any, field: any, value: any) => {
-    setProfileData((prev) => ({
+    setProfileData((prev: any) => ({
       ...prev,
       workingHours: {
         ...prev.workingHours,
@@ -555,7 +558,7 @@ export default function SettingsScreen() {
                 <TextInput
                   value={profileData.fullName}
                   onChangeText={(text) =>
-                    setProfileData((prev) => ({ ...prev, fullName: text }))
+                    setProfileData((prev: any) => ({ ...prev, fullName: text }))
                   }
                   className={`${
                     isDark
@@ -599,7 +602,7 @@ export default function SettingsScreen() {
                 <TextInput
                   value={profileData.email}
                   onChangeText={(text) =>
-                    setProfileData((prev) => ({ ...prev, email: text }))
+                    setProfileData((prev: any) => ({ ...prev, email: text }))
                   }
                   className={`${
                     isDark
@@ -645,7 +648,10 @@ export default function SettingsScreen() {
                 <TextInput
                   value={profileData.businessName}
                   onChangeText={(text) =>
-                    setProfileData((prev) => ({ ...prev, businessName: text }))
+                    setProfileData((prev: any) => ({
+                      ...prev,
+                      businessName: text,
+                    }))
                   }
                   className={`${
                     isDark
@@ -698,7 +704,7 @@ export default function SettingsScreen() {
                   <Picker
                     selectedValue={profileData.businessType}
                     onValueChange={(value) =>
-                      setProfileData((prev) => ({
+                      setProfileData((prev: any) => ({
                         ...prev,
                         businessType: value,
                       }))
@@ -747,7 +753,7 @@ export default function SettingsScreen() {
                   value={profileData.seats.toString()}
                   onChangeText={(text) => {
                     const numericValue = text.replace(/[^0-9]/g, "");
-                    setProfileData((prev) => ({
+                    setProfileData((prev: any) => ({
                       ...prev,
                       seats: parseInt(numericValue) || 0,
                     }));
@@ -797,7 +803,7 @@ export default function SettingsScreen() {
                   <TextInput
                     value={profileData.businessAddress}
                     onChangeText={(text) =>
-                      setProfileData((prev) => ({
+                      setProfileData((prev: any) => ({
                         ...prev,
                         businessAddress: text,
                       }))
@@ -866,7 +872,7 @@ export default function SettingsScreen() {
                     const numericValue = text
                       .replace(/[^0-9]/g, "")
                       .slice(0, 10);
-                    setProfileData((prev) => ({
+                    setProfileData((prev: any) => ({
                       ...prev,
                       phoneNumber: numericValue,
                     }));
@@ -1302,6 +1308,26 @@ export default function SettingsScreen() {
                 className={`ml-3 ${isDark ? "text-white" : "text-gray-900"}`}
               >
                 {accountLanguageSet.termsOfService}
+              </Text>
+            </View>
+            <ChevronRight size={16} color={isDark ? "#60A5FA" : "#3B82F6"} />
+          </TouchableOpacity>
+
+          {/* Manage employer/employee */}
+          <TouchableOpacity
+            onPress={() => {
+              router.push("/(auth)/(signupflows)/code_helper");
+            }}
+            className="flex-row items-center justify-between py-3"
+          >
+            <View className="flex-row items-center">
+              <QrCode size={18} color={isDark ? "#60A5FA" : "#3B82F6"} />
+              <Text
+                className={`ml-3 ${isDark ? "text-white" : "text-gray-900"}`}
+              >
+                {regType === "helper"
+                  ? manageLanguageSet.manageEmployer
+                  : manageLanguageSet.manageEmployee}
               </Text>
             </View>
             <ChevronRight size={16} color={isDark ? "#60A5FA" : "#3B82F6"} />

@@ -1,10 +1,10 @@
 // app/(auth)/_layout.tsx
-import { Tabs } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import FloatingActionButtons from "@/components/FloatingActionButtons";
 import useThemeStore from "@/store/themeStore";
 import { translations } from "@/translations/tabsTranslations/tabTranslations";
-import FloatingActionButtons from "@/components/FloatingActionButtons";
+import { Ionicons } from "@expo/vector-icons";
+import { Tabs } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function AuthLayout() {
   const insets = useSafeAreaInsets();
@@ -23,7 +23,7 @@ export default function AuthLayout() {
             borderTopWidth: 1,
             borderTopColor: isDark ? "#374151" : "#e5e5e5",
             paddingBottom: insets.bottom + 10, // Add extra padding for home indicator
-            paddingTop: 8,
+            // paddingTop: 8,
             // height: 70 + insets.bottom, // Adjust height based on safe area
             position: "absolute",
           },

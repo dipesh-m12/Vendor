@@ -1,42 +1,40 @@
-import React, { useEffect, useState } from "react";
-import {
-  View,
-  TouchableOpacity,
-  Text,
-  Alert,
-  TextInput,
-  Modal,
-  ScrollView,
-} from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
-import { useRouter } from "expo-router";
+import { businessTypes, countryCodes } from "@/constants";
 import useThemeStore from "@/store/themeStore";
-import {
-  ArrowLeft,
-  User,
-  Mail,
-  Phone,
-  MapPin,
-  Lock,
-  Eye,
-  Shield,
-  EyeOff,
-  ChevronDown,
-  Users,
-} from "lucide-react-native";
+import { selectCountryCodeTranslations } from "@/translations/selectCountryCodeTranslations";
 import {
   signupTranslations,
   translations,
 } from "@/translations/signupTranslations";
-import { z } from "zod";
-import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { LinearGradient } from "expo-linear-gradient";
 import * as Location from "expo-location";
+import { useRouter } from "expo-router";
+import {
+  ArrowLeft,
+  ChevronDown,
+  Eye,
+  EyeOff,
+  Lock,
+  Mail,
+  MapPin,
+  Phone,
+  Shield,
+  User,
+  Users,
+} from "lucide-react-native";
+import React, { useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import {
+  Alert,
+  Modal,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import ThemeWidget from "@/components/ThemeWidget";
-import LanguageWidget from "@/components/LanguageWidget";
-import { selectCountryCodeTranslations } from "@/translations/selectCountryCodeTranslations";
-import { businessTypes, countryCodes } from "@/constants";
+import { z } from "zod";
 
 const PasswordStrengthIndicator = ({
   password,
@@ -194,7 +192,7 @@ type FormData = {
   password: string;
   confirmPassword: string;
   agreeToTerms: boolean;
-  seatsNumber: number;
+  seatsNumber: number | null;
 };
 
 export default function SignUpScreen() {

@@ -1,13 +1,11 @@
-import React, { useEffect, useState } from "react";
-import { View, TouchableOpacity, Text, TextInput } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
-import { Box } from "@gluestack-ui/themed";
-import { useRouter } from "expo-router";
 import useThemeStore from "@/store/themeStore";
-import ThemeWidget from "@/components/ThemeWidget";
-import LanguageWidget from "@/components/LanguageWidget";
-import { Eye, EyeOff, ArrowLeft, Mail, Lock } from "lucide-react-native";
 import { loginTranslations } from "@/translations/loginTranslations";
+import { Box } from "@gluestack-ui/themed";
+import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
+import { ArrowLeft, Eye, EyeOff, Lock, Mail } from "lucide-react-native";
+import React, { useEffect, useState } from "react";
+import { Text, TextInput, TouchableOpacity, View } from "react-native";
 import { z } from "zod";
 
 const loginSchema = z.object({
@@ -287,7 +285,7 @@ export default function LoginScreen() {
 
         {/* Sign Up Link */}
         <TouchableOpacity
-          onPress={() => router.push("/(auth)/signup")}
+          onPress={() => router.push("/(auth)/(signupflows)/choose")}
           className=" text-center w-full"
         >
           <Text
