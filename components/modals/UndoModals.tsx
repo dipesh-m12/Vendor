@@ -1,8 +1,8 @@
-import React, { useState } from "react";
-import { Modal, View, Text, TouchableOpacity, Animated } from "react-native";
-import { Info, RotateCcw, X } from "lucide-react-native";
 import useThemeStore from "@/store/themeStore";
 import { translations } from "@/translations/tabsTranslations/queue/modal_undo";
+import { Info, RotateCcw, X } from "lucide-react-native";
+import React, { useState } from "react";
+import { Modal, Text, TouchableOpacity, View } from "react-native";
 
 // First Modal - Notification Banner
 const UndoNotificationBanner = ({
