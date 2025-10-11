@@ -1,31 +1,31 @@
-import React, { useState, useEffect } from "react";
-import {
-  View,
-  TouchableOpacity,
-  Alert,
-  FlatList,
-  ActivityIndicator,
-  Pressable,
-  PermissionsAndroid,
-  Platform,
-  Text,
-} from "react-native";
+import LanguageWidget from "@/components/LanguageWidget";
+import ThemeWidget from "@/components/ThemeWidget";
+import { HelpModal } from "@/components/connection/HelpModal";
+import LogoutConfirmationModal from "@/components/connection/LogoutConfirmationModal";
+import useThemeStore from "@/store/themeStore";
+import translations from "@/translations/connectTranslations";
+import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import {
   Bluetooth,
-  Wifi,
-  LogOut,
   HelpCircle,
+  LogOut,
   RefreshCw,
+  Wifi,
 } from "lucide-react-native";
-import { LinearGradient } from "expo-linear-gradient";
-import useThemeStore from "@/store/themeStore";
+import React, { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  PermissionsAndroid,
+  Platform,
+  Pressable,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import ThemeWidget from "@/components/ThemeWidget";
-import LanguageWidget from "@/components/LanguageWidget";
-import LogoutConfirmationModal from "@/components/connection/LogoutConfirmationModal";
-import { HelpModal } from "@/components/connection/HelpModal";
-import translations from "@/translations/connectTranslations";
 
 const ConnectionScreen = () => {
   const router = useRouter();
@@ -74,26 +74,19 @@ const ConnectionScreen = () => {
         console.warn(err);
       }
     } else {
-      // iOS permissions would be handled differently
       setHasPermission(true);
       scanForDevices();
     }
   };
 
   const scanForDevices = async () => {
-    // if (!hasPermission) {
-    //   await requestBluetoothPermissions();
-    //   return;
-    // }
-
     setIsScanning(true);
     setDiscoveredDevices([]);
+    setSelectedDevice(null);
 
     try {
-      // Simulate device discovery
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      // Mock devices for demonstration
       const mockDevices = [
         {
           id: "QV001",
@@ -117,15 +110,17 @@ const ConnectionScreen = () => {
     }
   };
 
-  const connectToDevice = async (device: any) => {
+  const handleDeviceSelect = (device: any) => {
     setSelectedDevice(device);
+  };
+
+  const connectToDevice = async () => {
+    if (!selectedDevice) return;
+
     setIsConnecting(true);
 
     try {
-      // Simulate connection process
       await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      // Navigate to next screen on successful connection
       router.replace("/(tabs)/queue");
     } catch (error) {
       Alert.alert(
@@ -133,17 +128,16 @@ const ConnectionScreen = () => {
         "Could not connect to the selected device"
       );
       setIsConnecting(false);
-      setSelectedDevice(null);
     }
   };
 
   const toggleDeviceType = (type: any) => {
     setDeviceType(type);
     setDiscoveredDevices([]);
+    setSelectedDevice(null);
     if (type === "bluetooth" && hasPermission) {
       scanForDevices();
     } else if (type === "wifi") {
-      // WiFi scanning logic would go here
       setDiscoveredDevices([]);
     }
   };
@@ -157,61 +151,74 @@ const ConnectionScreen = () => {
     router.replace("/(auth)/signin");
   };
 
-  const renderDeviceItem = ({ item }: any) => (
-    <TouchableOpacity
-      onPress={() => connectToDevice(item)}
-      disabled={isConnecting}
-      style={{
-        backgroundColor: isDark ? "#374151" : "white",
-        borderRadius: 12,
-        padding: 16,
-        marginBottom: 12,
-        borderWidth: 1,
-        borderColor: isDark ? "#4B5563" : "#E5E7EB",
-        opacity: isConnecting && selectedDevice?.id !== item.id ? 0.5 : 1,
-      }}
-    >
-      <View
+  const renderDeviceItem = ({ item }: any) => {
+    const isSelected = selectedDevice?.id === item.id;
+
+    return (
+      <TouchableOpacity
+        onPress={() => handleDeviceSelect(item)}
+        disabled={isConnecting}
+        activeOpacity={0.8}
         style={{
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
+          backgroundColor: isSelected
+            ? isDark
+              ? "#1E3A8A"
+              : "#DBEAFE"
+            : isDark
+              ? "#374151"
+              : "white",
+          borderRadius: 12,
+          padding: 16,
+          marginBottom: 12,
+          borderWidth: isSelected ? 2 : 1,
+          borderColor: isSelected
+            ? "#3B82F6"
+            : isDark
+              ? "#4B5563"
+              : "#E5E7EB",
+          opacity: isConnecting ? 0.5 : 1,
         }}
       >
-        <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
-          {deviceType === "bluetooth" ? (
-            <Bluetooth size={24} color="#3B82F6" />
-          ) : (
-            <Wifi size={24} color="#3B82F6" />
-          )}
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
+            {deviceType === "bluetooth" ? (
+              <Bluetooth size={24} color="#3B82F6" />
+            ) : (
+              <Wifi size={24} color="#3B82F6" />
+            )}
 
-          <View style={{ marginLeft: 12, flex: 1 }}>
-            <Text
-              style={{
-                fontSize: 16,
-                fontWeight: "600",
-                color: isDark ? "#F9FAFB" : "#111827",
-                marginBottom: 2,
-              }}
-            >
-              {item.name}
-            </Text>
-            <Text
-              style={{
-                fontSize: 14,
-                color: isDark ? "#9CA3AF" : "#6B7280",
-              }}
-            >
-              ID: {item.id} • {item.status}
-            </Text>
+            <View style={{ marginLeft: 12, flex: 1 }}>
+              <Text
+                style={{
+                  fontSize: 16,
+                  fontWeight: "600",
+                  color: isDark ? "#F9FAFB" : "#111827",
+                  marginBottom: 2,
+                }}
+              >
+                {item.name}
+              </Text>
+              <Text
+                style={{
+                  fontSize: 14,
+                  color: isDark ? "#9CA3AF" : "#6B7280",
+                }}
+              >
+                ID: {item.id} • {item.status}
+              </Text>
+            </View>
           </View>
+         
         </View>
-        {isConnecting && selectedDevice?.id === item.id && (
-          <ActivityIndicator size="small" color="#3B82F6" />
-        )}
-      </View>
-    </TouchableOpacity>
-  );
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <LinearGradient
@@ -225,7 +232,7 @@ const ConnectionScreen = () => {
       style={{ flex: 1 }}
     >
       <SafeAreaView style={{ flex: 1, paddingHorizontal: 16 }}>
-        {/* Header with Logout and Help Buttons */}
+        {/* Header */}
         <View
           style={{
             flexDirection: "row",
@@ -375,11 +382,7 @@ const ConnectionScreen = () => {
                 paddingHorizontal: 16,
                 borderRadius: 8,
                 backgroundColor:
-                  deviceType === "bluetooth"
-                    ? isDark
-                      ? "#3B82F6"
-                      : "#3B82F6"
-                    : "transparent",
+                  deviceType === "bluetooth" ? "#3B82F6" : "transparent",
               }}
             >
               <Bluetooth
@@ -388,8 +391,8 @@ const ConnectionScreen = () => {
                   deviceType === "bluetooth"
                     ? "#FFFFFF"
                     : isDark
-                    ? "#A5B4FC"
-                    : "#3B82F6"
+                      ? "#A5B4FC"
+                      : "#3B82F6"
                 }
               />
               <Text
@@ -399,8 +402,8 @@ const ConnectionScreen = () => {
                     deviceType === "bluetooth"
                       ? "#FFFFFF"
                       : isDark
-                      ? "#A5B4FC"
-                      : "#3B82F6",
+                        ? "#A5B4FC"
+                        : "#3B82F6",
                   fontWeight: "500",
                 }}
               >
@@ -419,11 +422,7 @@ const ConnectionScreen = () => {
                 paddingHorizontal: 16,
                 borderRadius: 8,
                 backgroundColor:
-                  deviceType === "wifi"
-                    ? isDark
-                      ? "#3B82F6"
-                      : "#3B82F6"
-                    : "transparent",
+                  deviceType === "wifi" ? "#3B82F6" : "transparent",
               }}
             >
               <Wifi
@@ -432,8 +431,8 @@ const ConnectionScreen = () => {
                   deviceType === "wifi"
                     ? "#FFFFFF"
                     : isDark
-                    ? "#A5B4FC"
-                    : "#3B82F6"
+                      ? "#A5B4FC"
+                      : "#3B82F6"
                 }
               />
               <Text
@@ -443,8 +442,8 @@ const ConnectionScreen = () => {
                     deviceType === "wifi"
                       ? "#FFFFFF"
                       : isDark
-                      ? "#A5B4FC"
-                      : "#3B82F6",
+                        ? "#A5B4FC"
+                        : "#3B82F6",
                   fontWeight: "500",
                 }}
               >
@@ -561,14 +560,14 @@ const ConnectionScreen = () => {
           ) : null}
         </View>
 
-        {/* Bottom Action Buttons */}
+        {/* Bottom Action Buttons - FIXED */}
         {discoveredDevices.length > 0 && (
           <View
             style={{
               flexDirection: "row",
               gap: 12,
               marginTop: 16,
-              paddingBottom: 8,
+              marginBottom: 12, // Added spacing before troubleshooting text
             }}
           >
             <TouchableOpacity
@@ -577,7 +576,7 @@ const ConnectionScreen = () => {
               style={{
                 flex: 1,
                 backgroundColor: isDark ? "#374151" : "white",
-                paddingVertical: 10,
+                paddingVertical: 14,
                 borderRadius: 12,
                 alignItems: "center",
                 borderWidth: 1,
@@ -585,61 +584,80 @@ const ConnectionScreen = () => {
               }}
             >
               <RefreshCw size={18} color={isDark ? "#A5B4FC" : "#3B82F6"} />
-              <Text
-                style={{
-                  color: isDark ? "#A5B4FC" : "#3B82F6",
-                  fontWeight: "500",
-                  marginTop: 4,
-                }}
-              >
-                {languageSet.refresh}
-              </Text>
+
             </TouchableOpacity>
 
-            <TouchableOpacity
-              onPress={() => selectedDevice && connectToDevice(selectedDevice)}
-              disabled={!selectedDevice || isConnecting}
+            {/* FIXED Connect Button with proper borderRadius */}
+            <View
               style={{
                 flex: 2,
-                backgroundColor:
-                  selectedDevice && !isConnecting ? "#3B82F6" : "#9CA3AF",
-                paddingVertical: 16,
                 borderRadius: 12,
-                alignItems: "center",
+                overflow: "hidden", // Key fix for borderRadius
+                opacity: !selectedDevice || isConnecting ? 0.5 : 1,
               }}
             >
-              {isConnecting ? (
-                <ActivityIndicator size="small" color="white" />
-              ) : (
-                <Text
+              <TouchableOpacity
+                onPress={connectToDevice}
+                disabled={!selectedDevice || isConnecting}
+                activeOpacity={0.8}
+                style={{
+                  flex: 2,
+                  borderRadius: 12,
+                  overflow: "hidden",
+                  opacity: !selectedDevice || isConnecting ? 0.5 : 1,
+                }}
+              >
+                <LinearGradient
+                  colors={
+                    selectedDevice && !isConnecting
+                      ? ["#3B82F6", "#2563EB"]
+                      : ["#9CA3AF", "#6B7280"]
+                  }
+                  start={[0, 0]}
+                  end={[1, 0]}
                   style={{
-                    color: "white",
-                    fontWeight: "600",
-                    fontSize: 16,
+                    paddingVertical: 16,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    borderRadius: 12,
                   }}
                 >
-                  {languageSet.connect}
-                </Text>
-              )}
-            </TouchableOpacity>
+                  {isConnecting ? (
+                    <ActivityIndicator size="small" color="white" />
+                  ) : (
+                    <Text
+                      style={{
+                        color: "white",
+                        fontWeight: "600",
+                        fontSize: 14,
+                      }}
+                    >
+                      {languageSet.connect}
+                    </Text>
+                  )}
+                </LinearGradient>
+              </TouchableOpacity>
+            </View>
           </View>
         )}
 
-        {/* Bottom Banner */}
+        {/* Bottom Banner - FIXED with underline */}
         <Pressable onPress={() => setShowHelpModal(true)}>
-          <View style={{ paddingVertical: 16, alignItems: "center" }}>
+          <View style={{ paddingVertical: 20, alignItems: "center" }}>
             <Text
               style={{
                 textAlign: "center",
                 color: isDark ? "#A5B4FC" : "#3B82F6",
                 fontSize: 14,
+                lineHeight: 20,
               }}
             >
               {languageSet.troubleText}{" "}
               <Text
                 style={{
                   fontWeight: "600",
-                  color: isDark ? "#F8FAFC" : "#1E3A8A",
+                  color: isDark ? "#3B82F6" : "#1E3A8A",
+                  textDecorationLine: "underline", // Added underline
                 }}
               >
                 {languageSet.troubleshootingGuide}
@@ -647,6 +665,7 @@ const ConnectionScreen = () => {
             </Text>
           </View>
         </Pressable>
+
         {/* Help Modal */}
         <HelpModal
           isOpen={showHelpModal}

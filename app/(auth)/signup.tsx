@@ -11,6 +11,7 @@ import * as Location from "expo-location";
 import { useRouter } from "expo-router";
 import {
   ArrowLeft,
+  Check,
   ChevronDown,
   Eye,
   EyeOff,
@@ -20,18 +21,22 @@ import {
   Phone,
   Shield,
   User,
-  Users,
+  Users
 } from "lucide-react-native";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   Alert,
+  Keyboard,
+  KeyboardAvoidingView,
   Modal,
+  Platform,
   ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  TouchableWithoutFeedback,
+  View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { z } from "zod";
@@ -137,7 +142,7 @@ const signUpSchemas = [
       .string()
       .min(1, "Business address is required")
       .refine(
-        (val) => /^[A-Za-z0-9\s,.]+$/.test(val),
+        (val) => /^[A-Za-z0-9\s,.:;-]+$/.test(val),
         "Only alphanumeric characters, commas, dots, and spaces allowed"
       ),
     seatsNumber: z
@@ -181,13 +186,13 @@ type FormData = {
   phoneNumber: string;
   businessName: string;
   businessType:
-    | "Retail"
-    | "Restaurant"
-    | "Healthcare"
-    | "Banking"
-    | "Government"
-    | "Education"
-    | "Others";
+  | "Retail"
+  | "Restaurant"
+  | "Healthcare"
+  | "Banking"
+  | "Government"
+  | "Education"
+  | "Others";
   businessAddress: string;
   password: string;
   confirmPassword: string;
@@ -227,7 +232,7 @@ export default function SignUpScreen() {
       countryCode: "+91",
       phoneNumber: "",
       businessName: "",
-      businessType: "Retail",
+      businessType: undefined,
       businessAddress: "",
       password: "",
       confirmPassword: "",
@@ -238,6 +243,13 @@ export default function SignUpScreen() {
 
   const password = watch("password", "");
   const emailValue = watch("email", "");
+  const fullNameValue = watch("fullName", "");
+  const phoneNumberValue = watch("phoneNumber", "");
+  const businessNameValue = watch("businessName", "");
+  const businessTypeValue = watch("businessType");
+  const businessAddressValue = watch("businessAddress", "");
+  const seatsNumberValue = watch("seatsNumber");
+
 
   const validateStep = handleSubmit(
     (data) => {
@@ -247,7 +259,7 @@ export default function SignUpScreen() {
         onSubmit(data);
       }
     },
-    () => {}
+    () => { }
   );
 
   const onSubmit = async (data: FormData) => {
@@ -385,6 +397,9 @@ export default function SignUpScreen() {
               />
             )}
           />
+          {!errors.fullName && fullNameValue && fullNameValue.length >= 2 && (
+            <Check size={20} color="#10B981" strokeWidth={3} />
+          )}
         </View>
         <View style={{ height: 20 }}>
           {errors.fullName ? (
@@ -448,24 +463,8 @@ export default function SignUpScreen() {
               />
             )}
           />
-          {!errors.email && (
-            <View
-              style={{
-                width: 20,
-                height: 20,
-                borderRadius: 10,
-                backgroundColor: "#10B981",
-                alignItems: "center",
-                justifyContent: "center",
-                marginLeft: 8,
-              }}
-            >
-              <Text
-                style={{ color: "white", fontSize: 12, fontWeight: "bold" }}
-              >
-                ✓
-              </Text>
-            </View>
+          {!errors.email && emailValue && /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(emailValue) && (
+            <Check size={20} color="#10B981" strokeWidth={3} />
           )}
         </View>
         <View style={{ height: 20 }}>
@@ -569,6 +568,9 @@ export default function SignUpScreen() {
                 />
               )}
             />
+            {!errors.phoneNumber && phoneNumberValue && phoneNumberValue.length === 10 && (
+              <Check size={20} color="#10B981" strokeWidth={3} />
+            )}
           </View>
         </View>
         <View style={{ height: 20 }}>
@@ -587,103 +589,99 @@ export default function SignUpScreen() {
         </View>
       </View>
 
+      {/* Country Code Picker Modal */}
       <Modal
         visible={showCountryPicker}
         transparent={true}
         animationType="slide"
-        onRequestClose={() => {
-          console.log("Closing country code modal"); // Debug log
-          setShowCountryPicker(false);
-        }}
+        onRequestClose={() => setShowCountryPicker(false)}
       >
-        <View
-          style={{
-            flex: 1,
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
+        <TouchableWithoutFeedback onPress={() => setShowCountryPicker(false)}>
           <View
             style={{
-              backgroundColor: isDark ? "#374151" : "white",
-              borderRadius: 12,
-              maxWidth: 300,
-              width: "80%",
-              padding: 16,
-              zIndex: 1000,
+              flex: 1,
+              backgroundColor: "rgba(0, 0, 0, 0.5)",
+              justifyContent: "center",
+              alignItems: "center",
             }}
           >
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: 16,
-              }}
-            >
-              <Text
+            <TouchableWithoutFeedback onPress={() => { }}>
+              <View
                 style={{
-                  fontSize: 18,
-                  fontWeight: "bold",
-                  color: isDark ? "#F9FAFB" : "#1E3A8A",
+                  backgroundColor: isDark ? "#374151" : "white",
+                  borderRadius: 12,
+                  maxWidth: 300,
+                  width: "80%",
+                  padding: 16,
                 }}
               >
-                {selectCountryCodeTranslations[language]}
-              </Text>
-              <TouchableOpacity
-                onPress={() => {
-                  setShowCountryPicker(false);
-                }}
-              >
-                <Text style={{ color: "#3B82F6", fontSize: 16 }}>✕</Text>
-              </TouchableOpacity>
-            </View>
-            <ScrollView style={{ maxHeight: 300 }}>
-              {countryCodes.map((item) => (
-                <TouchableOpacity
-                  key={item.code}
+                <View
                   style={{
-                    paddingVertical: 10,
                     flexDirection: "row",
+                    justifyContent: "space-between",
                     alignItems: "center",
-                  }}
-                  onPress={() => {
-                    console.log(`Selected country code: ${item.code}`); // Debug log
-                    setCountryCode(item.code);
-                    setValue("countryCode", item.code);
-                    clearErrors("countryCode");
-                    setShowCountryPicker(false);
+                    marginBottom: 16,
                   }}
                 >
                   <Text
                     style={{
-                      color: isDark ? "#F9FAFB" : "#111827",
-                      fontSize: 16,
-                      fontWeight: "500",
+                      fontSize: 18,
+                      fontWeight: "bold",
+                      color: isDark ? "#F9FAFB" : "#1E3A8A",
                     }}
                   >
-                    {item.code}
+                    {selectCountryCodeTranslations[language]}
                   </Text>
-                  <Text
-                    style={{
-                      color: isDark ? "#9CA3AF" : "#6B7280",
-                      fontSize: 14,
-                      marginLeft: 8,
-                    }}
-                  >
-                    {item.country}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
+                  <TouchableOpacity onPress={() => setShowCountryPicker(false)}>
+                    <Text style={{ color: "#3B82F6", fontSize: 20 }}>✕</Text>
+                  </TouchableOpacity>
+                </View>
+                <ScrollView style={{ maxHeight: 300 }}>
+                  {countryCodes.map((item) => (
+                    <TouchableOpacity
+                      key={item.code}
+                      style={{
+                        paddingVertical: 10,
+                        flexDirection: "row",
+                        alignItems: "center",
+                      }}
+                      onPress={() => {
+                        setCountryCode(item.code);
+                        setValue("countryCode", item.code);
+                        clearErrors("countryCode");
+                        setShowCountryPicker(false);
+                      }}
+                    >
+                      <Text
+                        style={{
+                          color: isDark ? "#F9FAFB" : "#111827",
+                          fontSize: 16,
+                          fontWeight: "500",
+                        }}
+                      >
+                        {item.code}
+                      </Text>
+                      <Text
+                        style={{
+                          color: isDark ? "#9CA3AF" : "#6B7280",
+                          fontSize: 14,
+                          marginLeft: 8,
+                        }}
+                      >
+                        {item.country}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+            </TouchableWithoutFeedback>
           </View>
-        </View>
+        </TouchableWithoutFeedback>
       </Modal>
 
       {/* Continue Button */}
       <TouchableOpacity
-        style={{ width: "100%", marginBottom: 24 }}
+        style={{ width: "100%", marginTop: 16 }}
         onPress={validateStep}
         disabled={isSubmitting}
       >
@@ -712,6 +710,7 @@ export default function SignUpScreen() {
       </TouchableOpacity>
     </>
   );
+
 
   const renderStep2 = () => (
     <>
@@ -778,6 +777,9 @@ export default function SignUpScreen() {
               />
             )}
           />
+          {!errors.businessName && businessNameValue && businessNameValue.length >= 2 && (
+            <Check size={20} color="#10B981" strokeWidth={3} />
+          )}
         </View>
         <View style={{ height: 20 }}>
           {errors.businessName ? (
@@ -816,18 +818,22 @@ export default function SignUpScreen() {
               flex: 1,
               marginLeft: 12,
               fontSize: 16,
-              color: watch("businessType")
+              color: businessTypeValue
                 ? isDark
                   ? "#F9FAFB"
                   : "#111827"
                 : isDark
-                ? "#9CA3AF"
-                : "#6B7280",
+                  ? "#9CA3AF"
+                  : "#6B7280",
             }}
           >
-            {watch("businessType") || "Select Business Type"}
+            {businessTypeValue || "Select Business Type"}
           </Text>
-          <ChevronDown size={16} color="#3B82F6" />
+          {!errors.businessType && businessTypeValue ? (
+            <Check size={20} color="#10B981" strokeWidth={3} style={{ marginRight: 8 }} />
+          ) : (
+            <ChevronDown size={16} color="#3B82F6" />
+          )}
         </TouchableOpacity>
         <View style={{ height: 20 }}>
           {errors.businessType ? (
@@ -883,6 +889,9 @@ export default function SignUpScreen() {
               />
             )}
           />
+          {!errors.businessAddress && businessAddressValue && (
+            <Check size={20} color="#10B981" strokeWidth={3} style={{ marginRight: 8 }} />
+          )}
           <TouchableOpacity
             style={{
               backgroundColor: isDetectingLocation ? "#E5E7EB" : "#DBEAFE",
@@ -968,7 +977,6 @@ export default function SignUpScreen() {
                 placeholderTextColor={isDark ? "#9CA3AF" : "#6B7280"}
                 value={value ? value.toString() : ""}
                 onChangeText={(text) => {
-                  // Only allow numbers
                   const numericValue = text.replace(/[^0-9]/g, "");
                   onChange(numericValue ? parseInt(numericValue, 10) : "");
                   clearErrors("seatsNumber");
@@ -977,6 +985,12 @@ export default function SignUpScreen() {
               />
             )}
           />
+          {!errors.seatsNumber &&
+            typeof seatsNumberValue === "number" &&
+            seatsNumberValue >= 1 &&
+            seatsNumberValue <= 1000 && (
+              <Check size={20} color="#10B981" strokeWidth={3} />
+            )}
         </View>
         <View style={{ height: 20 }}>
           {errors.seatsNumber ? (
@@ -999,82 +1013,79 @@ export default function SignUpScreen() {
         visible={showBusinessTypePicker}
         transparent={true}
         animationType="slide"
-        onRequestClose={() => {
-          setShowBusinessTypePicker(false);
-        }}
+        onRequestClose={() => setShowBusinessTypePicker(false)}
       >
-        <View
-          style={{
-            flex: 1,
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
+        <TouchableWithoutFeedback onPress={() => setShowBusinessTypePicker(false)}>
           <View
             style={{
-              backgroundColor: isDark ? "#374151" : "white",
-              borderRadius: 12,
-              maxWidth: 300,
-              width: "80%",
-              padding: 16,
-              zIndex: 1000,
+              flex: 1,
+              backgroundColor: "rgba(0, 0, 0, 0.5)",
+              justifyContent: "center",
+              alignItems: "center",
             }}
           >
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: 16,
-              }}
-            >
-              <Text
+            <TouchableWithoutFeedback onPress={() => { }}>
+              <View
                 style={{
-                  fontSize: 18,
-                  fontWeight: "bold",
-                  color: isDark ? "#F9FAFB" : "#1E3A8A",
+                  backgroundColor: isDark ? "#374151" : "white",
+                  borderRadius: 12,
+                  maxWidth: 300,
+                  width: "80%",
+                  padding: 16,
                 }}
               >
-                {languageSet.businessType}
-              </Text>
-              <TouchableOpacity
-                onPress={() => {
-                  setShowBusinessTypePicker(false);
-                }}
-              >
-                <Text style={{ color: "#3B82F6", fontSize: 16 }}>✕</Text>
-              </TouchableOpacity>
-            </View>
-            <ScrollView style={{ maxHeight: 300 }}>
-              {businessTypes.map((item) => (
-                <TouchableOpacity
-                  key={item}
+                <View
                   style={{
-                    paddingVertical: 10,
                     flexDirection: "row",
+                    justifyContent: "space-between",
                     alignItems: "center",
-                  }}
-                  onPress={() => {
-                    setValue("businessType", item as FormData["businessType"]);
-                    clearErrors("businessType");
-                    setShowBusinessTypePicker(false);
+                    marginBottom: 16,
                   }}
                 >
                   <Text
                     style={{
-                      color: isDark ? "#F9FAFB" : "#111827",
-                      fontSize: 16,
-                      fontWeight: "500",
+                      fontSize: 18,
+                      fontWeight: "bold",
+                      color: isDark ? "#F9FAFB" : "#1E3A8A",
                     }}
                   >
-                    {item}
+                    {languageSet.businessType}
                   </Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
+                  <TouchableOpacity onPress={() => setShowBusinessTypePicker(false)}>
+                    <Text style={{ color: "#3B82F6", fontSize: 20 }}>✕</Text>
+                  </TouchableOpacity>
+                </View>
+                <ScrollView style={{ maxHeight: 300 }}>
+                  {businessTypes.map((item) => (
+                    <TouchableOpacity
+                      key={item}
+                      style={{
+                        paddingVertical: 10,
+                        flexDirection: "row",
+                        alignItems: "center",
+                      }}
+                      onPress={() => {
+                        setValue("businessType", item as FormData["businessType"]);
+                        clearErrors("businessType");
+                        setShowBusinessTypePicker(false);
+                      }}
+                    >
+                      <Text
+                        style={{
+                          color: isDark ? "#F9FAFB" : "#111827",
+                          fontSize: 16,
+                          fontWeight: "500",
+                        }}
+                      >
+                        {item}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+            </TouchableWithoutFeedback>
           </View>
-        </View>
+        </TouchableWithoutFeedback>
       </Modal>
 
       {/* Location Permission Modal */}
@@ -1082,102 +1093,95 @@ export default function SignUpScreen() {
         visible={showLocationModal}
         transparent={true}
         animationType="slide"
-        onRequestClose={() => {
-          setShowLocationModal(false);
-        }}
+        onRequestClose={() => setShowLocationModal(false)}
       >
-        <View
-          style={{
-            flex: 1,
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
+        <TouchableWithoutFeedback onPress={() => setShowLocationModal(false)}>
           <View
             style={{
-              backgroundColor: isDark ? "#374151" : "white",
-              borderRadius: 12,
-              width: "90%",
-              padding: 16,
-              zIndex: 1000,
+              flex: 1,
+              backgroundColor: "rgba(0, 0, 0, 0.5)",
+              justifyContent: "center",
+              alignItems: "center",
             }}
           >
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: 16,
-              }}
-            >
-              <Text
+            <TouchableWithoutFeedback onPress={() => { }}>
+              <View
                 style={{
-                  fontSize: 18,
-                  fontWeight: "bold",
-                  color: isDark ? "#F9FAFB" : "#1E3A8A",
+                  backgroundColor: isDark ? "#374151" : "white",
+                  borderRadius: 12,
+                  width: "90%",
+                  padding: 16,
                 }}
               >
-                {languageSet.allowLocationAccess}
-              </Text>
-              <TouchableOpacity
-                onPress={() => {
-                  setShowLocationModal(false);
-                }}
-              >
-                <Text style={{ color: "#3B82F6", fontSize: 16 }}>✕</Text>
-              </TouchableOpacity>
-            </View>
-            <Text
-              style={{
-                color: isDark ? "#9CA3AF" : "#6B7280",
-                fontSize: 14,
-                marginBottom: 24,
-              }}
-            >
-              {languageSet.locationPermissionMessage}
-            </Text>
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "flex-end",
-                gap: 16,
-              }}
-            >
-              <TouchableOpacity
-                onPress={() => {
-                  setShowLocationModal(false);
-                }}
-              >
-                <Text
+                <View
                   style={{
-                    color: "#3B82F6",
-                    fontSize: 16,
-                    fontWeight: "600",
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginBottom: 16,
                   }}
                 >
-                  {languageSet.deny}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={handleDetectLocation}>
+                  <Text
+                    style={{
+                      fontSize: 18,
+                      fontWeight: "bold",
+                      color: isDark ? "#F9FAFB" : "#1E3A8A",
+                    }}
+                  >
+                    {languageSet.allowLocationAccess}
+                  </Text>
+                  <TouchableOpacity onPress={() => setShowLocationModal(false)}>
+                    <Text style={{ color: "#3B82F6", fontSize: 20 }}>✕</Text>
+                  </TouchableOpacity>
+                </View>
                 <Text
                   style={{
-                    color: "#3B82F6",
-                    fontSize: 16,
-                    fontWeight: "600",
+                    color: isDark ? "#9CA3AF" : "#6B7280",
+                    fontSize: 14,
+                    marginBottom: 24,
                   }}
                 >
-                  {languageSet.allow}
+                  {languageSet.locationPermissionMessage}
                 </Text>
-              </TouchableOpacity>
-            </View>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "flex-end",
+                    gap: 16,
+                  }}
+                >
+                  <TouchableOpacity onPress={() => setShowLocationModal(false)}>
+                    <Text
+                      style={{
+                        color: "#3B82F6",
+                        fontSize: 16,
+                        fontWeight: "600",
+                      }}
+                    >
+                      {languageSet.deny}
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={handleDetectLocation}>
+                    <Text
+                      style={{
+                        color: "#3B82F6",
+                        fontSize: 16,
+                        fontWeight: "600",
+                      }}
+                    >
+                      {languageSet.allow}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
           </View>
-        </View>
+        </TouchableWithoutFeedback>
       </Modal>
 
       {/* Continue Button */}
       <TouchableOpacity
-        style={{ width: "100%", marginBottom: 24 }}
+        style={{ width: "100%", marginTop: 16 }}
         onPress={validateStep}
         disabled={isSubmitting}
       >
@@ -1326,16 +1330,7 @@ export default function SignUpScreen() {
               />
             )}
           />
-          <TouchableOpacity
-            style={{ marginLeft: 8 }}
-            onPress={() => setPasswordVisible(!passwordVisible)}
-          >
-            {passwordVisible ? (
-              <EyeOff size={20} color="#3B82F6" />
-            ) : (
-              <Eye size={20} color="#3B82F6" />
-            )}
-          </TouchableOpacity>
+
         </View>
         <View style={{ height: 20 }}>
           {errors.confirmPassword ? (
@@ -2460,27 +2455,25 @@ export default function SignUpScreen() {
       <LinearGradient
         colors={
           isDark
-            ? ["#1E1B4B", "#312E81", "#3730A3"]
+            ? ["#0F172A", "#1E293B", "#334155"]
             : ["#F1F5F9", "#E2E8F0", "#CBD5E1"]
         }
         start={[0, 0]}
         end={[0, 1]}
         style={{ flex: 1 }}
       >
-        {/* <ThemeWidget isDark={isDark} toggleTheme={toggleTheme} />
-        <LanguageWidget
-          setLanguage={setLanguage}
-          isDark={isDark}
-          language={language}
-        /> */}
         <TouchableOpacity
-          onPress={() => (step === 1 ? router.back() : setStep(step - 1))}
+          onPress={() => {
+            Keyboard.dismiss();
+            step === 1 ? router.back() : setStep(step - 1);
+          }}
           style={{
             position: "absolute",
             top: 30,
             left: 15,
             flexDirection: "row",
             alignItems: "center",
+            zIndex: 10,
           }}
         >
           <ArrowLeft size={20} color="#3B82F6" />
@@ -2488,22 +2481,41 @@ export default function SignUpScreen() {
             {languageSet.back}
           </Text>
         </TouchableOpacity>
-        {renderStepIndicator()}
-        <View
-          style={{
-            flex: 1,
-            alignItems: "flex-start",
-            // justifyContent: "",
-            paddingHorizontal: 16,
-            marginTop: 40,
-            width: "100%",
-          }}
+
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={{ flex: 1 }}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
         >
-          {step === 1 && renderStep1()}
-          {step === 2 && renderStep2()}
-          {step === 3 && renderStep3()}
-        </View>
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <ScrollView
+              contentContainerStyle={{
+                flexGrow: 1,
+                paddingBottom: 40,
+              }}
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}
+              bounces={false}
+            >
+              {renderStepIndicator()}
+              <View
+                style={{
+                  flex: 1,
+                  alignItems: "flex-start",
+                  paddingHorizontal: 16,
+                  marginTop: 40,
+                  width: "100%",
+                }}
+              >
+                {step === 1 && renderStep1()}
+                {step === 2 && renderStep2()}
+                {step === 3 && renderStep3()}
+              </View>
+            </ScrollView>
+          </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
       </LinearGradient>
     </SafeAreaView>
   );
+
 }

@@ -14,7 +14,6 @@ import {
 } from "@/translations/tabsTranslations/settings/profileTranslations";
 import { queueSettingsTranslations } from "@/translations/tabsTranslations/settings/queueSettingsTranslations";
 import { securityTranslations } from "@/translations/tabsTranslations/settings/securityTranslations";
-import DateTimePicker from "@react-native-community/datetimepicker";
 import { Picker } from "@react-native-picker/picker";
 import * as ImagePicker from "expo-image-picker";
 import { LinearGradient } from "expo-linear-gradient";
@@ -65,6 +64,8 @@ import {
   View,
 } from "react-native";
 import { z } from "zod";
+
+
 
 // Validation schemas
 const profileSchema = z.object({
@@ -135,6 +136,50 @@ export default function SettingsScreen() {
   });
 
   const [errors, setErrors] = useState<any>({});
+
+  const [customTimePicker, setCustomTimePicker] = useState({
+    visible: false,
+    day: "",
+    field: "",
+    hour: 9,
+    minute: 0,
+    ampm: "AM",
+  });
+
+  const formatCustomTime = () => {
+    return `${customTimePicker.hour}:${customTimePicker.minute.toString().padStart(2, "0")} ${customTimePicker.ampm}`;
+  };
+  const setCommonTime = (time: string) => {
+    const [timePart, period] = time.split(" ");
+    const [hours, minutes] = timePart.split(":").map(Number);
+
+    setCustomTimePicker(prev => ({
+      ...prev,
+      hour: hours,
+      minute: minutes,
+      ampm: period,
+    }));
+  };
+
+  const handleSetTime = () => {
+    let hour24 = customTimePicker.hour;
+    if (customTimePicker.ampm === "PM" && customTimePicker.hour !== 12) {
+      hour24 = customTimePicker.hour + 12;
+    } else if (customTimePicker.ampm === "AM" && customTimePicker.hour === 12) {
+      hour24 = 0;
+    }
+
+    const timeString = `${hour24.toString().padStart(2, "0")}:${customTimePicker.minute.toString().padStart(2, "0")}`;
+
+    handleWorkingHoursChange(
+      customTimePicker.day,
+      customTimePicker.field,
+      timeString
+    );
+
+    setCustomTimePicker(prev => ({ ...prev, visible: false }));
+    showToast("Time updated successfully!");
+  };
 
   // Modal states
   const [modals, setModals] = useState({
@@ -278,10 +323,10 @@ export default function SettingsScreen() {
       if (!result.canceled && result.assets && result.assets.length > 0) {
         setProfileData(
           (prev: any) =>
-            ({
-              ...prev,
-              avatar: result.assets[0].uri,
-            } as any)
+          ({
+            ...prev,
+            avatar: result.assets[0].uri,
+          } as any)
         );
         showToast("Profile picture updated!");
       }
@@ -309,9 +354,8 @@ export default function SettingsScreen() {
 
       if (address.length > 0) {
         const addr = address[0];
-        const fullAddress = `${addr.name || ""} ${addr.street || ""} ${
-          addr.city || ""
-        } ${addr.region || ""} ${addr.country || ""}`.trim();
+        const fullAddress = `${addr.name || ""} ${addr.street || ""} ${addr.city || ""
+          } ${addr.region || ""} ${addr.country || ""}`.trim();
         setProfileData((prev: any) => ({
           ...prev,
           businessAddress: fullAddress,
@@ -349,14 +393,28 @@ export default function SettingsScreen() {
 
   const openTimePicker = (day: any, field: any) => {
     const timeString = profileData.workingHours[day][field];
-    const [hours, minutes] = timeString.split(":");
-    const date = new Date();
-    date.setHours(parseInt(hours));
-    date.setMinutes(parseInt(minutes));
+    const [hours24, minutes] = timeString.split(":").map(Number);
 
-    setTimePickerData({ day, field, value: date });
-    openModal("timePicker");
+    let hour12 = hours24;
+    let ampm = "AM";
+
+    if (hours24 >= 12) {
+      ampm = "PM";
+      if (hours24 > 12) hour12 = hours24 - 12;
+    } else if (hours24 === 0) {
+      hour12 = 12;
+    }
+
+    setCustomTimePicker({
+      visible: true,
+      day,
+      field,
+      hour: hour12,
+      minute: minutes,
+      ampm,
+    });
   };
+
 
   const handleTimeChange = (event: any, selectedDate: any) => {
     if (Platform.OS === "android") {
@@ -429,9 +487,8 @@ export default function SettingsScreen() {
           <ArrowLeft size={24} color={isDark ? "#60A5FA" : "#3B82F6"} />
         </TouchableOpacity>
         <Text
-          className={`text-xl font-bold ${
-            isDark ? "text-white" : "text-blue-900"
-          }`}
+          className={`text-xl font-bold ${isDark ? "text-white" : "text-blue-900"
+            }`}
         >
           {profileLanguageSet.settings}
         </Text>
@@ -444,15 +501,13 @@ export default function SettingsScreen() {
       >
         {/* Profile Section */}
         <View
-          className={`${
-            isDark ? "bg-gray-800" : "bg-white"
-          } rounded-xl p-4 mb-4 shadow-sm`}
+          className={`${isDark ? "bg-gray-800" : "bg-white"
+            } rounded-xl p-4 mb-4 shadow-sm`}
         >
           <View className="flex-row items-center justify-between mb-4">
             <Text
-              className={`text-lg font-semibold ${
-                isDark ? "text-blue-300" : "text-blue-800"
-              }`}
+              className={`text-lg font-semibold ${isDark ? "text-blue-300" : "text-blue-800"
+                }`}
             >
               {profileLanguageSet.profileInformation}
             </Text>
@@ -463,9 +518,8 @@ export default function SettingsScreen() {
               >
                 <Edit2 size={16} color={isDark ? "#60A5FA" : "#3B82F6"} />
                 <Text
-                  className={`ml-1 ${
-                    isDark ? "text-blue-400" : "text-blue-600"
-                  }`}
+                  className={`ml-1 ${isDark ? "text-blue-400" : "text-blue-600"
+                    }`}
                 >
                   {profileLanguageSet.edit}
                 </Text>
@@ -510,11 +564,9 @@ export default function SettingsScreen() {
               activeOpacity={isEditingProfile ? 0.7 : 1}
             >
               <View
-                className={`w-20 h-20 rounded-full ${
-                  isDark ? "bg-gray-700" : "bg-blue-100"
-                } items-center justify-center border-2 ${
-                  isDark ? "border-gray-600" : "border-blue-200"
-                }`}
+                className={`w-20 h-20 rounded-full ${isDark ? "bg-gray-700" : "bg-blue-100"
+                  } items-center justify-center border-2 ${isDark ? "border-gray-600" : "border-blue-200"
+                  }`}
               >
                 {profileData.avatar ? (
                   <Image
@@ -522,7 +574,7 @@ export default function SettingsScreen() {
                     className="w-full h-full rounded-full"
                   />
                 ) : (
-                  <User size={32} color={isDark ? "#60A5FA" : "#3B82F6"} />
+                  <Star size={32} color={isDark ? "#60A5FA" : "#3B82F6"} />
                 )}
               </View>
               {isEditingProfile && (
@@ -532,9 +584,8 @@ export default function SettingsScreen() {
               )}
             </TouchableOpacity>
             <Text
-              className={`mt-2 text-sm ${
-                isDark ? "text-blue-400" : "text-blue-600"
-              }`}
+              className={`mt-2 text-sm ${isDark ? "text-blue-400" : "text-blue-600"
+                }`}
             >
               {profileLanguageSet.profilePicture}
             </Text>
@@ -547,9 +598,8 @@ export default function SettingsScreen() {
               <View className="flex-row items-center mb-1">
                 <User size={18} color={isDark ? "#60A5FA" : "#3B82F6"} />
                 <Text
-                  className={`ml-3 text-sm ${
-                    isDark ? "text-blue-300" : "text-blue-600"
-                  }`}
+                  className={`ml-3 text-sm ${isDark ? "text-blue-300" : "text-blue-600"
+                    }`}
                 >
                   {profileLanguageSet.fullName}
                 </Text>
@@ -560,21 +610,18 @@ export default function SettingsScreen() {
                   onChangeText={(text) =>
                     setProfileData((prev: any) => ({ ...prev, fullName: text }))
                   }
-                  className={`${
-                    isDark
-                      ? "bg-gray-700 border-gray-600 text-white"
-                      : "bg-white border-blue-200 text-gray-900"
-                  } border rounded-lg p-3 text-base ${
-                    errors.fullName ? "border-red-500" : ""
-                  }`}
+                  className={`${isDark
+                    ? "bg-gray-700 border-gray-600 text-white"
+                    : "bg-white border-blue-200 text-gray-900"
+                    } border rounded-lg p-3 text-base ${errors.fullName ? "border-red-500" : ""
+                    }`}
                   placeholder={profileLanguageSet.placeholderFullName}
                   placeholderTextColor={isDark ? "#9CA3AF" : "#6B7280"}
                 />
               ) : (
                 <Text
-                  className={`${
-                    isDark ? "text-gray-100" : "text-gray-900"
-                  } text-base ml-6`}
+                  className={`${isDark ? "text-gray-100" : "text-gray-900"
+                    } text-base ml-6`}
                 >
                   {profileData.fullName || "Not provided"}
                 </Text>
@@ -591,9 +638,8 @@ export default function SettingsScreen() {
               <View className="flex-row items-center mb-1">
                 <Mail size={18} color={isDark ? "#60A5FA" : "#3B82F6"} />
                 <Text
-                  className={`ml-3 text-sm ${
-                    isDark ? "text-blue-300" : "text-blue-600"
-                  }`}
+                  className={`ml-3 text-sm ${isDark ? "text-blue-300" : "text-blue-600"
+                    }`}
                 >
                   {profileLanguageSet.emailAddress}
                 </Text>
@@ -604,13 +650,11 @@ export default function SettingsScreen() {
                   onChangeText={(text) =>
                     setProfileData((prev: any) => ({ ...prev, email: text }))
                   }
-                  className={`${
-                    isDark
-                      ? "bg-gray-700 border-gray-600 text-white"
-                      : "bg-white border-blue-200 text-gray-900"
-                  } border rounded-lg p-3 text-base ${
-                    errors.email ? "border-red-500" : ""
-                  }`}
+                  className={`${isDark
+                    ? "bg-gray-700 border-gray-600 text-white"
+                    : "bg-white border-blue-200 text-gray-900"
+                    } border rounded-lg p-3 text-base ${errors.email ? "border-red-500" : ""
+                    }`}
                   placeholder={profileLanguageSet.placeholderEmail}
                   placeholderTextColor={isDark ? "#9CA3AF" : "#6B7280"}
                   keyboardType="email-address"
@@ -618,9 +662,8 @@ export default function SettingsScreen() {
                 />
               ) : (
                 <Text
-                  className={`${
-                    isDark ? "text-gray-100" : "text-gray-900"
-                  } text-base ml-6`}
+                  className={`${isDark ? "text-gray-100" : "text-gray-900"
+                    } text-base ml-6`}
                 >
                   {profileData.email}
                 </Text>
@@ -637,9 +680,8 @@ export default function SettingsScreen() {
               <View className="flex-row items-center mb-1">
                 <Star size={18} color={isDark ? "#60A5FA" : "#3B82F6"} />
                 <Text
-                  className={`ml-3 text-sm ${
-                    isDark ? "text-blue-300" : "text-blue-600"
-                  }`}
+                  className={`ml-3 text-sm ${isDark ? "text-blue-300" : "text-blue-600"
+                    }`}
                 >
                   {profileLanguageSet.businessName}
                 </Text>
@@ -653,21 +695,18 @@ export default function SettingsScreen() {
                       businessName: text,
                     }))
                   }
-                  className={`${
-                    isDark
-                      ? "bg-gray-700 border-gray-600 text-white"
-                      : "bg-white border-blue-200 text-gray-900"
-                  } border rounded-lg p-3 text-base ${
-                    errors.businessName ? "border-red-500" : ""
-                  }`}
+                  className={`${isDark
+                    ? "bg-gray-700 border-gray-600 text-white"
+                    : "bg-white border-blue-200 text-gray-900"
+                    } border rounded-lg p-3 text-base ${errors.businessName ? "border-red-500" : ""
+                    }`}
                   placeholder={profileLanguageSet.placeholderBusinessName}
                   placeholderTextColor={isDark ? "#9CA3AF" : "#6B7280"}
                 />
               ) : (
                 <Text
-                  className={`${
-                    isDark ? "text-gray-100" : "text-gray-900"
-                  } text-base ml-6`}
+                  className={`${isDark ? "text-gray-100" : "text-gray-900"
+                    } text-base ml-6`}
                 >
                   {profileData.businessName}
                 </Text>
@@ -684,22 +723,19 @@ export default function SettingsScreen() {
               <View className="flex-row items-center mb-1">
                 <BarChart2 size={18} color={isDark ? "#60A5FA" : "#3B82F6"} />
                 <Text
-                  className={`ml-3 text-sm ${
-                    isDark ? "text-blue-300" : "text-blue-600"
-                  }`}
+                  className={`ml-3 text-sm ${isDark ? "text-blue-300" : "text-blue-600"
+                    }`}
                 >
                   {profileLanguageSet.businessType}
                 </Text>
               </View>
               {isEditingProfile ? (
                 <View
-                  className={`${
-                    isDark
-                      ? "bg-gray-700 border-gray-600"
-                      : "bg-white border-blue-200"
-                  } border rounded-lg ${
-                    errors.businessType ? "border-red-500" : ""
-                  }`}
+                  className={`${isDark
+                    ? "bg-gray-700 border-gray-600"
+                    : "bg-white border-blue-200"
+                    } border rounded-lg ${errors.businessType ? "border-red-500" : ""
+                    }`}
                 >
                   <Picker
                     selectedValue={profileData.businessType}
@@ -722,9 +758,8 @@ export default function SettingsScreen() {
                 </View>
               ) : (
                 <Text
-                  className={`${
-                    isDark ? "text-gray-100" : "text-gray-900"
-                  } text-base ml-6`}
+                  className={`${isDark ? "text-gray-100" : "text-gray-900"
+                    } text-base ml-6`}
                 >
                   {profileData.businessType || "Not provided"}
                 </Text>
@@ -741,9 +776,8 @@ export default function SettingsScreen() {
               <View className="flex-row items-center mb-1">
                 <Users size={18} color={isDark ? "#60A5FA" : "#3B82F6"} />
                 <Text
-                  className={`ml-3 text-sm ${
-                    isDark ? "text-blue-300" : "text-blue-600"
-                  }`}
+                  className={`ml-3 text-sm ${isDark ? "text-blue-300" : "text-blue-600"
+                    }`}
                 >
                   {profileLanguageSet.numberOfSeats}
                 </Text>
@@ -758,13 +792,11 @@ export default function SettingsScreen() {
                       seats: parseInt(numericValue) || 0,
                     }));
                   }}
-                  className={`${
-                    isDark
-                      ? "bg-gray-700 border-gray-600 text-white"
-                      : "bg-white border-blue-200 text-gray-900"
-                  } border rounded-lg p-3 text-base ${
-                    errors.seats ? "border-red-500" : ""
-                  }`}
+                  className={`${isDark
+                    ? "bg-gray-700 border-gray-600 text-white"
+                    : "bg-white border-blue-200 text-gray-900"
+                    } border rounded-lg p-3 text-base ${errors.seats ? "border-red-500" : ""
+                    }`}
                   placeholder={profileLanguageSet.placeholderSeats}
                   placeholderTextColor={isDark ? "#9CA3AF" : "#6B7280"}
                   keyboardType="numeric"
@@ -772,9 +804,8 @@ export default function SettingsScreen() {
                 />
               ) : (
                 <Text
-                  className={`${
-                    isDark ? "text-gray-100" : "text-gray-900"
-                  } text-base ml-6`}
+                  className={`${isDark ? "text-gray-100" : "text-gray-900"
+                    } text-base ml-6`}
                 >
                   {profileData.seats} seats
                 </Text>
@@ -791,9 +822,8 @@ export default function SettingsScreen() {
               <View className="flex-row items-center mb-1">
                 <MapPin size={18} color={isDark ? "#60A5FA" : "#3B82F6"} />
                 <Text
-                  className={`ml-3 text-sm ${
-                    isDark ? "text-blue-300" : "text-blue-600"
-                  }`}
+                  className={`ml-3 text-sm ${isDark ? "text-blue-300" : "text-blue-600"
+                    }`}
                 >
                   {profileLanguageSet.businessAddress}
                 </Text>
@@ -808,13 +838,11 @@ export default function SettingsScreen() {
                         businessAddress: text,
                       }))
                     }
-                    className={`${
-                      isDark
-                        ? "bg-gray-700 border-gray-600 text-white"
-                        : "bg-white border-blue-200 text-gray-900"
-                    } border rounded-lg p-3 text-base mb-2 ${
-                      errors.businessAddress ? "border-red-500" : ""
-                    }`}
+                    className={`${isDark
+                      ? "bg-gray-700 border-gray-600 text-white"
+                      : "bg-white border-blue-200 text-gray-900"
+                      } border rounded-lg p-3 text-base mb-2 ${errors.businessAddress ? "border-red-500" : ""
+                      }`}
                     placeholder={profileLanguageSet.placeholderBusinessAddress}
                     placeholderTextColor={isDark ? "#9CA3AF" : "#6B7280"}
                     multiline
@@ -838,9 +866,8 @@ export default function SettingsScreen() {
                 </View>
               ) : (
                 <Text
-                  className={`${
-                    isDark ? "text-gray-100" : "text-gray-900"
-                  } text-base ml-6`}
+                  className={`${isDark ? "text-gray-100" : "text-gray-900"
+                    } text-base ml-6`}
                 >
                   {profileData.businessAddress || "Not provided"}
                 </Text>
@@ -857,9 +884,8 @@ export default function SettingsScreen() {
               <View className="flex-row items-center mb-1">
                 <Phone size={18} color={isDark ? "#60A5FA" : "#3B82F6"} />
                 <Text
-                  className={`ml-3 text-sm ${
-                    isDark ? "text-blue-300" : "text-blue-600"
-                  }`}
+                  className={`ml-3 text-sm ${isDark ? "text-blue-300" : "text-blue-600"
+                    }`}
                 >
                   {profileLanguageSet.phoneNumber}
                 </Text>
@@ -877,13 +903,11 @@ export default function SettingsScreen() {
                       phoneNumber: numericValue,
                     }));
                   }}
-                  className={`${
-                    isDark
-                      ? "bg-gray-700 border-gray-600 text-white"
-                      : "bg-white border-blue-200 text-gray-900"
-                  } border rounded-lg p-3 text-base ${
-                    errors.phoneNumber ? "border-red-500" : ""
-                  }`}
+                  className={`${isDark
+                    ? "bg-gray-700 border-gray-600 text-white"
+                    : "bg-white border-blue-200 text-gray-900"
+                    } border rounded-lg p-3 text-base ${errors.phoneNumber ? "border-red-500" : ""
+                    }`}
                   placeholder={profileLanguageSet.placeholderPhoneNumber}
                   placeholderTextColor={isDark ? "#9CA3AF" : "#6B7280"}
                   keyboardType="phone-pad"
@@ -891,9 +915,8 @@ export default function SettingsScreen() {
                 />
               ) : (
                 <Text
-                  className={`${
-                    isDark ? "text-gray-100" : "text-gray-900"
-                  } text-base ml-6`}
+                  className={`${isDark ? "text-gray-100" : "text-gray-900"
+                    } text-base ml-6`}
                 >
                   {profileData.phoneNumber || "Not provided"}
                 </Text>
@@ -910,27 +933,25 @@ export default function SettingsScreen() {
               <View className="flex-row items-center mb-1">
                 <Calendar size={18} color={isDark ? "#60A5FA" : "#3B82F6"} />
                 <Text
-                  className={`ml-3 text-sm ${
-                    isDark ? "text-blue-300" : "text-blue-600"
-                  }`}
+                  className={`ml-3 text-sm ${isDark ? "text-blue-300" : "text-blue-600"
+                    }`}
                 >
                   {profileLanguageSet.workingHours}
                 </Text>
               </View>
               <View className="flex-row items-center justify-between ml-6">
                 <Text
-                  className={`${
-                    isDark ? "text-gray-100" : "text-gray-900"
-                  } text-base`}
+                  className={`${isDark ? "text-gray-100" : "text-gray-900"
+                    } text-base`}
                 >
                   Mon:{" "}
                   {profileData.workingHours.monday.closed
                     ? "Closed"
                     : `${formatTime(
-                        profileData.workingHours.monday.open
-                      )} - ${formatTime(
-                        profileData.workingHours.monday.close
-                      )}`}
+                      profileData.workingHours.monday.open
+                    )} - ${formatTime(
+                      profileData.workingHours.monday.close
+                    )}`}
                 </Text>
                 <ChevronRight
                   size={16}
@@ -943,14 +964,12 @@ export default function SettingsScreen() {
 
         {/* General Settings */}
         <View
-          className={`${
-            isDark ? "bg-gray-800" : "bg-white"
-          } rounded-xl p-4 mb-4 shadow-sm`}
+          className={`${isDark ? "bg-gray-800" : "bg-white"
+            } rounded-xl p-4 mb-4 shadow-sm`}
         >
           <Text
-            className={`text-lg font-semibold ${
-              isDark ? "text-blue-300" : "text-blue-800"
-            } mb-4`}
+            className={`text-lg font-semibold ${isDark ? "text-blue-300" : "text-blue-800"
+              } mb-4`}
           >
             {generalLanguageSet.generalSettings}
           </Text>
@@ -1004,11 +1023,10 @@ export default function SettingsScreen() {
               </Text>
             </View>
             <View
-              className={`${
-                isDark
-                  ? "bg-gray-700 border-gray-600"
-                  : "bg-white border-blue-200"
-              } border rounded-lg`}
+              className={`${isDark
+                ? "bg-gray-700 border-gray-600"
+                : "bg-white border-blue-200"
+                } border rounded-lg`}
             >
               <Picker
                 selectedValue={language}
@@ -1038,9 +1056,8 @@ export default function SettingsScreen() {
                   {generalLanguageSet.displayDevice}
                 </Text>
                 <Text
-                  className={`text-xs ${
-                    isDark ? "text-blue-300" : "text-blue-600"
-                  }`}
+                  className={`text-xs ${isDark ? "text-blue-300" : "text-blue-600"
+                    }`}
                 >
                   QVuew Display 1 • Connected
                 </Text>
@@ -1052,14 +1069,12 @@ export default function SettingsScreen() {
 
         {/* Queue Settings */}
         <View
-          className={`${
-            isDark ? "bg-gray-800" : "bg-white"
-          } rounded-xl p-4 mb-4 shadow-sm`}
+          className={`${isDark ? "bg-gray-800" : "bg-white"
+            } rounded-xl p-4 mb-4 shadow-sm`}
         >
           <Text
-            className={`text-lg font-semibold ${
-              isDark ? "text-blue-300" : "text-blue-800"
-            } mb-4`}
+            className={`text-lg font-semibold ${isDark ? "text-blue-300" : "text-blue-800"
+              } mb-4`}
           >
             {queueLanguageSet.queueSettings}
           </Text>
@@ -1099,17 +1114,15 @@ export default function SettingsScreen() {
                       inactivityTimeout: parseInt(text) || 5,
                     }))
                   }
-                  className={`${
-                    isDark
-                      ? "bg-gray-700 border-gray-600 text-white"
-                      : "bg-white border-blue-200 text-gray-900"
-                  } border rounded-lg p-2 w-16 text-center`}
+                  className={`${isDark
+                    ? "bg-gray-700 border-gray-600 text-white"
+                    : "bg-white border-blue-200 text-gray-900"
+                    } border rounded-lg p-2 w-16 text-center`}
                   keyboardType="numeric"
                 />
                 <Text
-                  className={`ml-2 ${
-                    isDark ? "text-blue-300" : "text-blue-600"
-                  }`}
+                  className={`ml-2 ${isDark ? "text-blue-300" : "text-blue-600"
+                    }`}
                 >
                   {queueLanguageSet.minutes}
                 </Text>
@@ -1138,9 +1151,8 @@ export default function SettingsScreen() {
           </View>
           {settings.privacyMode && (
             <Text
-              className={`text-xs ${
-                isDark ? "text-blue-300" : "text-blue-600"
-              } ml-9 -mt-2`}
+              className={`text-xs ${isDark ? "text-blue-300" : "text-blue-600"
+                } ml-9 -mt-2`}
             >
               {queueLanguageSet.hideCustomerNames}
             </Text>
@@ -1149,14 +1161,12 @@ export default function SettingsScreen() {
 
         {/* Security Settings */}
         <View
-          className={`${
-            isDark ? "bg-gray-800" : "bg-white"
-          } rounded-xl p-4 mb-4 shadow-sm`}
+          className={`${isDark ? "bg-gray-800" : "bg-white"
+            } rounded-xl p-4 mb-4 shadow-sm`}
         >
           <Text
-            className={`text-lg font-semibold ${
-              isDark ? "text-blue-300" : "text-blue-800"
-            } mb-4`}
+            className={`text-lg font-semibold ${isDark ? "text-blue-300" : "text-blue-800"
+              } mb-4`}
           >
             {settingLanguageSet.security}
           </Text>
@@ -1186,9 +1196,8 @@ export default function SettingsScreen() {
                   {settingLanguageSet.twoFactorAuthentication}
                 </Text>
                 <Text
-                  className={`text-xs ${
-                    isDark ? "text-blue-300" : "text-blue-600"
-                  }`}
+                  className={`text-xs ${isDark ? "text-blue-300" : "text-blue-600"
+                    }`}
                 >
                   {twoFactorEnabled
                     ? settingLanguageSet.currentlyEnabled
@@ -1237,14 +1246,12 @@ export default function SettingsScreen() {
 
         {/* Account Settings */}
         <View
-          className={`${
-            isDark ? "bg-gray-800" : "bg-white"
-          } rounded-xl p-4 mb-4 shadow-sm`}
+          className={`${isDark ? "bg-gray-800" : "bg-white"
+            } rounded-xl p-4 mb-4 shadow-sm`}
         >
           <Text
-            className={`text-lg font-semibold ${
-              isDark ? "text-blue-300" : "text-blue-800"
-            } mb-4`}
+            className={`text-lg font-semibold ${isDark ? "text-blue-300" : "text-blue-800"
+              } mb-4`}
           >
             {accountLanguageSet.account}
           </Text>
@@ -1363,16 +1370,14 @@ export default function SettingsScreen() {
       <Modal visible={modals.workingHours} animationType="slide" transparent>
         <View className="flex-1 bg-black/50 justify-center">
           <View
-            className={`${
-              isDark ? "bg-gray-800" : "bg-white"
-            } mx-4 rounded-xl max-h-4/5`}
+            className={`${isDark ? "bg-gray-800" : "bg-white"
+              } mx-4 rounded-xl max-h-4/5`}
             style={{ maxHeight: "90%", minHeight: "80%" }}
           >
             <View className="flex-row items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
               <Text
-                className={`text-lg font-semibold ${
-                  isDark ? "text-white" : "text-gray-900"
-                }`}
+                className={`text-lg font-semibold ${isDark ? "text-white" : "text-gray-900"
+                  }`}
               >
                 {profileModalLanguageSet.workingHoursModalTitle}
               </Text>
@@ -1383,9 +1388,8 @@ export default function SettingsScreen() {
 
             <ScrollView className="p-4" showsVerticalScrollIndicator={false}>
               <Text
-                className={`text-sm ${
-                  isDark ? "text-gray-300" : "text-gray-600"
-                } mb-4`}
+                className={`text-sm ${isDark ? "text-gray-300" : "text-gray-600"
+                  } mb-4`}
               >
                 {profileModalLanguageSet.workingHoursDescription}
               </Text>
@@ -1393,23 +1397,20 @@ export default function SettingsScreen() {
               {Object.entries(profileData.workingHours).map(([day, hours]) => (
                 <View
                   key={day}
-                  className={`mb-4 p-3 rounded-lg ${
-                    isDark ? "bg-blue-900/20" : "bg-blue-900/10"
-                  } `}
+                  className={`mb-4 p-3 rounded-lg ${isDark ? "bg-blue-900/20" : "bg-blue-900/10"
+                    } `}
                 >
                   <View className="flex-row items-center justify-between mb-3">
                     <Text
-                      className={`font-medium capitalize ${
-                        isDark ? "text-blue-300" : "text-blue-800"
-                      }`}
+                      className={`font-medium capitalize ${isDark ? "text-blue-300" : "text-blue-800"
+                        }`}
                     >
                       {day}
                     </Text>
                     <View className="flex-row items-center">
                       <Text
-                        className={`text-sm mr-2 ${
-                          isDark ? "text-gray-300" : "text-gray-600"
-                        }`}
+                        className={`text-sm mr-2 ${isDark ? "text-gray-300" : "text-gray-600"
+                          }`}
                       >
                         Closed
                       </Text>
@@ -1428,24 +1429,21 @@ export default function SettingsScreen() {
                     <View className="flex-row items-center justify-between">
                       <View className="flex-1 mr-2">
                         <Text
-                          className={`text-xs mb-1 ${
-                            isDark ? "text-gray-400" : "text-gray-500"
-                          }`}
+                          className={`text-xs mb-1 ${isDark ? "text-gray-400" : "text-gray-500"
+                            }`}
                         >
                           Open
                         </Text>
                         <TouchableOpacity
                           onPress={() => openTimePicker(day, "open")}
-                          className={`${
-                            isDark
-                              ? "bg-gray-700 border-gray-600"
-                              : "bg-white border-gray-300"
-                          } border rounded-lg p-3`}
+                          className={`${isDark
+                            ? "bg-gray-700 border-gray-600"
+                            : "bg-white border-gray-300"
+                            } border rounded-lg p-3`}
                         >
                           <Text
-                            className={`${
-                              isDark ? "text-white" : "text-gray-900"
-                            }`}
+                            className={`${isDark ? "text-white" : "text-gray-900"
+                              }`}
                           >
                             {formatTime(hours.open)}
                           </Text>
@@ -1453,34 +1451,30 @@ export default function SettingsScreen() {
                       </View>
 
                       <Text
-                        className={`mx-2 ${
-                          isDark ? "text-gray-400" : "text-gray-500"
-                        }`}
+                        className={`mx-2 ${isDark ? "text-gray-400" : "text-gray-500"
+                          }`}
                       >
                         to
                       </Text>
 
                       <View className="flex-1 ml-2">
                         <Text
-                          className={`text-xs mb-1  ${
-                            isDark ? "text-gray-400" : "text-gray-500"
-                          }`}
+                          className={`text-xs mb-1  ${isDark ? "text-gray-400" : "text-gray-500"
+                            }`}
                           style={{ textAlign: "right", marginRight: 8 }}
                         >
                           Close
                         </Text>
                         <TouchableOpacity
                           onPress={() => openTimePicker(day, "close")}
-                          className={`${
-                            isDark
-                              ? "bg-gray-700 border-gray-600"
-                              : "bg-white border-gray-300"
-                          } border rounded-lg p-3`}
+                          className={`${isDark
+                            ? "bg-gray-700 border-gray-600"
+                            : "bg-white border-gray-300"
+                            } border rounded-lg p-3`}
                         >
                           <Text
-                            className={`${
-                              isDark ? "text-white" : "text-gray-900"
-                            }`}
+                            className={`${isDark ? "text-white" : "text-gray-900"
+                              }`}
                           >
                             {formatTime(hours.close)}
                           </Text>
@@ -1510,52 +1504,368 @@ export default function SettingsScreen() {
         </View>
       </Modal>
 
-      {/* Time Picker Modal */}
-      {modals.timePicker && (
-        <Modal visible={modals.timePicker} animationType="slide" transparent>
-          <View className="flex-1 bg-black/50 justify-center">
+      {/* Custom Time Picker Modal */}
+      <Modal
+        visible={customTimePicker.visible}
+        animationType="fade"
+        transparent
+        onRequestClose={() => setCustomTimePicker(prev => ({ ...prev, visible: false }))}
+      >
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            justifyContent: "center",
+            alignItems: "center",
+            padding: 16,
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: "white",
+              borderRadius: 16,
+              width: "100%",
+              maxWidth: 400,
+              padding: 20,
+            }}
+          >
+            {/* Header */}
             <View
-              className={`${
-                isDark ? "bg-gray-800" : "bg-white"
-              } mx-4 rounded-xl p-4`}
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: 20,
+              }}
             >
-              <View className="flex-row items-center justify-between mb-4">
-                <Text
-                  className={`text-lg font-semibold ${
-                    isDark ? "text-white" : "text-gray-900"
-                  }`}
-                >
-                  Select{" "}
-                  {timePickerData.field === "open" ? "Opening" : "Closing"} Time
+              <Text
+                style={{
+                  fontSize: 18,
+                  fontWeight: "600",
+                  color: "#1E40AF",
+                }}
+              >
+                Select {customTimePicker.field === "open" ? "Opening" : "Closing"} Time
+              </Text>
+              <TouchableOpacity
+                onPress={() => setCustomTimePicker(prev => ({ ...prev, visible: false }))}
+              >
+                <X size={24} color="#6B7280" />
+              </TouchableOpacity>
+            </View>
+
+            {/* Time Display */}
+            <View
+              style={{
+                backgroundColor: "#EFF6FF",
+                borderRadius: 12,
+                padding: 20,
+                marginBottom: 20,
+                alignItems: "center",
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 40,
+                  fontWeight: "bold",
+                  color: "#1E40AF",
+                  letterSpacing: 2,
+                }}
+              >
+                {formatCustomTime()}
+              </Text>
+            </View>
+
+            {/* Scrollable Time Selectors */}
+            <View style={{ marginBottom: 20 }}>
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  marginBottom: 8,
+                }}
+              >
+                <Text style={{ fontSize: 12, color: "#6B7280", width: 80, textAlign: "center" }}>
+                  Hour
                 </Text>
-                <TouchableOpacity onPress={() => closeModal("timePicker")}>
-                  <X size={24} color={isDark ? "#9CA3AF" : "#6B7280"} />
-                </TouchableOpacity>
+                <Text style={{ fontSize: 12, color: "#6B7280", width: 80, textAlign: "center" }}>
+                  Minute
+                </Text>
+                <Text style={{ fontSize: 12, color: "#6B7280", width: 80, textAlign: "center" }}>
+                  AM/PM
+                </Text>
               </View>
 
-              <DateTimePicker
-                value={timePickerData.value}
-                mode="time"
-                is24Hour={false}
-                display="spinner"
-                onChange={handleTimeChange}
-                textColor={isDark ? "white" : "black"}
-              />
-
-              {Platform.OS === "ios" && (
-                <TouchableOpacity
-                  onPress={() => closeModal("timePicker")}
-                  className="bg-blue-600 rounded-lg p-3 mt-4"
+              <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+                {/* Hour Scroll */}
+                <View
+                  style={{
+                    width: 80,
+                    height: 140,
+                    borderWidth: 1,
+                    borderColor: "#D1D5DB",
+                    borderRadius: 8,
+                    backgroundColor: "#F9FAFB",
+                    overflow: "hidden",
+                  }}
                 >
-                  <Text className="text-white font-medium text-center">
-                    Done
-                  </Text>
-                </TouchableOpacity>
-              )}
+                  <ScrollView
+                    showsVerticalScrollIndicator={true}
+                    persistentScrollbar={true}
+                  >
+                    {Array.from({ length: 12 }, (_, i) => i + 1).map((hour) => (
+                      <TouchableOpacity
+                        key={hour}
+                        onPress={() =>
+                          setCustomTimePicker(prev => ({ ...prev, hour }))
+                        }
+                        style={{
+                          paddingVertical: 12,
+                          alignItems: "center",
+                          backgroundColor:
+                            customTimePicker.hour === hour ? "#DBEAFE" : "transparent",
+                          borderBottomWidth: 0.5,
+                          borderBottomColor: "#E5E7EB",
+                        }}
+                      >
+                        <Text
+                          style={{
+                            fontSize: 16,
+                            fontWeight: customTimePicker.hour === hour ? "600" : "400",
+                            color: customTimePicker.hour === hour ? "#1E40AF" : "#1F2937",
+                          }}
+                        >
+                          {hour}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                </View>
+
+                <Text
+                  style={{
+                    fontSize: 24,
+                    fontWeight: "bold",
+                    color: "#6B7280",
+                    marginHorizontal: 8,
+                  }}
+                >
+                  :
+                </Text>
+
+                {/* Minute Scroll */}
+                <View
+                  style={{
+                    width: 80,
+                    height: 140,
+                    borderWidth: 1,
+                    borderColor: "#D1D5DB",
+                    borderRadius: 8,
+                    backgroundColor: "#F9FAFB",
+                    overflow: "hidden",
+                  }}
+                >
+                  <ScrollView
+                    showsVerticalScrollIndicator={true}
+                    persistentScrollbar={true}
+                  >
+                    {Array.from({ length: 60 }, (_, i) => i).map((minute) => (
+                      <TouchableOpacity
+                        key={minute}
+                        onPress={() =>
+                          setCustomTimePicker(prev => ({ ...prev, minute }))
+                        }
+                        style={{
+                          paddingVertical: 12,
+                          alignItems: "center",
+                          backgroundColor:
+                            customTimePicker.minute === minute ? "#DBEAFE" : "transparent",
+                          borderBottomWidth: 0.5,
+                          borderBottomColor: "#E5E7EB",
+                        }}
+                      >
+                        <Text
+                          style={{
+                            fontSize: 16,
+                            fontWeight: customTimePicker.minute === minute ? "600" : "400",
+                            color: customTimePicker.minute === minute ? "#1E40AF" : "#1F2937",
+                          }}
+                        >
+                          {minute.toString().padStart(2, "0")}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                </View>
+
+                {/* AM/PM Buttons */}
+                <View
+                  style={{
+                    width: 80,
+                    height: 140,
+                    justifyContent: "center",
+                    gap: 8,
+                  }}
+                >
+                  <TouchableOpacity
+                    onPress={() =>
+                      setCustomTimePicker(prev => ({ ...prev, ampm: "AM" }))
+                    }
+                    style={{
+                      flex: 1,
+                      borderWidth: 1,
+                      borderColor: customTimePicker.ampm === "AM" ? "#3B82F6" : "#D1D5DB",
+                      borderRadius: 8,
+                      backgroundColor: customTimePicker.ampm === "AM" ? "#DBEAFE" : "#F9FAFB",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontSize: 16,
+                        fontWeight: customTimePicker.ampm === "AM" ? "600" : "400",
+                        color: customTimePicker.ampm === "AM" ? "#1E40AF" : "#1F2937",
+                      }}
+                    >
+                      AM
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    onPress={() =>
+                      setCustomTimePicker(prev => ({ ...prev, ampm: "PM" }))
+                    }
+                    style={{
+                      flex: 1,
+                      borderWidth: 1,
+                      borderColor: customTimePicker.ampm === "PM" ? "#3B82F6" : "#D1D5DB",
+                      borderRadius: 8,
+                      backgroundColor: customTimePicker.ampm === "PM" ? "#DBEAFE" : "#F9FAFB",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontSize: 16,
+                        fontWeight: customTimePicker.ampm === "PM" ? "600" : "400",
+                        color: customTimePicker.ampm === "PM" ? "#1E40AF" : "#1F2937",
+                      }}
+                    >
+                      PM
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+
+            {/* Common Times */}
+            <View style={{ marginBottom: 20 }}>
+              <Text
+                style={{
+                  fontSize: 13,
+                  fontWeight: "500",
+                  color: "#6B7280",
+                  marginBottom: 12,
+                }}
+              >
+                Common Times
+              </Text>
+              <View
+                style={{
+                  flexDirection: "row",
+                  flexWrap: "wrap",
+                  gap: 8,
+                }}
+              >
+                {[
+                  "9:00 AM",
+                  "12:00 PM",
+                  "5:00 PM",
+                  "8:30 AM",
+                  "1:30 PM",
+                  "6:30 PM",
+                ].map((time) => (
+                  <TouchableOpacity
+                    key={time}
+                    onPress={() => setCommonTime(time)}
+                    style={{
+                      backgroundColor: "#EFF6FF",
+                      paddingHorizontal: 16,
+                      paddingVertical: 10,
+                      borderRadius: 8,
+                      borderWidth: 1,
+                      borderColor: "#BFDBFE",
+                      minWidth: "30%",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontSize: 14,
+                        color: "#1E40AF",
+                        fontWeight: "500",
+                      }}
+                    >
+                      {time}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
+            {/* Action Buttons */}
+            <View style={{ flexDirection: "row", gap: 12 }}>
+              <TouchableOpacity
+                onPress={() => setCustomTimePicker(prev => ({ ...prev, visible: false }))}
+                style={{
+                  flex: 1,
+                  backgroundColor: "#F3F4F6",
+                  paddingVertical: 14,
+                  borderRadius: 8,
+                  alignItems: "center",
+                  borderWidth: 1,
+                  borderColor: "#D1D5DB",
+                }}
+              >
+                <Text
+                  style={{
+                    fontSize: 16,
+                    fontWeight: "600",
+                    color: "#374151",
+                  }}
+                >
+                  Cancel
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={handleSetTime}
+                style={{
+                  flex: 1,
+                  backgroundColor: "#3B82F6",
+                  paddingVertical: 14,
+                  borderRadius: 8,
+                  alignItems: "center",
+                }}
+              >
+                <Text
+                  style={{
+                    fontSize: 16,
+                    fontWeight: "600",
+                    color: "white",
+                  }}
+                >
+                  Set Time
+                </Text>
+              </TouchableOpacity>
             </View>
           </View>
-        </Modal>
-      )}
+        </View>
+      </Modal>
+
+      {/* Delete Account Modal */}
 
       {/* Display Device Modal */}
       <Modal visible={modals.displayDevice} animationType="slide" transparent>
@@ -1565,9 +1875,8 @@ export default function SettingsScreen() {
           >
             <View className="flex-row items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
               <Text
-                className={`text-lg font-semibold ${
-                  isDark ? "text-white" : "text-gray-900"
-                }`}
+                className={`text-lg font-semibold ${isDark ? "text-white" : "text-gray-900"
+                  }`}
               >
                 {generalModalLanguageSet.displayDevice}
               </Text>
@@ -1582,16 +1891,14 @@ export default function SettingsScreen() {
                 <Monitor size={24} color="#3B82F6" />
                 <View className="ml-3">
                   <Text
-                    className={`font-medium ${
-                      isDark ? "text-blue-300" : "text-blue-800"
-                    }`}
+                    className={`font-medium ${isDark ? "text-blue-300" : "text-blue-800"
+                      }`}
                   >
                     QVuew Display 1
                   </Text>
                   <Text
-                    className={`text-sm ${
-                      isDark ? "text-blue-400" : "text-blue-600"
-                    }`}
+                    className={`text-sm ${isDark ? "text-blue-400" : "text-blue-600"
+                      }`}
                   >
                     Connected • Last synced 2 minutes ago
                   </Text>
@@ -1600,9 +1907,8 @@ export default function SettingsScreen() {
 
               {/* Display Settings */}
               <Text
-                className={`font-medium mb-3 ${
-                  isDark ? "text-gray-300" : "text-gray-700"
-                }`}
+                className={`font-medium mb-3 ${isDark ? "text-gray-300" : "text-gray-700"
+                  }`}
               >
                 {generalModalLanguageSet.displaySettings}
               </Text>
@@ -1667,18 +1973,16 @@ export default function SettingsScreen() {
 
                 <View className="pt-2">
                   <Text
-                    className={`text-sm mb-1 ${
-                      isDark ? "text-gray-400" : "text-gray-600"
-                    }`}
+                    className={`text-sm mb-1 ${isDark ? "text-gray-400" : "text-gray-600"
+                      }`}
                   >
                     {generalModalLanguageSet.displayRefreshRate}
                   </Text>
                   <View
-                    className={`${
-                      isDark
-                        ? "bg-gray-700 border-gray-600"
-                        : "bg-white border-gray-300"
-                    } border rounded-lg`}
+                    className={`${isDark
+                      ? "bg-gray-700 border-gray-600"
+                      : "bg-white border-gray-300"
+                      } border rounded-lg`}
                   >
                     <Picker
                       selectedValue="5"
@@ -1703,9 +2007,8 @@ export default function SettingsScreen() {
 
               <TouchableOpacity className="border border-blue-300 dark:border-blue-700 rounded-lg p-3">
                 <Text
-                  className={`font-medium text-center ${
-                    isDark ? "text-blue-400" : "text-blue-600"
-                  }`}
+                  className={`font-medium text-center ${isDark ? "text-blue-400" : "text-blue-600"
+                    }`}
                 >
                   {generalModalLanguageSet.disconnectDevice}
                 </Text>

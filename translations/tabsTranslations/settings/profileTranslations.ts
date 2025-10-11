@@ -45,7 +45,7 @@ export const translations: Record<string, Translation> = {
     edit: "Edit",
     save: "Save",
     cancel: "Cancel",
-    profilePicture: "Profile Picture",
+    profilePicture: "Business Logo",
     fullName: "Full Name",
     emailAddress: "Email Address",
     businessName: "Business Name",

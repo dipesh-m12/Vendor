@@ -1,37 +1,80 @@
-import React, { useState } from "react";
-import { View, Text, TouchableOpacity, ScrollView, Modal } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
-import { useRouter } from "expo-router";
 import useThemeStore from "@/store/themeStore";
+import { useRouter } from "expo-router";
 import {
+  AlertCircle,
   ArrowLeft,
-  Filter,
-  ChevronDown,
-  Users,
-  Clock,
-  UserX,
-  TrendingDown,
-  TrendingUp,
+  BarChart3,
   Calendar,
   CheckCircle,
-  User,
+  ChevronDown,
+  Clock,
+  Filter,
   Info,
-  BarChart3,
-  X,
+  TrendingDown,
+  TrendingUp,
+  User,
+  Users,
 } from "lucide-react-native";
-import { PieChart } from "react-native-chart-kit";
-import { Dimensions } from "react-native";
+
+import React, { useState } from "react";
+import {
+  Dimensions,
+  Modal,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import Svg, { Circle, G } from "react-native-svg";
+
 import { translations } from "@/translations/tabsTranslations/statsTransaltions";
 
 const screenWidth = Dimensions.get("window").width;
+
+// Custom Donut Chart Component
+const DonutChart = ({ data, size = 200, strokeWidth = 40 }: any) => {
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const center = size / 2;
+
+  let cumulativePercent = 0;
+
+  return (
+    <Svg
+      width={size}
+      height={size}
+      style={{ transform: [{ rotate: "-90deg" }] }}
+    >
+      {data.map((item: any, index: number) => {
+        const percentage = item.percentage;
+        const rotation = (cumulativePercent / 100) * 360;
+
+        cumulativePercent += percentage;
+
+        return (
+          <G key={index} rotation={rotation} origin={`${center}, ${center}`}>
+            <Circle
+              cx={center}
+              cy={center}
+              r={radius}
+              stroke={item.color}
+              strokeWidth={strokeWidth}
+              fill="transparent"
+              strokeDasharray={`${(circumference * percentage) / 100} ${circumference}`}
+              strokeLinecap="butt"
+            />
+          </G>
+        );
+      })}
+    </Svg>
+  );
+};
 
 export default function StatisticsPage() {
   const router = useRouter();
   const { isDark, language } = useThemeStore();
   const [selectedTimeRange, setSelectedTimeRange] = useState("Last 7 Days");
   const [showTimeRangeModal, setShowTimeRangeModal] = useState(false);
-  const [showCustomerInsightsModal, setShowCustomerInsightsModal] =
-    useState(false);
 
   const languageSet = translations[language];
 
@@ -43,41 +86,25 @@ export default function StatisticsPage() {
     "Last 90 Days",
   ];
 
-  // Sample data - replace with real data
-  const statsData = {
-    customersServed: 253,
-    customersSkipped: 47,
-    customersLeft: 30,
-    avgWaitTime: "15 min",
-    totalCustomers: 330,
-    conversionRate: "68%",
-    retentionRate: "39%",
-    visited: 370,
-    served: 253,
-    serviceCompletion: 85,
-  };
-
-  const pieData = [
+  // Donut chart data
+  const donutData = [
     {
-      name: languageSet.served,
-      population: 253,
+      name: "Served",
+      value: 285,
+      percentage: 76,
       color: "#4285F4",
-      legendFontColor: isDark ? "#F9FAFB" : "#374151",
-      legendFontSize: 12,
     },
     {
-      name: languageSet.skipped,
-      population: 47,
+      name: "Customers Skipped",
+      value: 53,
+      percentage: 14,
       color: "#FB923C",
-      legendFontColor: isDark ? "#F9FAFB" : "#374151",
-      legendFontSize: 12,
     },
     {
-      name: languageSet.left,
-      population: 30,
+      name: "Customers Left",
+      value: 35,
+      percentage: 9,
       color: "#EF4444",
-      legendFontColor: isDark ? "#F9FAFB" : "#374151",
-      legendFontSize: 12,
     },
   ];
 
@@ -86,157 +113,29 @@ export default function StatisticsPage() {
     { time: "2:00 PM - 3:00 PM", traffic: "High Traffic" },
     { time: "12:00 PM - 1:00 PM", traffic: "High Traffic" },
   ];
-  // languageSet.highTraffic
 
-  const containerBg = isDark ? "#1F2937" : "#F1F5F9";
+  const containerBg = isDark ? "#1F2937" : "#F3F4F6";
   const cardBg = isDark ? "#374151" : "#FFFFFF";
-  const textPrimary = isDark ? "#F9FAFB" : "#1E293B";
-  const textSecondary = isDark ? "#9CA3AF" : "#64748B";
-  const borderColor = isDark ? "#4B5563" : "#E2E8F0";
-
-  const StatCard = ({
-    icon,
-    title,
-    value,
-    subtitle,
-    color = "#4285F4",
-    trend,
-  }: any) => (
-    <View
-      style={{
-        backgroundColor: cardBg,
-        borderRadius: 12,
-        padding: 16,
-        marginBottom: 12,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 3,
-      }}
-    >
-      <View
-        style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}
-      >
-        <View
-          style={{
-            width: 32,
-            height: 32,
-            borderRadius: 16,
-            backgroundColor: isDark ? "rgba(66, 133, 244, 0.2)" : "#EFF6FF",
-            alignItems: "center",
-            justifyContent: "center",
-            marginRight: 12,
-          }}
-        >
-          {icon}
-        </View>
-        <Text style={{ color: textPrimary, fontWeight: "600", flex: 1 }}>
-          {title}
-        </Text>
-        {trend && (
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
-            {trend > 0 ? (
-              <TrendingUp size={16} color="#10B981" />
-            ) : (
-              <TrendingDown size={16} color="#EF4444" />
-            )}
-            <Text
-              style={{
-                color: trend > 0 ? "#10B981" : "#EF4444",
-                fontSize: 12,
-                marginLeft: 4,
-              }}
-            >
-              {Math.abs(trend)}%
-            </Text>
-          </View>
-        )}
-      </View>
-      <Text
-        style={{
-          fontSize: 28,
-          fontWeight: "bold",
-          color: color,
-          marginBottom: 4,
-        }}
-      >
-        {value}
-      </Text>
-      <Text style={{ color: textSecondary, fontSize: 14 }}>{subtitle}</Text>
-    </View>
-  );
-
-  const InsightCard = ({
-    icon,
-    title,
-    description,
-    color = "#4285F4",
-  }: any) => (
-    <View
-      style={{
-        backgroundColor: isDark ? "rgba(66, 133, 244, 0.1)" : "#EFF6FF",
-        borderRadius: 8,
-        padding: 12,
-        marginBottom: 8,
-        flexDirection: "row",
-        alignItems: "flex-start",
-      }}
-    >
-      <View
-        style={{
-          width: 24,
-          height: 24,
-          borderRadius: 12,
-          backgroundColor: color,
-          alignItems: "center",
-          justifyContent: "center",
-          marginRight: 12,
-          marginTop: 2,
-        }}
-      >
-        {icon}
-      </View>
-      <View style={{ flex: 1 }}>
-        <Text
-          style={{
-            color: textPrimary,
-            fontWeight: "600",
-            marginBottom: 4,
-          }}
-        >
-          {title}
-        </Text>
-        <Text style={{ color: textSecondary, fontSize: 14, lineHeight: 20 }}>
-          {description}
-        </Text>
-      </View>
-    </View>
-  );
+  const textPrimary = isDark ? "#F9FAFB" : "#1F2937";
+  const textSecondary = isDark ? "#9CA3AF" : "#6B7280";
+  const borderColor = isDark ? "#4B5563" : "#E5E7EB";
 
   return (
-    <LinearGradient
-      colors={
-        isDark
-          ? ["#1E1B4B", "#312E81", "#3730A3"]
-          : ["#F1F5F9", "#E2E8F0", "#CBD5E1"]
-      }
-      start={[0, 0]}
-      end={[0, 1]}
-      style={{ flex: 1 }}
-    >
+    <View style={{ flex: 1, backgroundColor: containerBg }}>
       {/* Header */}
       <View
         style={{
           paddingTop: 60,
           paddingBottom: 16,
           paddingHorizontal: 16,
-          backgroundColor: isDark ? "rgba(255, 255, 255, 0.1)" : "white",
+          backgroundColor: isDark ? "#374151" : "white",
           shadowColor: "#000",
           shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.1,
+          shadowOpacity: 0.05,
           shadowRadius: 4,
-          elevation: 3,
+          elevation: 2,
+          borderBottomWidth: 1,
+          borderBottomColor: borderColor,
         }}
       >
         <View style={{ flexDirection: "row", alignItems: "center" }}>
@@ -244,61 +143,65 @@ export default function StatisticsPage() {
             onPress={() => router.back()}
             style={{ marginRight: 16, padding: 4 }}
           >
-            <ArrowLeft size={24} color="#4285F4" />
+            <ArrowLeft size={24} color="#1E40AF" />
           </TouchableOpacity>
           <Text
             style={{
-              fontSize: 20,
-              fontWeight: "bold",
-              color: textPrimary,
+              fontSize: 18,
+              fontWeight: "700",
+              color: "#1E40AF",
             }}
           >
-            {languageSet.statistics}
+            Statistics
           </Text>
         </View>
       </View>
 
       <ScrollView
         style={{ flex: 1 }}
-        contentContainerStyle={{ padding: 16, paddingBottom: 140 }}
+        contentContainerStyle={{ paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
       >
         {/* Time Range Filter */}
         <View
           style={{
             backgroundColor: cardBg,
+            marginHorizontal: 16,
+            marginTop: 16,
+            marginBottom: 12,
             borderRadius: 12,
             padding: 16,
-            marginBottom: 16,
             shadowColor: "#000",
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.1,
-            shadowRadius: 4,
-            elevation: 3,
+            shadowOffset: { width: 0, height: 1 },
+            shadowOpacity: 0.05,
+            shadowRadius: 2,
+            elevation: 2,
           }}
         >
           <View
             style={{
               flexDirection: "row",
               alignItems: "center",
-              marginBottom: 8,
+              justifyContent: "space-between",
             }}
           >
-            <Filter size={20} color="#4285F4" />
-            <Text
-              style={{
-                color: textPrimary,
-                fontWeight: "600",
-                marginLeft: 8,
-                flex: 1,
-              }}
-            >
-              {languageSet.timeRange}
-            </Text>
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <Filter size={18} color="#1E40AF" />
+              <Text
+                style={{
+                  color: "#1E40AF",
+                  fontWeight: "600",
+                  marginLeft: 8,
+                  fontSize: 14,
+                }}
+              >
+                Time Range
+              </Text>
+            </View>
             <TouchableOpacity
               onPress={() => setShowTimeRangeModal(true)}
               style={{
-                backgroundColor: isDark ? "rgba(66, 133, 244, 0.2)" : "#EFF6FF",
+                backgroundColor: "#EFF6FF",
                 paddingHorizontal: 12,
                 paddingVertical: 6,
                 borderRadius: 6,
@@ -306,61 +209,232 @@ export default function StatisticsPage() {
                 alignItems: "center",
               }}
             >
-              <Text style={{ color: "#4285F4", marginRight: 4 }}>
+              <Text
+                style={{ color: "#1E40AF", marginRight: 4, fontSize: 13 }}
+              >
                 {selectedTimeRange}
               </Text>
-              <ChevronDown size={16} color="#4285F4" />
+              <ChevronDown size={16} color="#1E40AF" />
             </TouchableOpacity>
           </View>
-          <Text style={{ color: textSecondary, fontSize: 14 }}>
+          <Text style={{ color: textSecondary, fontSize: 12, marginTop: 8 }}>
             Showing statistics for the last 7 days
           </Text>
         </View>
 
-        {/* Stats Grid */}
+        {/* Stats Grid - 2x2 */}
+        {/* Stats Grid - 2x2 */}
         <View
           style={{
             flexDirection: "row",
             flexWrap: "wrap",
-            justifyContent: "space-between",
-            alignItems: "stretch",
+            paddingHorizontal: 16,
+            gap: 12,
+            marginBottom: 12,
           }}
         >
-          <View style={{ width: "48%" }}>
-            <StatCard
-              icon={<Users size={20} color="#4285F4" />}
-              title={languageSet.customersServed}
-              value="253"
-              subtitle="Last 7 Days"
-              color="#4285F4"
-            />
+          {/* Customers Served */}
+          <View
+            style={{
+              flex: 1,
+              minWidth: (screenWidth - 44) / 2,
+              backgroundColor: cardBg,
+              borderRadius: 12,
+              padding: 14,
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 1 },
+              shadowOpacity: 0.05,
+              shadowRadius: 2,
+              elevation: 2,
+            }}
+          >
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                marginBottom: 12,
+              }}
+            >
+              <Users size={18} color="#3B82F6" style={{ marginRight: 6 }} />
+              <Text
+                style={{
+                  fontSize: 13,
+                  color: "#3B82F6",
+                  fontWeight: "500",
+                  flex: 1,
+                  lineHeight: 18,
+                }}
+                numberOfLines={2}
+              >
+                Customers{"\n"}Served
+              </Text>
+            </View>
+            <Text
+              style={{
+                fontSize: 32,
+                fontWeight: "bold",
+                color: "#1E40AF",
+                marginBottom: 4,
+              }}
+            >
+              246
+            </Text>
+            <Text style={{ fontSize: 11, color: textSecondary }}>
+              Last 7 Days
+            </Text>
           </View>
-          <View style={{ width: "48%" }}>
-            <StatCard
-              icon={<Clock size={20} color="#4285F4" />}
-              title={languageSet.avgWaitTime}
-              value="15 min"
-              subtitle="Last 7 Days"
-              color="#4285F4"
-            />
+
+          {/* Avg Wait Time */}
+          <View
+            style={{
+              flex: 1,
+              minWidth: (screenWidth - 44) / 2,
+              backgroundColor: cardBg,
+              borderRadius: 12,
+              padding: 14,
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 1 },
+              shadowOpacity: 0.05,
+              shadowRadius: 2,
+              elevation: 2,
+            }}
+          >
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                marginBottom: 12,
+              }}
+            >
+              <Clock size={18} color="#3B82F6" style={{ marginRight: 6 }} />
+              <Text
+                style={{
+                  fontSize: 13,
+                  color: "#3B82F6",
+                  fontWeight: "500",
+                  flex: 1,
+                  lineHeight: 18,
+                }}
+                numberOfLines={2}
+              >
+                Avg. Wait{"\n"}Time
+              </Text>
+            </View>
+            <Text
+              style={{
+                fontSize: 32,
+                fontWeight: "bold",
+                color: "#1E40AF",
+                marginBottom: 4,
+              }}
+            >
+              15 min
+            </Text>
+            <Text style={{ fontSize: 11, color: textSecondary }}>
+              Last 7 Days
+            </Text>
           </View>
-          <View style={{ width: "48%" }}>
-            <StatCard
-              icon={<UserX size={20} color="#FB923C" />}
-              title={languageSet.customersSkipped}
-              value="47"
-              subtitle="Last 7 Days"
-              color="#FB923C"
-            />
+
+          {/* Customers Skipped */}
+          <View
+            style={{
+              flex: 1,
+              minWidth: (screenWidth - 44) / 2,
+              backgroundColor: cardBg,
+              borderRadius: 12,
+              padding: 14,
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 1 },
+              shadowOpacity: 0.05,
+              shadowRadius: 2,
+              elevation: 2,
+            }}
+          >
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                marginBottom: 12,
+              }}
+            >
+              <AlertCircle size={18} color="#F59E0B" style={{ marginRight: 6 }} />
+              <Text
+                style={{
+                  fontSize: 13,
+                  color: "#F59E0B",
+                  fontWeight: "500",
+                  flex: 1,
+                  lineHeight: 18,
+                }}
+                numberOfLines={2}
+              >
+                Customers{"\n"}Skipped
+              </Text>
+            </View>
+            <Text
+              style={{
+                fontSize: 32,
+                fontWeight: "bold",
+                color: "#F59E0B",
+                marginBottom: 4,
+              }}
+            >
+              44
+            </Text>
+            <Text style={{ fontSize: 11, color: textSecondary }}>
+              Last 7 Days
+            </Text>
           </View>
-          <View style={{ width: "48%" }}>
-            <StatCard
-              icon={<TrendingDown size={20} color="#EF4444" />}
-              title={languageSet.customersLeft}
-              value="30"
-              subtitle="Last 7 Days"
-              color="#EF4444"
-            />
+
+          {/* Customers Left */}
+          <View
+            style={{
+              flex: 1,
+              minWidth: (screenWidth - 44) / 2,
+              backgroundColor: cardBg,
+              borderRadius: 12,
+              padding: 14,
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 1 },
+              shadowOpacity: 0.05,
+              shadowRadius: 2,
+              elevation: 2,
+            }}
+          >
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                marginBottom: 12,
+              }}
+            >
+              <ArrowLeft size={18} color="#EF4444" style={{ marginRight: 6 }} />
+              <Text
+                style={{
+                  fontSize: 13,
+                  color: "#EF4444",
+                  fontWeight: "500",
+                  flex: 1,
+                  lineHeight: 18,
+                }}
+                numberOfLines={2}
+              >
+                Customers{"\n"}Left
+              </Text>
+            </View>
+            <Text
+              style={{
+                fontSize: 32,
+                fontWeight: "bold",
+                color: "#EF4444",
+                marginBottom: 4,
+              }}
+            >
+              30
+            </Text>
+            <Text style={{ fontSize: 11, color: textSecondary }}>
+              Last 7 Days
+            </Text>
           </View>
         </View>
 
@@ -368,14 +442,15 @@ export default function StatisticsPage() {
         <View
           style={{
             backgroundColor: cardBg,
+            marginHorizontal: 16,
+            marginBottom: 12,
             borderRadius: 12,
             padding: 16,
-            marginBottom: 16,
             shadowColor: "#000",
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.1,
-            shadowRadius: 4,
-            elevation: 3,
+            shadowOffset: { width: 0, height: 1 },
+            shadowOpacity: 0.05,
+            shadowRadius: 2,
+            elevation: 2,
           }}
         >
           <View
@@ -383,66 +458,176 @@ export default function StatisticsPage() {
               flexDirection: "row",
               justifyContent: "space-between",
               alignItems: "center",
-              marginBottom: 16,
+              marginBottom: 20,
             }}
           >
             <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <BarChart3 size={20} color="#4285F4" />
+              <TrendingUp size={18} color="#1E40AF" />
               <Text
                 style={{
-                  color: textPrimary,
+                  color: "#1E40AF",
                   fontWeight: "600",
                   marginLeft: 8,
+                  fontSize: 14,
                 }}
               >
-                {languageSet.customerDistribution}
+                Customer Distribution
               </Text>
             </View>
-            <Text style={{ color: "#4285F4", fontSize: 14 }}>330 total</Text>
+            <Text style={{ color: "#1E40AF", fontSize: 13, fontWeight: "500", backgroundColor: "#F3F4F6", paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12 }}>
+              373 total
+            </Text>
           </View>
 
-          <View style={{ alignItems: "center", marginBottom: 16 }}>
-            <PieChart
-              data={pieData}
-              width={screenWidth - 80}
-              height={220}
-              chartConfig={{
-                backgroundColor: cardBg,
-                backgroundGradientFrom: cardBg,
-                backgroundGradientTo: cardBg,
-                color: (opacity = 1) => `rgba(66, 133, 244, ${opacity})`,
-              }}
-              accessor="population"
-              backgroundColor="transparent"
-              paddingLeft="15"
-              center={[10, 0]}
-              absolute
-            />
-          </View>
+          {/* Donut Chart */}
+          <View style={{ alignItems: "center", marginBottom: 20 }}>
+            <View style={{ position: "relative", width: 200, height: 200 }}>
+              <DonutChart data={donutData} size={200} strokeWidth={40} />
 
-          <View
-            style={{ flexDirection: "row", justifyContent: "space-around" }}
-          >
-            {pieData.map((item, index) => (
-              <View key={index} style={{ alignItems: "center" }}>
-                <View
+              {/* Center Text */}
+              <View
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Text
                   style={{
-                    width: 12,
-                    height: 12,
-                    backgroundColor: item.color,
-                    borderRadius: 6,
-                    marginBottom: 4,
+                    fontSize: 48,
+                    fontWeight: "bold",
+                    color: textPrimary,
                   }}
-                />
-                <Text style={{ color: textPrimary, fontWeight: "600" }}>
-                  {item.name}
+                >
+                  373
                 </Text>
-                <Text style={{ color: textSecondary, fontSize: 12 }}>
-                  {item.population} ({Math.round((item.population / 330) * 100)}
-                  %)
+                <Text
+                  style={{
+                    fontSize: 14,
+                    color: textSecondary,
+                  }}
+                >
+                  total
                 </Text>
               </View>
-            ))}
+            </View>
+          </View>
+
+          {/* Legend */}
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-around",
+            }}
+          >
+            <View style={{ alignItems: "center" }}>
+              <View
+                style={{
+                  width: 10,
+                  height: 10,
+                  backgroundColor: "#4285F4",
+                  borderRadius: 5,
+                  marginBottom: 6,
+                }}
+              />
+              <Text
+                style={{
+                  fontSize: 12,
+                  fontWeight: "500",
+                  color: textPrimary,
+                  marginBottom: 2,
+                }}
+              >
+                Served
+              </Text>
+              <Text
+                style={{
+                  fontSize: 16,
+                  fontWeight: "bold",
+                  color: textPrimary,
+                  marginBottom: 2,
+                }}
+              >
+                285
+              </Text>
+              <Text style={{ fontSize: 11, color: textSecondary }}>
+                (76%)
+              </Text>
+            </View>
+
+            <View style={{ alignItems: "center" }}>
+              <View
+                style={{
+                  width: 10,
+                  height: 10,
+                  backgroundColor: "#FB923C",
+                  borderRadius: 5,
+                  marginBottom: 6,
+                }}
+              />
+              <Text
+                style={{
+                  fontSize: 12,
+                  fontWeight: "500",
+                  color: textPrimary,
+                  marginBottom: 2,
+                }}
+              >
+                Customers Skipped
+              </Text>
+              <Text
+                style={{
+                  fontSize: 16,
+                  fontWeight: "bold",
+                  color: textPrimary,
+                  marginBottom: 2,
+                }}
+              >
+                53
+              </Text>
+              <Text style={{ fontSize: 11, color: textSecondary }}>
+                (14%)
+              </Text>
+            </View>
+
+            <View style={{ alignItems: "center" }}>
+              <View
+                style={{
+                  width: 10,
+                  height: 10,
+                  backgroundColor: "#EF4444",
+                  borderRadius: 5,
+                  marginBottom: 6,
+                }}
+              />
+              <Text
+                style={{
+                  fontSize: 12,
+                  fontWeight: "500",
+                  color: textPrimary,
+                  marginBottom: 2,
+                }}
+              >
+                Customers  Left
+              </Text>
+              <Text
+                style={{
+                  fontSize: 16,
+                  fontWeight: "bold",
+                  color: textPrimary,
+                  marginBottom: 2,
+                }}
+              >
+                35
+              </Text>
+              <Text style={{ fontSize: 11, color: textSecondary }}>
+                (9%)
+              </Text>
+            </View>
           </View>
         </View>
 
@@ -450,14 +635,15 @@ export default function StatisticsPage() {
         <View
           style={{
             backgroundColor: cardBg,
+            marginHorizontal: 16,
+            marginBottom: 12,
             borderRadius: 12,
             padding: 16,
-            marginBottom: 16,
             shadowColor: "#000",
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.1,
-            shadowRadius: 4,
-            elevation: 3,
+            shadowOffset: { width: 0, height: 1 },
+            shadowOpacity: 0.05,
+            shadowRadius: 2,
+            elevation: 2,
           }}
         >
           <View
@@ -467,34 +653,39 @@ export default function StatisticsPage() {
               marginBottom: 16,
             }}
           >
-            <BarChart3 size={20} color="#4285F4" />
+            <BarChart3 size={18} color="#1E40AF" />
             <Text
               style={{
-                color: textPrimary,
+                color: "#1E40AF",
                 fontWeight: "600",
                 marginLeft: 8,
                 flex: 1,
+                fontSize: 14,
               }}
             >
-              {languageSet.customerInsights}
+              Customer Insights
             </Text>
-            <TouchableOpacity
-              onPress={() => setShowCustomerInsightsModal(true)}
-            >
-              <Info size={20} color={textSecondary} />
-            </TouchableOpacity>
+            <Info size={18} color="#3B82F6" />
           </View>
 
+          {/* Metrics Row */}
           <View
             style={{
               flexDirection: "row",
-              justifyContent: "space-around",
+              justifyContent: "space-between",
               marginBottom: 16,
+              paddingBottom: 16,
+              borderBottomWidth: 1,
+              borderBottomColor: borderColor,
             }}
           >
-            <View style={{ alignItems: "center" }}>
+            <View style={{ alignItems: "center", flex: 1 }}>
               <Text
-                style={{ color: textSecondary, fontSize: 12, marginBottom: 4 }}
+                style={{
+                  fontSize: 11,
+                  color: textSecondary,
+                  marginBottom: 4,
+                }}
               >
                 Visited
               </Text>
@@ -503,21 +694,26 @@ export default function StatisticsPage() {
                   fontSize: 24,
                   fontWeight: "bold",
                   color: textPrimary,
-                  marginBottom: 2,
+                  marginBottom: 4,
                 }}
               >
-                370
+                358
               </Text>
               <View style={{ flexDirection: "row", alignItems: "center" }}>
                 <TrendingDown size={12} color="#EF4444" />
-                <Text style={{ color: "#EF4444", fontSize: 10, marginLeft: 2 }}>
-                  28%
+                <Text style={{ color: "#EF4444", fontSize: 11, marginLeft: 2 }}>
+                  21%
                 </Text>
               </View>
             </View>
-            <View style={{ alignItems: "center" }}>
+
+            <View style={{ alignItems: "center", flex: 1 }}>
               <Text
-                style={{ color: textSecondary, fontSize: 12, marginBottom: 4 }}
+                style={{
+                  fontSize: 11,
+                  color: textSecondary,
+                  marginBottom: 4,
+                }}
               >
                 Served
               </Text>
@@ -525,22 +721,27 @@ export default function StatisticsPage() {
                 style={{
                   fontSize: 24,
                   fontWeight: "bold",
-                  color: "#8B5CF6",
-                  marginBottom: 2,
+                  color: textPrimary,
+                  marginBottom: 4,
                 }}
               >
-                253
+                285
               </Text>
               <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <TrendingUp size={12} color="#10B981" />
-                <Text style={{ color: "#10B981", fontSize: 10, marginLeft: 2 }}>
-                  12%
+                <TrendingDown size={12} color="#EF4444" />
+                <Text style={{ color: "#EF4444", fontSize: 11, marginLeft: 2 }}>
+                  22%
                 </Text>
               </View>
             </View>
-            <View style={{ alignItems: "center" }}>
+
+            <View style={{ alignItems: "center", flex: 1 }}>
               <Text
-                style={{ color: textSecondary, fontSize: 12, marginBottom: 4 }}
+                style={{
+                  fontSize: 11,
+                  color: textSecondary,
+                  marginBottom: 4,
+                }}
               >
                 Conversion
               </Text>
@@ -548,22 +749,27 @@ export default function StatisticsPage() {
                 style={{
                   fontSize: 24,
                   fontWeight: "bold",
-                  color: "#10B981",
-                  marginBottom: 2,
+                  color: textPrimary,
+                  marginBottom: 4,
                 }}
               >
-                68%
+                80%
               </Text>
               <View style={{ flexDirection: "row", alignItems: "center" }}>
                 <TrendingUp size={12} color="#10B981" />
-                <Text style={{ color: "#10B981", fontSize: 10, marginLeft: 2 }}>
-                  5%
+                <Text style={{ color: "#10B981", fontSize: 11, marginLeft: 2 }}>
+                  1%
                 </Text>
               </View>
             </View>
-            <View style={{ alignItems: "center" }}>
+
+            <View style={{ alignItems: "center", flex: 1 }}>
               <Text
-                style={{ color: textSecondary, fontSize: 12, marginBottom: 4 }}
+                style={{
+                  fontSize: 11,
+                  color: textSecondary,
+                  marginBottom: 4,
+                }}
               >
                 Retention
               </Text>
@@ -571,84 +777,265 @@ export default function StatisticsPage() {
                 style={{
                   fontSize: 24,
                   fontWeight: "bold",
-                  color: "#F59E0B",
-                  marginBottom: 2,
+                  color: textPrimary,
+                  marginBottom: 4,
                 }}
               >
-                39%
+                41%
               </Text>
+              <View style={{ flexDirection: "row", alignItems: "center" }}>
+                <TrendingUp size={12} color="#10B981" />
+                <Text style={{ color: "#10B981", fontSize: 11, marginLeft: 2 }}>
+                  8%
+                </Text>
+              </View>
             </View>
           </View>
 
+          {/* What is Conversion Rate */}
           <View
             style={{
-              backgroundColor: isDark ? "rgba(66, 133, 244, 0.1)" : "#EFF6FF",
+              backgroundColor: "#EFF6FF",
               borderRadius: 8,
               padding: 12,
-              marginBottom: 12,
-            }}
-          >
-            <Text
-              style={{ color: "#4285F4", fontWeight: "500", marginBottom: 4 }}
-            >
-              {languageSet.whatIsConversionRate}
-            </Text>
-            <Text
-              style={{ color: textSecondary, fontSize: 13, lineHeight: 16 }}
-            >
-              {languageSet.conversionRateDefinition}
-            </Text>
-          </View>
-
-          <View
-            style={{
-              backgroundColor: isDark ? "rgba(66, 133, 244, 0.05)" : "#F8FAFC",
-              borderRadius: 8,
-              padding: 12,
+              marginBottom: 16,
             }}
           >
             <Text
               style={{
-                color: textPrimary,
+                color: "#1E40AF",
                 fontWeight: "600",
-                marginBottom: 8,
+                marginBottom: 4,
+                fontSize: 13,
               }}
             >
-              {languageSet.keyInsights}
+              What is Conversion Rate?
             </Text>
-            <InsightCard
-              icon={<TrendingDown size={16} color="white" />}
-              title={languageSet.trafficTrend}
-              description="Customer visits are down by 28% compared to the previous period. Review your marketing strategy to attract more customers."
-              color="#EF4444"
-            />
-            <InsightCard
-              icon={<User size={16} color="white" />}
-              title={languageSet.customerRetention}
-              description="39% of your customers are returning visitors."
-              color="#4285F4"
-            />
-            <InsightCard
-              icon={<Calendar size={16} color="white" />}
-              title={languageSet.bestPerformanceDay}
-              description="Sun has your highest conversion rate. Consider studying what makes Sun successful and apply those practices to other days."
-              color="#8B5CF6"
-            />
+            <Text
+              style={{
+                color: "#3B82F6",
+                fontSize: 12,
+                lineHeight: 16,
+              }}
+            >
+              Conversion rate shows what percentage of customers who visited
+              were actually served. It&apos;s calculated as (Customers Served ÷
+              Customers Visited) × 100%. A higher conversion rate means you're
+              efficiently serving most of the customers who visit.
+            </Text>
           </View>
+
+          {/* Key Insights */}
+          <View>
+            <Text
+              style={{
+                color: textPrimary,
+                fontWeight: "600",
+                marginBottom: 12,
+                fontSize: 13,
+              }}
+            >
+              Key insights
+            </Text>
+
+            {/* Traffic trend */}
+            <View
+              style={{
+                flexDirection: "row",
+                marginBottom: 10,
+                alignItems: "flex-start",
+              }}
+            >
+              <View
+                style={{
+                  backgroundColor: "#FEE2E2",
+                  borderRadius: 4,
+                  padding: 4,
+                  marginRight: 10,
+                  marginTop: 2,
+                }}
+              >
+                <TrendingDown size={14} color="#EF4444" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text
+                  style={{
+                    color: textPrimary,
+                    fontWeight: "600",
+                    fontSize: 13,
+                    marginBottom: 2,
+                  }}
+                >
+                  Traffic trend:
+                </Text>
+                <Text
+                  style={{
+                    color: textSecondary,
+                    fontSize: 12,
+                    lineHeight: 16,
+                  }}
+                >
+                  Customer visits are down by 21% compared to the previous
+                  period. Review your marketing strategy to attract more
+                  customers.
+                </Text>
+              </View>
+            </View>
+
+            {/* Customer retention */}
+            <View
+              style={{
+                flexDirection: "row",
+                marginBottom: 10,
+                alignItems: "flex-start",
+              }}
+            >
+              <View
+                style={{
+                  backgroundColor: "#DBEAFE",
+                  borderRadius: 4,
+                  padding: 4,
+                  marginRight: 10,
+                  marginTop: 2,
+                }}
+              >
+                <User size={14} color="#1E40AF" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text
+                  style={{
+                    color: textPrimary,
+                    fontWeight: "600",
+                    fontSize: 13,
+                    marginBottom: 2,
+                  }}
+                >
+                  Customer retention:
+                </Text>
+                <Text
+                  style={{
+                    color: textSecondary,
+                    fontSize: 12,
+                    lineHeight: 16,
+                  }}
+                >
+                  41% of your customers are returning visitors. Your loyalty
+                  efforts are working well.
+                </Text>
+              </View>
+            </View>
+
+            {/* Best performing day */}
+            <View
+              style={{
+                flexDirection: "row",
+                marginBottom: 10,
+                alignItems: "flex-start",
+              }}
+            >
+              <View
+                style={{
+                  backgroundColor: "#F3E8FF",
+                  borderRadius: 4,
+                  padding: 4,
+                  marginRight: 10,
+                  marginTop: 2,
+                }}
+              >
+                <Calendar size={14} color="#8B5CF6" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text
+                  style={{
+                    color: textPrimary,
+                    fontWeight: "600",
+                    fontSize: 13,
+                    marginBottom: 2,
+                  }}
+                >
+                  Best performing day:
+                </Text>
+                <Text
+                  style={{
+                    color: textSecondary,
+                    fontSize: 12,
+                    lineHeight: 16,
+                  }}
+                >
+                  Wed has your highest conversion rate. Consider studying what
+                  makes Wed successful and apply those practices to other days.
+                </Text>
+              </View>
+            </View>
+
+            {/* Attention needed */}
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "flex-start",
+              }}
+            >
+              <View
+                style={{
+                  backgroundColor: "#FEF3C7",
+                  borderRadius: 4,
+                  padding: 4,
+                  marginRight: 10,
+                  marginTop: 2,
+                }}
+              >
+                <AlertCircle size={14} color="#F59E0B" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text
+                  style={{
+                    color: textPrimary,
+                    fontWeight: "600",
+                    fontSize: 13,
+                    marginBottom: 2,
+                  }}
+                >
+                  Attention needed:
+                </Text>
+                <Text
+                  style={{
+                    color: textSecondary,
+                    fontSize: 12,
+                    lineHeight: 16,
+                  }}
+                >
+                  Customer skips have decreased by 38%. Customers leaving
+                  without service has decreased by 29%.
+                </Text>
+              </View>
+            </View>
+          </View>
+
+          <Text
+            style={{
+              color: textSecondary,
+              fontSize: 11,
+              textAlign: "center",
+              marginTop: 16,
+            }}
+          >
+            This week
+          </Text>
         </View>
 
         {/* Peak Hours */}
         <View
           style={{
             backgroundColor: cardBg,
+            marginHorizontal: 16,
+            marginBottom: 12,
             borderRadius: 12,
             padding: 16,
-            marginBottom: 16,
             shadowColor: "#000",
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.1,
-            shadowRadius: 4,
-            elevation: 3,
+            shadowOffset: { width: 0, height: 1 },
+            shadowOpacity: 0.05,
+            shadowRadius: 2,
+            elevation: 2,
           }}
         >
           <View
@@ -658,15 +1045,16 @@ export default function StatisticsPage() {
               marginBottom: 16,
             }}
           >
-            <Calendar size={20} color="#4285F4" />
+            <Calendar size={18} color="#1E40AF" />
             <Text
               style={{
-                color: textPrimary,
+                color: "#1E40AF",
                 fontWeight: "600",
                 marginLeft: 8,
+                fontSize: 14,
               }}
             >
-              {languageSet.peakHours}
+              Peak Hours
             </Text>
           </View>
 
@@ -682,10 +1070,10 @@ export default function StatisticsPage() {
                 borderBottomColor: borderColor,
               }}
             >
-              <Text style={{ color: textPrimary, fontWeight: "500" }}>
+              <Text style={{ color: textPrimary, fontWeight: "500", fontSize: 13 }}>
                 {hour.time}
               </Text>
-              <Text style={{ color: "#4285F4", fontSize: 14 }}>
+              <Text style={{ color: "#3B82F6", fontSize: 13 }}>
                 {hour.traffic}
               </Text>
             </View>
@@ -696,14 +1084,15 @@ export default function StatisticsPage() {
         <View
           style={{
             backgroundColor: cardBg,
+            marginHorizontal: 16,
+            marginBottom: 20,
             borderRadius: 12,
             padding: 16,
-            marginBottom: 16,
             shadowColor: "#000",
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.1,
-            shadowRadius: 4,
-            elevation: 3,
+            shadowOffset: { width: 0, height: 1 },
+            shadowOpacity: 0.05,
+            shadowRadius: 2,
+            elevation: 2,
           }}
         >
           <View
@@ -713,21 +1102,22 @@ export default function StatisticsPage() {
               marginBottom: 16,
             }}
           >
-            <CheckCircle size={20} color="#10B981" />
+            <CheckCircle size={18} color="#10B981" />
             <Text
               style={{
-                color: textPrimary,
+                color: "#1E40AF",
                 fontWeight: "600",
                 marginLeft: 8,
+                fontSize: 14,
               }}
             >
-              {languageSet.serviceCompletion}
+              Service Completion
             </Text>
           </View>
 
           <View
             style={{
-              backgroundColor: isDark ? "#4B5563" : "#E2E8F0",
+              backgroundColor: "#E5E7EB",
               borderRadius: 8,
               height: 8,
               marginBottom: 12,
@@ -735,7 +1125,7 @@ export default function StatisticsPage() {
           >
             <View
               style={{
-                backgroundColor: "#4285F4",
+                backgroundColor: "#3B82F6",
                 borderRadius: 8,
                 height: 8,
                 width: "85%",
@@ -750,78 +1140,20 @@ export default function StatisticsPage() {
               alignItems: "center",
             }}
           >
-            <Text style={{ color: textSecondary, fontSize: 14 }}>0%</Text>
+            <Text style={{ color: textSecondary, fontSize: 12 }}>0%</Text>
             <Text
               style={{
-                color: "#4285F4",
+                color: "#3B82F6",
                 fontWeight: "600",
-                fontSize: 16,
+                fontSize: 14,
               }}
             >
-              85% {languageSet.completed}
+              85% Completed
             </Text>
-            <Text style={{ color: textSecondary, fontSize: 14 }}>100%</Text>
+            <Text style={{ color: textSecondary, fontSize: 12 }}>100%</Text>
           </View>
         </View>
       </ScrollView>
-
-      <Modal
-        visible={showCustomerInsightsModal}
-        animationType="fade"
-        transparent={true}
-        onRequestClose={() => setShowCustomerInsightsModal(false)}
-      >
-        <View
-          style={{
-            flex: 1,
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <View
-            style={{
-              backgroundColor: cardBg,
-              borderRadius: 12,
-              padding: 20,
-              width: "90%",
-              maxWidth: 400,
-            }}
-          >
-            <View
-              className="flex flex-row-reverse"
-              style={{ marginBottom: 20 }}
-            >
-              <X
-                color={isDark ? "white" : "black"}
-                onPress={() => setShowCustomerInsightsModal(false)}
-              />
-            </View>
-
-            {/* Description */}
-            <Text
-              style={{
-                fontSize: 14,
-                color: isDark ? "#9CA3AF" : "#6B7280",
-                lineHeight: 20,
-                marginBottom: 12,
-              }}
-            >
-              {languageSet.chartDescription}
-            </Text>
-            <Text
-              style={{
-                fontSize: 14,
-                color: isDark ? "#9CA3AF" : "#6B7280",
-                lineHeight: 20,
-                marginBottom: 24,
-              }}
-            >
-              {languageSet.trendsDescription}
-            </Text>
-          </View>
-        </View>
-      </Modal>
 
       {/* Time Range Modal */}
       <Modal
@@ -849,14 +1181,14 @@ export default function StatisticsPage() {
           >
             <Text
               style={{
-                fontSize: 18,
-                fontWeight: "bold",
+                fontSize: 16,
+                fontWeight: "600",
                 color: textPrimary,
                 marginBottom: 16,
                 textAlign: "center",
               }}
             >
-              {languageSet.selectTimeRange}
+              Select Time Range
             </Text>
             {timeRangeOptions.map((option) => (
               <TouchableOpacity
@@ -870,9 +1202,7 @@ export default function StatisticsPage() {
                   paddingHorizontal: 16,
                   backgroundColor:
                     selectedTimeRange === option
-                      ? isDark
-                        ? "rgba(66, 133, 244, 0.2)"
-                        : "#EFF6FF"
+                      ? "#EFF6FF"
                       : "transparent",
                   borderRadius: 8,
                   marginBottom: 4,
@@ -880,9 +1210,9 @@ export default function StatisticsPage() {
               >
                 <Text
                   style={{
-                    color:
-                      selectedTimeRange === option ? "#4285F4" : textPrimary,
+                    color: selectedTimeRange === option ? "#1E40AF" : textPrimary,
                     fontWeight: selectedTimeRange === option ? "600" : "400",
+                    fontSize: 14,
                   }}
                 >
                   {option}
@@ -892,6 +1222,6 @@ export default function StatisticsPage() {
           </View>
         </View>
       </Modal>
-    </LinearGradient>
+    </View>
   );
 }

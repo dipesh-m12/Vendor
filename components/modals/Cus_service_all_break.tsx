@@ -1,3 +1,7 @@
+import useThemeStore from "@/store/themeStore";
+import { translations } from "@/translations/tabsTranslations/queue/multimodal_translate";
+import { ChevronRight, Clock, Plus, X } from "lucide-react-native";
+import React from "react";
 import {
   Alert,
   Modal,
@@ -7,10 +11,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import React from "react";
-import { Clock, X, ChevronRight, Plus, Phone } from "lucide-react-native";
-import useThemeStore from "@/store/themeStore";
-import { translations } from "@/translations/tabsTranslations/queue/multimodal_translate";
 
 const CusDetails_serviceTime_AllView__break = ({
   globalQueue,
@@ -262,490 +262,8 @@ const CusDetails_serviceTime_AllView__break = ({
         </View>
       </Modal>
 
-      {/* Take Break Modal */}
-      <Modal
-        visible={showTakeBreakModal}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setShowTakeBreakModal(false)}
-      >
-        <View
-          style={{
-            flex: 1,
-            backgroundColor: "rgba(0,0,0,0.5)",
-            justifyContent: "center",
-            alignItems: "center",
-            padding: 20,
-          }}
-        >
-          <View
-            style={{
-              backgroundColor: isDark ? "#374151" : "white",
-              borderRadius: 16,
-              padding: 20,
-              width: "100%",
-              maxWidth: 400,
-            }}
-          >
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: 20,
-              }}
-            >
-              <Text
-                style={{
-                  fontSize: 20,
-                  fontWeight: "bold",
-                  color: isDark ? "#F8FAFC" : "#1E3A8A",
-                }}
-              >
-                {languageSet.takeABreak}
-              </Text>
-              <TouchableOpacity onPress={() => setShowTakeBreakModal(false)}>
-                <X size={24} color={isDark ? "#9CA3AF" : "#6B7280"} />
-              </TouchableOpacity>
-            </View>
 
-            <Text
-              style={{
-                fontSize: 16,
-                fontWeight: "600",
-                color: isDark ? "#A5B4FC" : "#3B82F6",
-                marginBottom: 12,
-              }}
-            >
-              {languageSet.selectBreakReason}
-            </Text>
 
-            <View style={{ gap: 8, marginBottom: 20 }}>
-              {[
-                { label: "☕ Tea Break", value: "Tea Break" },
-                { label: "🍽️ Lunch Break", value: "Lunch Break" },
-                { label: "👥 Staff Meeting", value: "Staff Meeting" },
-                { label: "🚨 Emergency", value: "Emergency" },
-              ].map((reason) => (
-                <TouchableOpacity
-                  key={reason.value}
-                  onPress={() => {
-                    setSelectedBreakReason(reason.value);
-                    setCustomReason("");
-                    setCustomDuration("");
-                    setShowCustomFields(false);
-                  }}
-                  style={{
-                    backgroundColor:
-                      selectedBreakReason === reason.value
-                        ? isDark
-                          ? "#6366F1"
-                          : "#EFF6FF"
-                        : isDark
-                        ? "#4B5563"
-                        : "#F8FAFC",
-                    padding: 12,
-                    borderRadius: 8,
-                    borderWidth: 1,
-                    borderColor:
-                      selectedBreakReason === reason.value
-                        ? "#3B82F6"
-                        : isDark
-                        ? "#6B7280"
-                        : "#E5E7EB",
-                  }}
-                >
-                  <Text
-                    style={{
-                      color:
-                        selectedBreakReason === reason.value
-                          ? "#3B82F6"
-                          : isDark
-                          ? "#F8FAFC"
-                          : "#1E3A8A",
-                      fontWeight:
-                        selectedBreakReason === reason.value ? "600" : "400",
-                    }}
-                  >
-                    {reason.label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-
-              <TouchableOpacity
-                onPress={() => {
-                  setSelectedBreakReason("");
-                  setCustomReason("");
-                  setCustomDuration("");
-                  setShowCustomFields(true);
-                }}
-                style={{
-                  backgroundColor: showCustomFields
-                    ? isDark
-                      ? "#6366F1"
-                      : "#EFF6FF"
-                    : isDark
-                    ? "#4B5563"
-                    : "#F8FAFC",
-                  padding: 12,
-                  borderRadius: 8,
-                  borderWidth: 1,
-                  borderColor: showCustomFields
-                    ? "#3B82F6"
-                    : isDark
-                    ? "#6B7280"
-                    : "#E5E7EB",
-                }}
-              >
-                <Text
-                  style={{
-                    color: showCustomFields
-                      ? "#3B82F6"
-                      : isDark
-                      ? "#F8FAFC"
-                      : "#1E3A8A",
-                    fontWeight: showCustomFields ? "600" : "400",
-                  }}
-                >
-                  + Custom Reason
-                </Text>
-              </TouchableOpacity>
-
-              {showCustomFields && (
-                <View style={{ gap: 8 }}>
-                  <TextInput
-                    style={{
-                      backgroundColor: isDark ? "#4B5563" : "#F8FAFC",
-                      padding: 12,
-                      borderRadius: 8,
-                      borderWidth: 1,
-                      borderColor: isDark ? "#6B7280" : "#E5E7EB",
-                      color: isDark ? "#F8FAFC" : "#1E3A8A",
-                    }}
-                    placeholder="Enter custom reason"
-                    placeholderTextColor={isDark ? "#9CA3AF" : "#6B7280"}
-                    value={customReason}
-                    onChangeText={setCustomReason}
-                  />
-                </View>
-              )}
-            </View>
-
-            <Text
-              style={{
-                fontSize: 16,
-                fontWeight: "600",
-                color: isDark ? "#A5B4FC" : "#3B82F6",
-                marginBottom: 12,
-              }}
-            >
-              {languageSet.selectDuration}
-            </Text>
-
-            <View
-              style={{
-                flexDirection: "row",
-                flexWrap: "wrap",
-                gap: 8,
-                marginBottom: 20,
-              }}
-            >
-              {[5, 10, 15, 30, 45, 60].map((duration) => (
-                <TouchableOpacity
-                  key={duration}
-                  onPress={() => {
-                    setSelectedBreakDuration(duration);
-                    setShowCustomFields(false);
-                  }}
-                  style={{
-                    backgroundColor:
-                      selectedBreakDuration === duration
-                        ? isDark
-                          ? "#6366F1"
-                          : "#4F7DF7"
-                        : isDark
-                        ? "#4B5563"
-                        : "#F8FAFC",
-                    paddingHorizontal: 16,
-                    paddingVertical: 8,
-                    borderRadius: 20,
-                    borderWidth: 1,
-                    borderColor:
-                      selectedBreakDuration === duration
-                        ? "#3B82F6"
-                        : isDark
-                        ? "#6B7280"
-                        : "#E5E7EB",
-                  }}
-                >
-                  <Text
-                    style={{
-                      color:
-                        selectedBreakDuration === duration
-                          ? "white"
-                          : isDark
-                          ? "#F8FAFC"
-                          : "#1E3A8A",
-                      fontWeight:
-                        selectedBreakDuration === duration ? "600" : "400",
-                    }}
-                  >
-                    {duration >= 60 ? `${duration / 60} hr` : `${duration} min`}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-
-              {showCustomFields && (
-                <TextInput
-                  style={{
-                    backgroundColor: isDark ? "#4B5563" : "#F8FAFC",
-                    paddingHorizontal: 16,
-                    paddingVertical: 8,
-                    borderRadius: 20,
-                    borderWidth: 1,
-                    borderColor: isDark ? "#6B7280" : "#E5E7EB",
-                    color: isDark ? "#F8FAFC" : "#1E3A8A",
-                    minWidth: 80,
-                  }}
-                  placeholder="Custom"
-                  placeholderTextColor={isDark ? "#9CA3AF" : "#6B7280"}
-                  value={customDuration}
-                  onChangeText={setCustomDuration}
-                  keyboardType="numeric"
-                />
-              )}
-            </View>
-
-            {!showCustomFields && (
-              <View
-                style={{
-                  backgroundColor: isDark ? "#4B5563" : "#F1F5F9",
-                  padding: 12,
-                  borderRadius: 8,
-                  marginBottom: 20,
-                }}
-              >
-                <Text
-                  style={{
-                    fontSize: 14,
-                    color: isDark ? "#9CA3AF" : "#6B7280",
-                    fontWeight: "600",
-                    marginBottom: 4,
-                  }}
-                >
-                  {languageSet.customerNotificationPreview}
-                </Text>
-                <Text
-                  style={{
-                    fontSize: 14,
-                    color: isDark ? "#F8FAFC" : "#1E3A8A",
-                  }}
-                >
-                  We&apos;re on a {selectedBreakReason || "[Reason]"} (
-                  {selectedBreakDuration} min). Please stay queued. Service will
-                  resume shortly.
-                </Text>
-              </View>
-            )}
-
-            <View style={{ flexDirection: "row", gap: 12 }}>
-              <TouchableOpacity
-                onPress={() => setShowTakeBreakModal(false)}
-                style={{
-                  flex: 1,
-                  backgroundColor: isDark ? "#4B5563" : "#F8FAFC",
-                  paddingVertical: 12,
-                  borderRadius: 8,
-                  alignItems: "center",
-                  borderWidth: 1,
-                  borderColor: isDark ? "#6B7280" : "#E5E7EB",
-                }}
-              >
-                <Text
-                  style={{
-                    color: isDark ? "#F8FAFC" : "#1E3A8A",
-                    fontWeight: "600",
-                  }}
-                >
-                  {languageSet.cancel}
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={startBreak}
-                disabled={!selectedBreakReason && !customReason}
-                style={{
-                  flex: 1,
-                  backgroundColor:
-                    !selectedBreakReason && !customReason
-                      ? isDark
-                        ? "#374151"
-                        : "#E5E7EB"
-                      : isDark
-                      ? "#6366F1"
-                      : "#4F7DF7",
-                  paddingVertical: 12,
-                  borderRadius: 8,
-                  alignItems: "center",
-                }}
-              >
-                <Text
-                  style={{
-                    color: "white",
-                    fontWeight: "600",
-                  }}
-                >
-                  {languageSet.startBreak}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
-
-      {/* View All Customers Modal */}
-      <Modal
-        visible={showAllCustomersModal}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setShowAllCustomersModal(false)}
-      >
-        <View
-          style={{
-            flex: 1,
-            backgroundColor: "rgba(0,0,0,0.5)",
-            justifyContent: "flex-end",
-          }}
-        >
-          <View
-            style={{
-              backgroundColor: isDark ? "#374151" : "white",
-              borderTopLeftRadius: 20,
-              borderTopRightRadius: 20,
-              padding: 17,
-              maxHeight: "80%",
-            }}
-          >
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: 20,
-              }}
-            >
-              <Text
-                style={{
-                  fontSize: 20,
-                  fontWeight: "bold",
-                  color: isDark ? "#F8FAFC" : "#1E3A8A",
-                }}
-              >
-                {languageSet.allCustomers.replace(
-                  "{globalQueue.length}",
-                  globalQueue.length
-                )}
-                {/* All Customers ({globalQueue.length}) */}
-              </Text>
-              <TouchableOpacity onPress={() => setShowAllCustomersModal(false)}>
-                <X size={24} color={isDark ? "#9CA3AF" : "#6B7280"} />
-              </TouchableOpacity>
-            </View>
-
-            <ScrollView style={{ maxHeight: 400 }}>
-              <View style={{ gap: 12 }}>
-                {globalQueue.map((customer: any) => (
-                  <View
-                    key={customer.id}
-                    style={{
-                      backgroundColor: isDark ? "#4B5563" : "#F8FAFC",
-                      borderRadius: 12,
-                      padding: 16,
-                      borderWidth: 1,
-                      borderColor: isDark ? "#6B7280" : "#E5E7EB",
-                      flexDirection: "row",
-                      alignItems: "center",
-                    }}
-                  >
-                    <View
-                      style={{
-                        width: 32,
-                        height: 32,
-                        borderRadius: 16,
-                        backgroundColor: isDark ? "#6366F1" : "#4F7DF7",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        marginRight: 12,
-                      }}
-                    >
-                      <Text style={{ color: "white", fontWeight: "bold" }}>
-                        {customer.position}
-                      </Text>
-                    </View>
-                    <View style={{ flex: 1 }}>
-                      <Text
-                        style={{
-                          fontSize: 16,
-                          fontWeight: "600",
-                          color: isDark ? "#F8FAFC" : "#1E3A8A",
-                          marginBottom: 2,
-                        }}
-                      >
-                        {customer.name}
-                      </Text>
-                      <Text
-                        style={{
-                          fontSize: 12,
-                          color: isDark ? "#9CA3AF" : "#6B7280",
-                        }}
-                      >
-                        {languageSet.estimatedWait.replace(
-                          "{customer.estimatedWait}",
-                          customer.estimatedWait
-                        )}
-                        {/* Est. wait: {customer.estimatedWait} min */}
-                      </Text>
-                    </View>
-                    <View style={{ flexDirection: "row", gap: 8 }}>
-                      <TouchableOpacity
-                        onPress={() => handleCallCustomer(customer)}
-                        style={{
-                          backgroundColor: isDark ? "#059669" : "#10B981",
-                          padding: 8,
-                          borderRadius: 8,
-                        }}
-                      >
-                        <Phone size={16} color="white" />
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        onPress={() => {
-                          setShowAllCustomersModal(false);
-                          handleCustomerDetails(customer);
-                        }}
-                        style={{
-                          backgroundColor: isDark ? "#1E40AF" : "#EFF6FF",
-                          padding: 8,
-                          borderRadius: 8,
-                        }}
-                      >
-                        <Text
-                          style={{
-                            color: isDark ? "#93C5FD" : "#3B82F6",
-                            fontWeight: "600",
-                            fontSize: 12,
-                          }}
-                        >
-                          {languageSet.details}
-                        </Text>
-                      </TouchableOpacity>
-                    </View>
-                  </View>
-                ))}
-              </View>
-            </ScrollView>
-          </View>
-        </View>
-      </Modal>
 
       {/* Customer Details Modal */}
       <Modal
@@ -1036,8 +554,8 @@ const CusDetails_serviceTime_AllView__break = ({
                                 ? "#DC2626"
                                 : "#FEE2E2"
                               : isDark
-                              ? "#059669"
-                              : "#D1FAE5",
+                                ? "#059669"
+                                : "#D1FAE5",
                             paddingHorizontal: 12,
                             paddingVertical: 6,
                             borderRadius: 6,
@@ -1047,8 +565,8 @@ const CusDetails_serviceTime_AllView__break = ({
                                 ? "#DC2626"
                                 : "#F87171"
                               : isDark
-                              ? "#059669"
-                              : "#10B981",
+                                ? "#059669"
+                                : "#10B981",
                           }}
                         >
                           <Text
@@ -1058,8 +576,8 @@ const CusDetails_serviceTime_AllView__break = ({
                                   ? "#FCA5A5"
                                   : "#DC2626"
                                 : isDark
-                                ? "#A7F3D0"
-                                : "#059669",
+                                  ? "#A7F3D0"
+                                  : "#059669",
                               fontSize: 12,
                               fontWeight: "600",
                             }}
@@ -1105,22 +623,21 @@ const CusDetails_serviceTime_AllView__break = ({
                               prev.map((customer: any) =>
                                 customer.id === selectedCustomer.id
                                   ? {
-                                      ...customer,
-                                      estimatedWait: Math.max(
-                                        0,
-                                        customer.estimatedWait + minutes
-                                      ),
-                                    }
+                                    ...customer,
+                                    estimatedWait: Math.max(
+                                      0,
+                                      customer.estimatedWait + minutes
+                                    ),
+                                  }
                                   : customer
                               )
                             );
 
                             Alert.alert(
                               languageSet.timeUpdated,
-                              `${
-                                minutes > 0
-                                  ? languageSet.added
-                                  : languageSet.reduced
+                              `${minutes > 0
+                                ? languageSet.added
+                                : languageSet.reduced
                               } ${Math.abs(minutes)} minutes`
                             );
                             setExtraTimeInput("0");
@@ -1211,7 +728,7 @@ const CusDetails_serviceTime_AllView__break = ({
                           Alert.alert(
                             languageSet.error || "Error",
                             languageSet.invalidData ||
-                              "Cannot perform action: Invalid queue or customer data"
+                            "Cannot perform action: Invalid queue or customer data"
                           );
                           return;
                         }
@@ -1274,8 +791,8 @@ const CusDetails_serviceTime_AllView__break = ({
                             ? "#F59E0B"
                             : "#FBBF24"
                           : isDark
-                          ? "#6B7280"
-                          : "#9CA3AF",
+                            ? "#6B7280"
+                            : "#9CA3AF",
                         paddingVertical: 12,
                         borderRadius: 8,
                         alignItems: "center",
@@ -1297,7 +814,7 @@ const CusDetails_serviceTime_AllView__break = ({
                     <TouchableOpacity
                       onPress={() => {
                         // Skip functionality - remove from queue
-                        setGlobalQueue((prev) =>
+                        setGlobalQueue((prev: any[]) =>
                           updateQueuePositions(
                             prev.filter((c) => c.id !== selectedCustomer.id)
                           )
@@ -1348,7 +865,7 @@ const CusDetails_serviceTime_AllView__break = ({
                               text: languageSet.remove,
                               style: "destructive",
                               onPress: () => {
-                                setGlobalQueue((prev) =>
+                                setGlobalQueue((prev: any[]) =>
                                   updateQueuePositions(
                                     prev.filter(
                                       (c) => c.id !== selectedCustomer.id

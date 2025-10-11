@@ -1,29 +1,25 @@
-import React, { useEffect, useState } from "react";
-import {
-  View,
-  TouchableOpacity,
-  Text,
-  ScrollView,
-  Alert,
-  Platform,
-} from "react-native";
+import useThemeStore from "@/store/themeStore";
+import { translations } from "@/translations/ratecards/prev";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import useThemeStore from "@/store/themeStore";
 import {
   ArrowLeft,
-  Trash2,
+  Clock,
   Edit,
   Plus,
-  Clock,
-  User,
-  DollarSign,
-  Camera,
+  Trash2,
+  User
 } from "lucide-react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import ThemeWidget from "@/components/ThemeWidget";
-import LanguageWidget from "@/components/LanguageWidget";
-import { translations } from "@/translations/ratecards/prev";
+import React, { useEffect, useState } from "react";
+import {
+  Alert,
+  Platform,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 interface Service {
   id: number;
   name: string;
@@ -437,37 +433,6 @@ export default function RateCardPreviewScreen() {
           zIndex: 1000,
         }}
       >
-        {/* Camera Button */}
-        <TouchableOpacity
-          onPress={handleAddNewService}
-          style={{
-            width: 56,
-            height: 56,
-            borderRadius: 28,
-            marginBottom: 12,
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: isDark ? 0.4 : 0.3,
-            shadowRadius: 8,
-            elevation: 8,
-          }}
-        >
-          <LinearGradient
-            colors={isDark ? ["#6366F1", "#4338CA"] : ["#4F7DF7", "#2563EB"]}
-            start={[0, 0]}
-            end={[1, 0]}
-            style={{
-              width: 56,
-              height: 56,
-              borderRadius: 28,
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <Camera size={24} color="white" />
-          </LinearGradient>
-        </TouchableOpacity>
-
         {/* Floating Add Button */}
         <TouchableOpacity
           onPress={handleAddNewService}

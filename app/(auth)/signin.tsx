@@ -5,7 +5,17 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { ArrowLeft, Eye, EyeOff, Lock, Mail } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
-import { Text, TextInput, TouchableOpacity, View } from "react-native";
+import {
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View
+} from "react-native";
 import { z } from "zod";
 
 const loginSchema = z.object({
@@ -62,251 +72,260 @@ export default function LoginScreen() {
       end={[0, 1]}
       style={{ flex: 1 }}
     >
-      {/* <ThemeWidget isDark={isDark} toggleTheme={toggleTheme} />
-      <LanguageWidget
-        setLanguage={setLanguage}
-        isDark={isDark}
-        language={language}
-      /> */}
-
-      <TouchableOpacity
-        onPress={() => router.back()}
-        style={{
-          position: "absolute",
-          top: 60,
-          left: 15,
-          flexDirection: "row",
-          alignItems: "center",
-          paddingVertical: 10,
-        }}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1 }}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
       >
-        <ArrowLeft size={20} color="#3B82F6" />
-        <Text
-          style={{
-            color: "#3B82F6",
-            marginLeft: 4,
-            fontSize: 16,
-          }}
-        >
-          {languageSet.back}
-        </Text>
-      </TouchableOpacity>
-
-      <View
-        style={{
-          flex: 1,
-          justifyContent: "center",
-          alignItems: "flex-start",
-          paddingHorizontal: 16,
-          marginTop: -50,
-          width: "100%",
-        }}
-      >
-        {/* Header */}
-        <Text
-          style={{
-            fontSize: 28,
-            fontWeight: "bold",
-            color: isDark ? "#F8FAFC" : "#1E3A8A",
-            marginBottom: 8,
-            textAlign: "left",
-          }}
-        >
-          {languageSet.welcomeBack}
-        </Text>
-        <Text
-          style={{
-            color: "#3B82F6",
-            fontSize: 16,
-            textAlign: "left",
-            marginBottom: 40,
-          }}
-        >
-          {languageSet.logInToAccount}
-        </Text>
-
-        {/* Email Input */}
-        <View
-          style={{
-            width: "100%",
-            marginBottom: 8,
-          }}
-        >
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              backgroundColor: isDark ? "#374151" : "white",
-              borderRadius: 12,
-              paddingHorizontal: 16,
-              paddingVertical: 8,
-              borderWidth: 1,
-              borderColor: isDark ? "#4B5563" : "#E5E7EB",
-            }}
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <ScrollView
+            contentContainerStyle={{ flexGrow: 1 }}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
           >
-            <Mail size={20} color="#3B82F6" />
-            <TextInput
-              style={{
-                flex: 1,
-                marginLeft: 12,
-                fontSize: 16,
-                color: isDark ? "#F9FAFB" : "#111827",
-              }}
-              placeholder={languageSet.emailOrPhone}
-              placeholderTextColor={isDark ? "#9CA3AF" : "#6B7280"}
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
-          </View>
-          <View className="h-5">
-            {errors.email ? (
-              <Text
-                style={{
-                  color: "red",
-                  fontSize: 11,
-                  textAlign: "left",
-                  marginTop: 4,
-                }}
-              >
-                {errors.email}
-              </Text>
-            ) : null}
-          </View>
-        </View>
-
-        {/* Password Input */}
-        <View
-          style={{
-            width: "100%",
-            marginBottom: 8,
-          }}
-        >
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              backgroundColor: isDark ? "#374151" : "white",
-              borderRadius: 12,
-              paddingHorizontal: 16,
-              paddingVertical: 8,
-              borderWidth: 1,
-              borderColor: isDark ? "#4B5563" : "#E5E7EB",
-            }}
-          >
-            <Lock size={20} color="#3B82F6" />
-            <TextInput
-              style={{
-                flex: 1,
-                marginLeft: 12,
-                fontSize: 16,
-                color: isDark ? "#F9FAFB" : "#111827",
-              }}
-              placeholder={languageSet.password}
-              placeholderTextColor={isDark ? "#9CA3AF" : "#6B7280"}
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry={!showPassword}
-              textContentType={showPassword ? "none" : "password"}
-            />
             <TouchableOpacity
-              onPress={() => setShowPassword(!showPassword)}
-              style={{ padding: 4 }}
-            >
-              {showPassword ? (
-                <Eye size={20} color="#3B82F6" />
-              ) : (
-                <EyeOff size={20} color="#3B82F6" />
-              )}
-            </TouchableOpacity>
-          </View>
-          <View className="h-5">
-            {errors.password ? (
-              <Text
-                style={{
-                  color: "red",
-                  fontSize: 11,
-                  textAlign: "left",
-                  marginTop: 4,
-                }}
-              >
-                {errors.password}
-              </Text>
-            ) : null}
-          </View>
-        </View>
-
-        {/* Forgot Password */}
-        <TouchableOpacity
-          style={{
-            alignSelf: "flex-end",
-            marginBottom: 32,
-          }}
-          onPress={() => router.push("/(auth)/forgot-password")}
-        >
-          <Text
-            style={{
-              color: isDark ? "#A5B4FC" : "#3B82F6",
-              fontSize: 14,
-              fontWeight: "500",
-            }}
-          >
-            {languageSet.forgotPassword}
-          </Text>
-        </TouchableOpacity>
-
-        {/* Login Button */}
-        <Box width="100%" marginBottom={8}>
-          <TouchableOpacity style={{ width: "100%" }} onPress={handleLogin}>
-            <LinearGradient
-              colors={isDark ? ["#6366F1", "#4338CA"] : ["#4F7DF7", "#2563EB"]}
-              start={[0, 0]}
-              end={[1, 0]}
+              onPress={() => router.back()}
               style={{
-                paddingVertical: 16,
-                borderRadius: 12,
+                position: "absolute",
+                top: 60,
+                left: 15,
+                flexDirection: "row",
                 alignItems: "center",
-                justifyContent: "center",
+                paddingVertical: 10,
+                zIndex: 10,
               }}
             >
+              <ArrowLeft size={20} color="#3B82F6" />
               <Text
                 style={{
-                  color: "white",
-                  fontWeight: "600",
+                  color: "#3B82F6",
+                  marginLeft: 4,
                   fontSize: 16,
                 }}
               >
-                {languageSet.logIn}
+                {languageSet.back}
               </Text>
-            </LinearGradient>
-          </TouchableOpacity>
-        </Box>
+            </TouchableOpacity>
 
-        {/* Sign Up Link */}
-        <TouchableOpacity
-          onPress={() => router.push("/(auth)/(signupflows)/choose")}
-          className=" text-center w-full"
-        >
-          <Text
-            style={{
-              color: "#3B82F6",
-              fontSize: 14,
-              textAlign: "center",
-            }}
-          >
-            {languageSet.noAccount.split(" ").map((word: any, index: any) =>
-              word === "Sign" || word === "Up" ? (
-                <Text key={index} style={{ fontWeight: "600" }}>
-                  {word}{" "}
+            <View
+              style={{
+                flex: 1,
+                justifyContent: "center",
+                alignItems: "flex-start",
+                paddingHorizontal: 16,
+                paddingTop: 120,
+                paddingBottom: 40,
+                width: "100%",
+              }}
+            >
+              {/* Header */}
+              <Text
+                style={{
+                  fontSize: 28,
+                  fontWeight: "bold",
+                  color: isDark ? "#F8FAFC" : "#1E3A8A",
+                  marginBottom: 8,
+                  textAlign: "left",
+                }}
+              >
+                {languageSet.welcomeBack}
+              </Text>
+              <Text
+                style={{
+                  color: "#3B82F6",
+                  fontSize: 16,
+                  textAlign: "left",
+                  marginBottom: 40,
+                }}
+              >
+                {languageSet.logInToAccount}
+              </Text>
+
+              {/* Email Input */}
+              <View
+                style={{
+                  width: "100%",
+                  marginBottom: 8,
+                }}
+              >
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    backgroundColor: isDark ? "#374151" : "white",
+                    borderRadius: 12,
+                    paddingHorizontal: 16,
+                    paddingVertical: 8,
+                    borderWidth: 1,
+                    borderColor: isDark ? "#4B5563" : "#E5E7EB",
+                  }}
+                >
+                  <Mail size={20} color="#3B82F6" />
+                  <TextInput
+                    style={{
+                      flex: 1,
+                      marginLeft: 12,
+                      fontSize: 16,
+                      color: isDark ? "#F9FAFB" : "#111827",
+                    }}
+                    placeholder={languageSet.emailOrPhone}
+                    placeholderTextColor={isDark ? "#9CA3AF" : "#6B7280"}
+                    value={email}
+                    onChangeText={setEmail}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                  />
+                </View>
+                <View style={{ height: 20 }}>
+                  {errors.email ? (
+                    <Text
+                      style={{
+                        color: "red",
+                        fontSize: 11,
+                        textAlign: "left",
+                        marginTop: 4,
+                      }}
+                    >
+                      {errors.email}
+                    </Text>
+                  ) : null}
+                </View>
+              </View>
+
+              {/* Password Input */}
+              <View
+                style={{
+                  width: "100%",
+                  marginBottom: 8,
+                }}
+              >
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    backgroundColor: isDark ? "#374151" : "white",
+                    borderRadius: 12,
+                    paddingHorizontal: 16,
+                    paddingVertical: 8,
+                    borderWidth: 1,
+                    borderColor: isDark ? "#4B5563" : "#E5E7EB",
+                  }}
+                >
+                  <Lock size={20} color="#3B82F6" />
+                  <TextInput
+                    style={{
+                      flex: 1,
+                      marginLeft: 12,
+                      fontSize: 16,
+                      color: isDark ? "#F9FAFB" : "#111827",
+                    }}
+                    placeholder={languageSet.password}
+                    placeholderTextColor={isDark ? "#9CA3AF" : "#6B7280"}
+                    value={password}
+                    onChangeText={setPassword}
+                    secureTextEntry={!showPassword}
+                    textContentType={showPassword ? "none" : "password"}
+                  />
+                  <TouchableOpacity
+                    onPress={() => setShowPassword(!showPassword)}
+                    style={{ padding: 4 }}
+                  >
+                    {showPassword ? (
+                      <Eye size={20} color="#3B82F6" />
+                    ) : (
+                      <EyeOff size={20} color="#3B82F6" />
+                    )}
+                  </TouchableOpacity>
+                </View>
+                <View style={{ height: 20 }}>
+                  {errors.password ? (
+                    <Text
+                      style={{
+                        color: "red",
+                        fontSize: 11,
+                        textAlign: "left",
+                        marginTop: 4,
+                      }}
+                    >
+                      {errors.password}
+                    </Text>
+                  ) : null}
+                </View>
+              </View>
+
+              {/* Forgot Password */}
+              <TouchableOpacity
+                style={{
+                  alignSelf: "flex-end",
+                  marginBottom: 32,
+                }}
+                onPress={() => router.push("/(auth)/forgot-password")}
+              >
+                <Text
+                  style={{
+                    color: isDark ? "#A5B4FC" : "#3B82F6",
+                    fontSize: 14,
+                    fontWeight: "500",
+                  }}
+                >
+                  {languageSet.forgotPassword}
                 </Text>
-              ) : (
-                <Text key={index}>{word} </Text>
-              )
-            )}
-          </Text>
-        </TouchableOpacity>
-      </View>
+              </TouchableOpacity>
+
+              {/* Login Button */}
+              <Box width="100%" marginBottom={8}>
+                <TouchableOpacity style={{ width: "100%" }} onPress={handleLogin}>
+                  <LinearGradient
+                    colors={isDark ? ["#6366F1", "#4338CA"] : ["#4F7DF7", "#2563EB"]}
+                    start={[0, 0]}
+                    end={[1, 0]}
+                    style={{
+                      paddingVertical: 16,
+                      borderRadius: 12,
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Text
+                      style={{
+                        color: "white",
+                        fontWeight: "600",
+                        fontSize: 16,
+                      }}
+                    >
+                      {languageSet.logIn}
+                    </Text>
+                  </LinearGradient>
+                </TouchableOpacity>
+              </Box>
+
+              {/* Sign Up Link */}
+              <TouchableOpacity
+                onPress={() => router.push("/(auth)/(signupflows)/choose")}
+                style={{ width: "100%", alignItems: "center" }}
+              >
+                <Text
+                  style={{
+                    color: "#3B82F6",
+                    fontSize: 14,
+                    textAlign: "center",
+                  }}
+                >
+                  {languageSet.noAccount.split(" ").map((word: any, index: any) =>
+                    word === "Sign" || word === "Up" ? (
+                      <Text key={index} style={{ fontWeight: "600" }}>
+                        {word}{" "}
+                      </Text>
+                    ) : (
+                      <Text key={index}>{word} </Text>
+                    )
+                  )}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
     </LinearGradient>
   );
 }
