@@ -8,8 +8,9 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Location from "expo-location";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import {
+  Armchair,
   ArrowLeft,
   Check,
   ChevronDown,
@@ -21,7 +22,6 @@ import {
   Phone,
   Shield,
   User,
-  Users
 } from "lucide-react-native";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -36,7 +36,7 @@ import {
   TextInput,
   TouchableOpacity,
   TouchableWithoutFeedback,
-  View
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { z } from "zod";
@@ -79,8 +79,7 @@ const PasswordStrengthIndicator = ({
             style={{
               flex: 1,
               height: 4,
-              backgroundColor:
-                index <= strength ? color : isDark ? "#4B5563" : "#E5E7EB",
+              backgroundColor: index <= strength ? color : isDark ? "#4B5563" : "#E5E7EB",
               borderRadius: 2,
             }}
           />
@@ -95,89 +94,61 @@ const PasswordStrengthIndicator = ({
   );
 };
 
-const signUpSchemas = [
-  z.object({
-    fullName: z
-      .string()
-      .min(1, "Full name is required")
-      .refine(
-        (val) => /^[A-Za-z\s]+$/.test(val),
-        "Only letters and spaces allowed"
-      ),
-    email: z
-      .string()
-      .min(1, "Email is required")
-      .email("Invalid email format")
-      .refine((val) => !val.includes("gamil.com"), {
-        message: "Did you mean gmail.com?",
-      }),
-    countryCode: z.string().default("+91"),
-    phoneNumber: z
-      .string()
-      .min(1, "Phone number is required")
-      .refine((val) => /^\d+$/.test(val), "Only digits allowed")
-      .refine(
-        (val) => val.length === 10,
-        "Phone number must be exactly 10 digits"
-      ),
-  }),
-  z.object({
-    businessName: z
-      .string()
-      .min(3, "Business name must be at least 3 characters")
-      .refine(
-        (val) => /^[A-Za-z0-9\s]+$/.test(val),
-        "Only alphanumeric characters and spaces allowed"
-      ),
-    businessType: z.enum([
-      "Retail",
-      "Restaurant",
-      "Healthcare",
-      "Banking",
-      "Government",
-      "Education",
-      "Others",
-    ]),
-    businessAddress: z
-      .string()
-      .min(1, "Business address is required")
-      .refine(
-        (val) => /^[A-Za-z0-9\s,.:;-]+$/.test(val),
-        "Only alphanumeric characters, commas, dots, and spaces allowed"
-      ),
-    seatsNumber: z
-      .number()
-      .min(1, "Must have at least 1 seat")
-      .max(1000, "Maximum 1000 seats allowed"),
-  }),
-  z
-    .object({
-      password: z
-        .string()
-        .min(8, "Password must be at least 8 characters")
-        .refine(
-          (val) => /[A-Z]/.test(val),
-          "Must contain at least one uppercase letter"
-        )
-        .refine(
-          (val) => /[a-z]/.test(val),
-          "Must contain at least one lowercase letter"
-        )
-        .refine((val) => /[0-9]/.test(val), "Must contain at least one number")
-        .refine(
-          (val) => /[^A-Za-z0-9]/.test(val),
-          "Must contain at least one special character"
-        ),
-      confirmPassword: z.string().min(1, "Please confirm your password"),
-      agreeToTerms: z
-        .boolean()
-        .refine((val) => val === true, "You must agree to the terms"),
-    })
-    .refine((data) => data.password === data.confirmPassword, {
-      message: "Passwords do not match",
-      path: ["confirmPassword"],
+// Create a combined schema that includes all fields
+const signUpSchema = z.object({
+  fullName: z
+    .string()
+    .min(1, "Full name is required")
+    .refine((val) => /^[A-Za-z\s]+$/.test(val), "Only letters and spaces allowed"),
+  email: z
+    .string()
+    .min(1, "Email is required")
+    .email("Invalid email format")
+    .refine((val) => !val.includes("gamil.com"), {
+      message: "Did you mean gmail.com?",
     }),
-];
+  countryCode: z.string().default("+91"),
+  phoneNumber: z
+    .string()
+    .min(1, "Phone number is required")
+    .refine((val) => /^\d+$/.test(val), "Only digits allowed")
+    .refine((val) => val.length === 10, "Phone number must be exactly 10 digits"),
+  businessName: z
+    .string()
+    .min(3, "Business name must be at least 3 characters")
+    .refine((val) => /^[A-Za-z0-9\s]+$/.test(val), "Only alphanumeric characters and spaces allowed"),
+  businessType: z.enum([
+    "Retail",
+    "Restaurant",
+    "Healthcare",
+    "Banking",
+    "Government",
+    "Education",
+    "Others",
+  ]),
+  businessAddress: z
+    .string()
+    .min(1, "Business address is required")
+    .refine((val) => /^[A-Za-z0-9\s,.:;-]+$/.test(val), "Only alphanumeric characters, commas, dots, and spaces allowed"),
+  seatsNumber: z
+    .number()
+    .min(1, "Must have at least 1 seat")
+    .max(1000, "Maximum 1000 seats allowed"),
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 characters")
+    .refine((val) => /[A-Z]/.test(val), "Must contain at least one uppercase letter")
+    .refine((val) => /[a-z]/.test(val), "Must contain at least one lowercase letter")
+    .refine((val) => /[0-9]/.test(val), "Must contain at least one number")
+    .refine((val) => /[^A-Za-z0-9]/.test(val), "Must contain at least one special character"),
+  confirmPassword: z.string().min(1, "Please confirm your password"),
+  agreeToTerms: z
+    .boolean()
+    .refine((val) => val === true, "You must agree to the terms"),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
+});
 
 type FormData = {
   fullName: string;
@@ -185,14 +156,7 @@ type FormData = {
   countryCode: string;
   phoneNumber: string;
   businessName: string;
-  businessType:
-  | "Retail"
-  | "Restaurant"
-  | "Healthcare"
-  | "Banking"
-  | "Government"
-  | "Education"
-  | "Others";
+  businessType: "Retail" | "Restaurant" | "Healthcare" | "Banking" | "Government" | "Education" | "Others";
   businessAddress: string;
   password: string;
   confirmPassword: string;
@@ -215,6 +179,33 @@ export default function SignUpScreen() {
   const [showCountryPicker, setShowCountryPicker] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showBusinessTypePicker, setShowBusinessTypePicker] = useState(false);
+  const [showPicker, setShowPicker] = useState(false);
+  const params = useLocalSearchParams();
+  const [userType, setUserType] = useState<'owner' | 'helper'>(
+    (params.userType as 'owner' | 'helper') || 'owner'
+  );
+
+  // Dark mode color palette - MATCHING all other pages
+  const colors = {
+    gradientStart: isDark ? "#111827" : "#F1F5F9",
+    gradientMid: isDark ? "#1F2937" : "#E2E8F0",
+    gradientEnd: isDark ? "#374151" : "#CBD5E1",
+    textPrimary: isDark ? "#DBEAFE" : "#1E3A8A",
+    textSecondary: isDark ? "#BFDBFE" : "#3B82F6",
+    textAccent: isDark ? "#93C5FD" : "#3B82F6",
+    textMuted: isDark ? "#9CA3AF" : "#6B7280",
+    iconColor: isDark ? "#60A5FA" : "#3B82F6",
+    inputBg: isDark ? "#374151" : "white",
+    inputBorder: isDark ? "#4B5563" : "#E5E7EB",
+    inputText: isDark ? "#F9FAFB" : "#111827",
+    placeholderColor: isDark ? "#9CA3AF" : "#6B7280",
+    modalBg: isDark ? "#374151" : "white",
+    modalTitleText: isDark ? "#DBEAFE" : "#1E3A8A",
+    modalBodyText: isDark ? "#BFDBFE" : "#1E40AF",
+    stepActive: "#3B82F6",
+    stepInactive: isDark ? "#4B5563" : "#E5E7EB",
+    strengthBarInactive: isDark ? "#4B5563" : "#E5E7EB",
+  };
 
   const {
     control,
@@ -223,8 +214,9 @@ export default function SignUpScreen() {
     setValue,
     watch,
     clearErrors,
+    trigger,
   } = useForm<FormData>({
-    resolver: zodResolver(signUpSchemas[step - 1]),
+    resolver: zodResolver(signUpSchema),
     mode: "onSubmit",
     defaultValues: {
       fullName: "",
@@ -237,7 +229,7 @@ export default function SignUpScreen() {
       password: "",
       confirmPassword: "",
       agreeToTerms: false,
-      seatsNumber: null,
+      seatsNumber: 2,
     },
   });
 
@@ -250,23 +242,36 @@ export default function SignUpScreen() {
   const businessAddressValue = watch("businessAddress", "");
   const seatsNumberValue = watch("seatsNumber");
 
+  const validateStep = async () => {
+    let fieldsToValidate: (keyof FormData)[] = [];
 
-  const validateStep = handleSubmit(
-    (data) => {
+    if (step === 1) {
+      fieldsToValidate = ['fullName', 'email', 'countryCode', 'phoneNumber'];
+    } else if (step === 2) {
+      fieldsToValidate = ['businessName', 'businessType', 'businessAddress', 'seatsNumber'];
+    } else if (step === 3) {
+      fieldsToValidate = ['password', 'confirmPassword', 'agreeToTerms'];
+    }
+
+    const isValid = await trigger(fieldsToValidate);
+
+    if (isValid) {
       if (step < 3) {
         setStep(step + 1);
       } else {
-        onSubmit(data);
+        handleSubmit(onSubmit)();
       }
-    },
-    () => { }
-  );
+    }
+  };
 
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
     try {
       console.log("Submitting signup data:", data);
-      router.push("/connect-device");
+      router.push({
+        pathname: "/connect-device",
+        params: { userType: userType },
+      } as any);
     } catch (error) {
       console.error("Signup error:", error);
       Alert.alert("Error", "An unexpected error occurred. Please try again.");
@@ -289,10 +294,7 @@ export default function SignUpScreen() {
         accuracy: Location.Accuracy.High,
       });
       const { latitude, longitude } = location.coords;
-      // Convert to proper address string
-      const addressString = `Lat: ${latitude.toFixed(
-        6
-      )}, Lng: ${longitude.toFixed(6)}`;
+      const addressString = `Lat: ${latitude.toFixed(6)}, Lng: ${longitude.toFixed(6)}`;
       setValue("businessAddress", addressString);
       clearErrors("businessAddress");
     } catch (error) {
@@ -319,14 +321,13 @@ export default function SignUpScreen() {
             style={{
               flex: 1,
               height: 4,
-              backgroundColor:
-                step >= stepNum ? "#3B82F6" : isDark ? "#4B5563" : "#E5E7EB",
+              backgroundColor: step >= stepNum ? colors.stepActive : colors.stepInactive,
               borderRadius: 2,
             }}
           />
         ))}
       </View>
-      <Text style={{ color: "#3B82F6", fontSize: 14 }}>
+      <Text style={{ color: colors.stepText, fontSize: 14 }}>
         {languageSet[`step${step}`]}
       </Text>
     </View>
@@ -338,7 +339,7 @@ export default function SignUpScreen() {
         style={{
           fontSize: 28,
           fontWeight: "bold",
-          color: isDark ? "#F8FAFC" : "#1E3A8A",
+          color: colors.textPrimary,
           marginBottom: 8,
         }}
       >
@@ -346,7 +347,7 @@ export default function SignUpScreen() {
       </Text>
       <Text
         style={{
-          color: "#3B82F6",
+          color: colors.textSecondary,
           fontSize: 16,
           marginBottom: 32,
         }}
@@ -360,15 +361,15 @@ export default function SignUpScreen() {
           style={{
             flexDirection: "row",
             alignItems: "center",
-            backgroundColor: isDark ? "#374151" : "white",
+            backgroundColor: colors.inputBg,
             borderRadius: 12,
             paddingHorizontal: 16,
             paddingVertical: 8,
             borderWidth: 1,
-            borderColor: isDark ? "#4B5563" : "#E5E7EB",
+            borderColor: colors.inputBorder,
           }}
         >
-          <User size={20} color="#3B82F6" />
+          <User size={20} color={colors.iconColor} />
           <Controller
             control={control}
             name="fullName"
@@ -385,10 +386,10 @@ export default function SignUpScreen() {
                   flex: 1,
                   marginLeft: 12,
                   fontSize: 16,
-                  color: isDark ? "#F9FAFB" : "#111827",
+                  color: colors.inputText,
                 }}
                 placeholder={languageSet.fullName}
-                placeholderTextColor={isDark ? "#9CA3AF" : "#6B7280"}
+                placeholderTextColor={colors.placeholderColor}
                 value={value}
                 onChangeText={(text) => {
                   onChange(text);
@@ -423,15 +424,15 @@ export default function SignUpScreen() {
           style={{
             flexDirection: "row",
             alignItems: "center",
-            backgroundColor: isDark ? "#374151" : "white",
+            backgroundColor: colors.inputBg,
             borderRadius: 12,
             paddingHorizontal: 16,
             paddingVertical: 8,
             borderWidth: 1,
-            borderColor: isDark ? "#4B5563" : "#E5E7EB",
+            borderColor: colors.inputBorder,
           }}
         >
-          <Mail size={20} color="#3B82F6" />
+          <Mail size={20} color={colors.iconColor} />
           <Controller
             control={control}
             name="email"
@@ -448,10 +449,10 @@ export default function SignUpScreen() {
                   flex: 1,
                   marginLeft: 12,
                   fontSize: 16,
-                  color: isDark ? "#F9FAFB" : "#111827",
+                  color: colors.inputText,
                 }}
                 placeholder={languageSet.emailAddress}
-                placeholderTextColor={isDark ? "#9CA3AF" : "#6B7280"}
+                placeholderTextColor={colors.placeholderColor}
                 value={value}
                 onChangeText={(text) => {
                   onChange(text);
@@ -520,9 +521,9 @@ export default function SignUpScreen() {
           <View
             style={{
               flex: 1,
-              backgroundColor: isDark ? "#374151" : "white",
+              backgroundColor: colors.inputBg,
               borderWidth: 1,
-              borderColor: isDark ? "#4B5563" : "#E5E7EB",
+              borderColor: colors.inputBorder,
               borderTopRightRadius: 12,
               borderBottomRightRadius: 12,
               borderLeftWidth: 0,
@@ -532,7 +533,7 @@ export default function SignUpScreen() {
               paddingVertical: 8,
             }}
           >
-            <Phone size={20} color="#3B82F6" />
+            <Phone size={20} color={colors.iconColor} />
             <Controller
               control={control}
               name="phoneNumber"
@@ -553,10 +554,10 @@ export default function SignUpScreen() {
                     flex: 1,
                     marginLeft: 12,
                     fontSize: 16,
-                    color: isDark ? "#F9FAFB" : "#111827",
+                    color: colors.inputText,
                   }}
                   placeholder={languageSet.phoneNumber}
-                  placeholderTextColor={isDark ? "#9CA3AF" : "#6B7280"}
+                  placeholderTextColor={colors.placeholderColor}
                   value={value}
                   onChangeText={(text) => {
                     const digits = text.replace(/\D/g, "").slice(0, 10);
@@ -608,7 +609,7 @@ export default function SignUpScreen() {
             <TouchableWithoutFeedback onPress={() => { }}>
               <View
                 style={{
-                  backgroundColor: isDark ? "#374151" : "white",
+                  backgroundColor: colors.modalBg,
                   borderRadius: 12,
                   maxWidth: 300,
                   width: "80%",
@@ -627,13 +628,13 @@ export default function SignUpScreen() {
                     style={{
                       fontSize: 18,
                       fontWeight: "bold",
-                      color: isDark ? "#F9FAFB" : "#1E3A8A",
+                      color: colors.modalTitleText,
                     }}
                   >
                     {selectCountryCodeTranslations[language]}
                   </Text>
                   <TouchableOpacity onPress={() => setShowCountryPicker(false)}>
-                    <Text style={{ color: "#3B82F6", fontSize: 20 }}>✕</Text>
+                    <Text style={{ color: colors.textSecondary, fontSize: 20 }}>✕</Text>
                   </TouchableOpacity>
                 </View>
                 <ScrollView style={{ maxHeight: 300 }}>
@@ -654,7 +655,7 @@ export default function SignUpScreen() {
                     >
                       <Text
                         style={{
-                          color: isDark ? "#F9FAFB" : "#111827",
+                          color: colors.inputText,
                           fontSize: 16,
                           fontWeight: "500",
                         }}
@@ -663,7 +664,7 @@ export default function SignUpScreen() {
                       </Text>
                       <Text
                         style={{
-                          color: isDark ? "#9CA3AF" : "#6B7280",
+                          color: colors.textMuted,
                           fontSize: 14,
                           marginLeft: 8,
                         }}
@@ -711,14 +712,13 @@ export default function SignUpScreen() {
     </>
   );
 
-
   const renderStep2 = () => (
     <>
       <Text
         style={{
           fontSize: 28,
           fontWeight: "bold",
-          color: isDark ? "#F8FAFC" : "#1E3A8A",
+          color: colors.textPrimary,
           marginBottom: 8,
         }}
       >
@@ -726,7 +726,7 @@ export default function SignUpScreen() {
       </Text>
       <Text
         style={{
-          color: "#3B82F6",
+          color: colors.textSecondary,
           fontSize: 16,
           marginBottom: 32,
         }}
@@ -740,15 +740,15 @@ export default function SignUpScreen() {
           style={{
             flexDirection: "row",
             alignItems: "center",
-            backgroundColor: isDark ? "#374151" : "white",
+            backgroundColor: colors.inputBg,
             borderRadius: 12,
             paddingHorizontal: 16,
             paddingVertical: 8,
             borderWidth: 1,
-            borderColor: isDark ? "#4B5563" : "#E5E7EB",
+            borderColor: colors.inputBorder,
           }}
         >
-          <User size={20} color="#3B82F6" />
+          <User size={20} color={colors.iconColor} />
           <Controller
             control={control}
             name="businessName"
@@ -765,10 +765,10 @@ export default function SignUpScreen() {
                   flex: 1,
                   marginLeft: 12,
                   fontSize: 16,
-                  color: isDark ? "#F9FAFB" : "#111827",
+                  color: colors.inputText,
                 }}
                 placeholder={languageSet.businessName}
-                placeholderTextColor={isDark ? "#9CA3AF" : "#6B7280"}
+                placeholderTextColor={colors.placeholderColor}
                 value={value || ""}
                 onChangeText={(text) => {
                   onChange(text);
@@ -804,27 +804,21 @@ export default function SignUpScreen() {
           style={{
             flexDirection: "row",
             alignItems: "center",
-            backgroundColor: isDark ? "#374151" : "white",
+            backgroundColor: colors.inputBg,
             borderRadius: 12,
             paddingHorizontal: 16,
             paddingVertical: 18,
             borderWidth: 1,
-            borderColor: isDark ? "#4B5563" : "#E5E7EB",
+            borderColor: colors.inputBorder,
           }}
         >
-          <User size={20} color="#3B82F6" />
+          <User size={20} color={colors.iconColor} />
           <Text
             style={{
               flex: 1,
               marginLeft: 12,
               fontSize: 16,
-              color: businessTypeValue
-                ? isDark
-                  ? "#F9FAFB"
-                  : "#111827"
-                : isDark
-                  ? "#9CA3AF"
-                  : "#6B7280",
+              color: businessTypeValue ? colors.inputText : colors.placeholderColor,
             }}
           >
             {businessTypeValue || "Select Business Type"}
@@ -832,7 +826,7 @@ export default function SignUpScreen() {
           {!errors.businessType && businessTypeValue ? (
             <Check size={20} color="#10B981" strokeWidth={3} style={{ marginRight: 8 }} />
           ) : (
-            <ChevronDown size={16} color="#3B82F6" />
+            <ChevronDown size={16} color={colors.iconColor} />
           )}
         </TouchableOpacity>
         <View style={{ height: 20 }}>
@@ -857,14 +851,14 @@ export default function SignUpScreen() {
           style={{
             flexDirection: "row",
             alignItems: "center",
-            backgroundColor: isDark ? "#374151" : "white",
+            backgroundColor: colors.inputBg,
             borderRadius: 12,
             paddingVertical: 8,
             borderWidth: 1,
-            borderColor: isDark ? "#4B5563" : "#E5E7EB",
+            borderColor: colors.inputBorder,
           }}
         >
-          <MapPin size={20} color="#3B82F6" style={{ marginHorizontal: 16 }} />
+          <MapPin size={20} color={colors.iconColor} style={{ marginHorizontal: 16 }} />
           <Controller
             control={control}
             name="businessAddress"
@@ -876,10 +870,10 @@ export default function SignUpScreen() {
                 style={{
                   flex: 1,
                   fontSize: 16,
-                  color: isDark ? "#F9FAFB" : "#111827",
+                  color: colors.inputText,
                 }}
                 placeholder={languageSet.businessAddress}
-                placeholderTextColor={isDark ? "#9CA3AF" : "#6B7280"}
+                placeholderTextColor={colors.placeholderColor}
                 value={value || ""}
                 onChangeText={(text) => {
                   onChange(text);
@@ -894,7 +888,7 @@ export default function SignUpScreen() {
           )}
           <TouchableOpacity
             style={{
-              backgroundColor: isDetectingLocation ? "#E5E7EB" : "#DBEAFE",
+              backgroundColor: isDetectingLocation ? colors.strengthBarInactive : "#DBEAFE",
               paddingHorizontal: 12,
               paddingVertical: 6,
               borderRadius: 8,
@@ -905,18 +899,16 @@ export default function SignUpScreen() {
             onPress={() => setShowLocationModal(true)}
             disabled={isDetectingLocation}
           >
-            <MapPin size={14} color="#3B82F6" />
+            <MapPin size={14} color={colors.iconColor} />
             <Text
               style={{
-                color: isDetectingLocation ? "#6B7280" : "#3B82F6",
+                color: isDetectingLocation ? colors.textMuted : colors.textSecondary,
                 fontSize: 12,
                 fontWeight: "500",
                 marginLeft: 4,
               }}
             >
-              {isDetectingLocation
-                ? "Getting address..."
-                : languageSet.detectLocation}
+              {isDetectingLocation ? "Getting address..." : languageSet.detectLocation}
             </Text>
           </TouchableOpacity>
         </View>
@@ -942,15 +934,15 @@ export default function SignUpScreen() {
           style={{
             flexDirection: "row",
             alignItems: "center",
-            backgroundColor: isDark ? "#374151" : "white",
+            backgroundColor: colors.inputBg,
             borderRadius: 12,
             paddingHorizontal: 16,
-            paddingVertical: 8,
+            paddingVertical: 12,
             borderWidth: 1,
-            borderColor: isDark ? "#4B5563" : "#E5E7EB",
+            borderColor: colors.inputBorder,
           }}
         >
-          <Users size={20} color="#3B82F6" />
+          <Armchair size={20} color={colors.iconColor} />
           <Controller
             control={control}
             name="seatsNumber"
@@ -961,37 +953,90 @@ export default function SignUpScreen() {
                 message: "Must have at least 1 seat",
               },
               max: {
-                value: 1000,
-                message: "Maximum 1000 seats allowed",
+                value: 4,
+                message: "Maximum 4 seats allowed",
               },
             }}
             render={({ field: { onChange, value } }) => (
-              <TextInput
+              <TouchableOpacity
                 style={{
                   flex: 1,
                   marginLeft: 12,
-                  fontSize: 16,
-                  color: isDark ? "#F9FAFB" : "#111827",
+                  justifyContent: "center",
                 }}
-                placeholder={numseatsLanguageSet.numberOfSeats}
-                placeholderTextColor={isDark ? "#9CA3AF" : "#6B7280"}
-                value={value ? value.toString() : ""}
-                onChangeText={(text) => {
-                  const numericValue = text.replace(/[^0-9]/g, "");
-                  onChange(numericValue ? parseInt(numericValue, 10) : "");
-                  clearErrors("seatsNumber");
-                }}
-                keyboardType="numeric"
-              />
+                onPress={() => setShowPicker(!showPicker)}
+              >
+                <Text
+                  style={{
+                    fontSize: 16,
+                    color: value ? colors.inputText : colors.placeholderColor,
+                  }}
+                >
+                  {value || numseatsLanguageSet.numberOfSeats}
+                </Text>
+              </TouchableOpacity>
             )}
           />
           {!errors.seatsNumber &&
             typeof seatsNumberValue === "number" &&
             seatsNumberValue >= 1 &&
-            seatsNumberValue <= 1000 && (
+            seatsNumberValue <= 4 && (
               <Check size={20} color="#10B981" strokeWidth={3} />
             )}
         </View>
+
+        {/* Scrollable Picker */}
+        {showPicker && (
+          <View
+            style={{
+              backgroundColor: colors.inputBg,
+              borderRadius: 12,
+              marginTop: 8,
+              borderWidth: 1,
+              borderColor: colors.inputBorder,
+              maxHeight: 120,
+            }}
+          >
+            <ScrollView
+              showsVerticalScrollIndicator={true}
+              nestedScrollEnabled={true}
+            >
+              {[1, 2, 3, 4].map((num) => (
+                <TouchableOpacity
+                  key={num}
+                  style={{
+                    paddingVertical: 12,
+                    paddingHorizontal: 16,
+                    borderBottomWidth: num !== 4 ? 1 : 0,
+                    borderBottomColor: colors.inputBorder,
+                    backgroundColor:
+                      seatsNumberValue === num
+                        ? isDark
+                          ? "#4B5563"
+                          : "#F3F4F6"
+                        : "transparent",
+                  }}
+                  onPress={() => {
+                    setValue("seatsNumber", num);
+                    clearErrors("seatsNumber");
+                    setShowPicker(false);
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      color: colors.inputText,
+                      fontWeight: seatsNumberValue === num ? "600" : "400",
+                    }}
+                  >
+                    {num} {num === 1 ? "Seat" : "Seats"}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        )}
+
         <View style={{ height: 20 }}>
           {errors.seatsNumber ? (
             <Text
@@ -1027,7 +1072,7 @@ export default function SignUpScreen() {
             <TouchableWithoutFeedback onPress={() => { }}>
               <View
                 style={{
-                  backgroundColor: isDark ? "#374151" : "white",
+                  backgroundColor: colors.modalBg,
                   borderRadius: 12,
                   maxWidth: 300,
                   width: "80%",
@@ -1046,13 +1091,13 @@ export default function SignUpScreen() {
                     style={{
                       fontSize: 18,
                       fontWeight: "bold",
-                      color: isDark ? "#F9FAFB" : "#1E3A8A",
+                      color: colors.modalTitleText,
                     }}
                   >
                     {languageSet.businessType}
                   </Text>
                   <TouchableOpacity onPress={() => setShowBusinessTypePicker(false)}>
-                    <Text style={{ color: "#3B82F6", fontSize: 20 }}>✕</Text>
+                    <Text style={{ color: colors.textSecondary, fontSize: 20 }}>✕</Text>
                   </TouchableOpacity>
                 </View>
                 <ScrollView style={{ maxHeight: 300 }}>
@@ -1072,7 +1117,7 @@ export default function SignUpScreen() {
                     >
                       <Text
                         style={{
-                          color: isDark ? "#F9FAFB" : "#111827",
+                          color: colors.inputText,
                           fontSize: 16,
                           fontWeight: "500",
                         }}
@@ -1107,7 +1152,7 @@ export default function SignUpScreen() {
             <TouchableWithoutFeedback onPress={() => { }}>
               <View
                 style={{
-                  backgroundColor: isDark ? "#374151" : "white",
+                  backgroundColor: colors.modalBg,
                   borderRadius: 12,
                   width: "90%",
                   padding: 16,
@@ -1125,18 +1170,18 @@ export default function SignUpScreen() {
                     style={{
                       fontSize: 18,
                       fontWeight: "bold",
-                      color: isDark ? "#F9FAFB" : "#1E3A8A",
+                      color: colors.modalTitleText,
                     }}
                   >
                     {languageSet.allowLocationAccess}
                   </Text>
                   <TouchableOpacity onPress={() => setShowLocationModal(false)}>
-                    <Text style={{ color: "#3B82F6", fontSize: 20 }}>✕</Text>
+                    <Text style={{ color: colors.textSecondary, fontSize: 20 }}>✕</Text>
                   </TouchableOpacity>
                 </View>
                 <Text
                   style={{
-                    color: isDark ? "#9CA3AF" : "#6B7280",
+                    color: colors.textMuted,
                     fontSize: 14,
                     marginBottom: 24,
                   }}
@@ -1153,7 +1198,7 @@ export default function SignUpScreen() {
                   <TouchableOpacity onPress={() => setShowLocationModal(false)}>
                     <Text
                       style={{
-                        color: "#3B82F6",
+                        color: colors.textSecondary,
                         fontSize: 16,
                         fontWeight: "600",
                       }}
@@ -1164,7 +1209,7 @@ export default function SignUpScreen() {
                   <TouchableOpacity onPress={handleDetectLocation}>
                     <Text
                       style={{
-                        color: "#3B82F6",
+                        color: colors.textSecondary,
                         fontSize: 16,
                         fontWeight: "600",
                       }}
@@ -1217,13 +1262,13 @@ export default function SignUpScreen() {
         style={{
           fontSize: 28,
           fontWeight: "bold",
-          color: isDark ? "#F8FAFC" : "#1E3A8A",
+          color: colors.textPrimary,
           marginBottom: 8,
         }}
       >
         {languageSet.createNewPassword}
       </Text>
-      <Text style={{ color: "#3B82F6", fontSize: 16, marginBottom: 32 }}>
+      <Text style={{ color: colors.textSecondary, fontSize: 16, marginBottom: 32 }}>
         {languageSet.enterNewPassword}
       </Text>
       {/* Password Input */}
@@ -1232,15 +1277,15 @@ export default function SignUpScreen() {
           style={{
             flexDirection: "row",
             alignItems: "center",
-            backgroundColor: isDark ? "#374151" : "white",
+            backgroundColor: colors.inputBg,
             borderRadius: 12,
             paddingHorizontal: 16,
             paddingVertical: 8,
             borderWidth: 1,
-            borderColor: isDark ? "#4B5563" : "#E5E7EB",
+            borderColor: colors.inputBorder,
           }}
         >
-          <Lock size={20} color="#3B82F6" />
+          <Lock size={20} color={colors.iconColor} />
           <Controller
             control={control}
             name="password"
@@ -1250,10 +1295,10 @@ export default function SignUpScreen() {
                   flex: 1,
                   marginLeft: 12,
                   fontSize: 16,
-                  color: isDark ? "#F9FAFB" : "#111827",
+                  color: colors.inputText,
                 }}
                 placeholder={languageSet.newPassword}
-                placeholderTextColor={isDark ? "#9CA3AF" : "#6B7280"}
+                placeholderTextColor={colors.placeholderColor}
                 value={value}
                 onChangeText={(text) => {
                   onChange(text);
@@ -1269,9 +1314,9 @@ export default function SignUpScreen() {
             onPress={() => setPasswordVisible(!passwordVisible)}
           >
             {passwordVisible ? (
-              <EyeOff size={20} color="#3B82F6" />
+              <EyeOff size={20} color={colors.iconColor} />
             ) : (
-              <Eye size={20} color="#3B82F6" />
+              <Eye size={20} color={colors.iconColor} />
             )}
           </TouchableOpacity>
         </View>
@@ -1290,23 +1335,22 @@ export default function SignUpScreen() {
           ) : null}
         </View>
       </View>
-      <PasswordStrengthIndicator password={password} isDark={isDark} />{" "}
-      {/* Assuming this component exists */}
+      <PasswordStrengthIndicator password={password} isDark={isDark} />
       {/* Confirm Password Input */}
       <View style={{ width: "100%", marginBottom: 8 }}>
         <View
           style={{
             flexDirection: "row",
             alignItems: "center",
-            backgroundColor: isDark ? "#374151" : "white",
+            backgroundColor: colors.inputBg,
             borderRadius: 12,
             paddingHorizontal: 16,
             paddingVertical: 8,
             borderWidth: 1,
-            borderColor: isDark ? "#4B5563" : "#E5E7EB",
+            borderColor: colors.inputBorder,
           }}
         >
-          <Lock size={20} color="#3B82F6" />
+          <Lock size={20} color={colors.iconColor} />
           <Controller
             control={control}
             name="confirmPassword"
@@ -1316,10 +1360,10 @@ export default function SignUpScreen() {
                   flex: 1,
                   marginLeft: 12,
                   fontSize: 16,
-                  color: isDark ? "#F9FAFB" : "#111827",
+                  color: colors.inputText,
                 }}
                 placeholder={languageSet.confirmNewPassword}
-                placeholderTextColor={isDark ? "#9CA3AF" : "#6B7280"}
+                placeholderTextColor={colors.placeholderColor}
                 value={value}
                 onChangeText={(text) => {
                   onChange(text);
@@ -1330,7 +1374,6 @@ export default function SignUpScreen() {
               />
             )}
           />
-
         </View>
         <View style={{ height: 20 }}>
           {errors.confirmPassword ? (
@@ -1368,10 +1411,10 @@ export default function SignUpScreen() {
                     height: 20,
                     borderRadius: 4,
                     borderWidth: 1,
-                    borderColor: "#3B82F6",
+                    borderColor: colors.textSecondary,
                     alignItems: "center",
                     justifyContent: "center",
-                    backgroundColor: value ? "#3B82F6" : "transparent",
+                    backgroundColor: value ? colors.textSecondary : "transparent",
                   }}
                 >
                   {value && (
@@ -1381,14 +1424,14 @@ export default function SignUpScreen() {
               </TouchableOpacity>
               <Text
                 style={{
-                  color: isDark ? "#F9FAFB" : "#111827",
+                  color: colors.inputText,
                   fontSize: 14,
                 }}
               >
                 {languageSet.agreeToTerms}{" "}
                 <Text
                   style={{
-                    color: "#3B82F6",
+                    color: colors.textSecondary,
                     textDecorationLine: "underline",
                   }}
                   onPress={() => setShowTermsModal(true)}
@@ -1398,7 +1441,7 @@ export default function SignUpScreen() {
                 {languageSet.and}{" "}
                 <Text
                   style={{
-                    color: "#3B82F6",
+                    color: colors.textSecondary,
                     textDecorationLine: "underline",
                   }}
                   onPress={() => setShowPrivacyModal(true)}
@@ -1421,7 +1464,6 @@ export default function SignUpScreen() {
         style={{ width: "100%", marginBottom: 8, marginTop: 10 }}
         onPress={handleSubmit(() => {
           setIsSubmitting(true);
-          // Simulate submission
           setTimeout(() => setIsSubmitting(false), 2000);
         })}
         disabled={isSubmitting}
@@ -1439,9 +1481,7 @@ export default function SignUpScreen() {
           }}
         >
           <Text style={{ color: "white", fontWeight: "600", fontSize: 16 }}>
-            {isSubmitting
-              ? "Creating Account..."
-              : languageSet.createYourAccount}
+            {isSubmitting ? "Creating Account..." : languageSet.createYourAccount}
           </Text>
         </LinearGradient>
       </TouchableOpacity>
@@ -1449,7 +1489,7 @@ export default function SignUpScreen() {
         onPress={() => router.push("/(auth)/signin")}
         style={{ alignItems: "center" }}
       >
-        <Text style={{ color: "#3B82F6", fontSize: 14 }}>
+        <Text style={{ color: colors.textSecondary, fontSize: 14 }}>
           {languageSet.alreadyHaveAccount}{" "}
           <Text style={{ fontWeight: "600" }}>{languageSet.logIn}</Text>
         </Text>
@@ -1471,9 +1511,8 @@ export default function SignUpScreen() {
         >
           <View
             style={{
-              backgroundColor: isDark ? "#374151" : "white",
+              backgroundColor: colors.modalBg,
               borderRadius: 12,
-              // maxWidth: 300,
               width: "90%",
               padding: 16,
               zIndex: 1000,
@@ -1491,13 +1530,13 @@ export default function SignUpScreen() {
                 style={{
                   fontSize: 18,
                   fontWeight: "bold",
-                  color: isDark ? "#F9FAFB" : "#1E3A8A",
+                  color: colors.modalTitleText,
                 }}
               >
                 {languageSet.termsModalTitle}
               </Text>
               <TouchableOpacity onPress={() => setShowTermsModal(false)}>
-                <Text style={{ color: "#3B82F6", fontSize: 16 }}>✕</Text>
+                <Text style={{ color: colors.textSecondary, fontSize: 16 }}>✕</Text>
               </TouchableOpacity>
             </View>
             <ScrollView style={{ maxHeight: 400 }}>
@@ -1515,7 +1554,8 @@ export default function SignUpScreen() {
                 <Text
                   style={{
                     fontSize: 14,
-                    color: isDark ? "#D1D5DB" : "#1E40AF",
+                    color: colors.modalBodyText,
+                    marginTop: 8,
                   }}
                 >
                   Last Updated: April 20, 2025
@@ -1527,7 +1567,7 @@ export default function SignUpScreen() {
                   style={{
                     fontSize: 16,
                     fontWeight: "600",
-                    color: isDark ? "#D1D5DB" : "#1E40AF",
+                    color: colors.modalBodyText,
                     marginTop: 16,
                   }}
                 >
@@ -1536,7 +1576,7 @@ export default function SignUpScreen() {
                 <Text
                   style={{
                     fontSize: 14,
-                    color: isDark ? "#D1D5DB" : "#1E40AF",
+                    color: colors.modalBodyText,
                     marginTop: 4,
                   }}
                 >
@@ -1550,7 +1590,7 @@ export default function SignUpScreen() {
                   style={{
                     fontSize: 16,
                     fontWeight: "600",
-                    color: isDark ? "#D1D5DB" : "#1E40AF",
+                    color: colors.modalBodyText,
                     marginTop: 16,
                   }}
                 >
@@ -1559,7 +1599,7 @@ export default function SignUpScreen() {
                 <Text
                   style={{
                     fontSize: 14,
-                    color: isDark ? "#D1D5DB" : "#1E40AF",
+                    color: colors.modalBodyText,
                     marginTop: 4,
                   }}
                 >
@@ -1575,7 +1615,7 @@ export default function SignUpScreen() {
                   style={{
                     fontSize: 16,
                     fontWeight: "600",
-                    color: isDark ? "#D1D5DB" : "#1E40AF",
+                    color: colors.modalBodyText,
                     marginTop: 16,
                   }}
                 >
@@ -1584,7 +1624,7 @@ export default function SignUpScreen() {
                 <Text
                   style={{
                     fontSize: 14,
-                    color: isDark ? "#D1D5DB" : "#1E40AF",
+                    color: colors.modalBodyText,
                     marginTop: 4,
                   }}
                 >
@@ -1600,7 +1640,7 @@ export default function SignUpScreen() {
                   style={{
                     fontSize: 16,
                     fontWeight: "600",
-                    color: isDark ? "#D1D5DB" : "#1E40AF",
+                    color: colors.modalBodyText,
                     marginTop: 16,
                   }}
                 >
@@ -1609,7 +1649,7 @@ export default function SignUpScreen() {
                 <Text
                   style={{
                     fontSize: 14,
-                    color: isDark ? "#D1D5DB" : "#1E40AF",
+                    color: colors.modalBodyText,
                     marginTop: 4,
                   }}
                 >
@@ -1624,7 +1664,7 @@ export default function SignUpScreen() {
                   style={{
                     fontSize: 16,
                     fontWeight: "600",
-                    color: isDark ? "#D1D5DB" : "#1E40AF",
+                    color: colors.modalBodyText,
                     marginTop: 16,
                   }}
                 >
@@ -1633,7 +1673,7 @@ export default function SignUpScreen() {
                 <Text
                   style={{
                     fontSize: 14,
-                    color: isDark ? "#D1D5DB" : "#1E40AF",
+                    color: colors.modalBodyText,
                     marginTop: 4,
                   }}
                 >
@@ -1643,7 +1683,7 @@ export default function SignUpScreen() {
                   <Text
                     style={{
                       fontSize: 14,
-                      color: isDark ? "#D1D5DB" : "#1E40AF",
+                      color: colors.modalBodyText,
                       marginBottom: 4,
                     }}
                   >
@@ -1652,7 +1692,7 @@ export default function SignUpScreen() {
                   <Text
                     style={{
                       fontSize: 14,
-                      color: isDark ? "#D1D5DB" : "#1E40AF",
+                      color: colors.modalBodyText,
                       marginBottom: 4,
                     }}
                   >
@@ -1661,7 +1701,7 @@ export default function SignUpScreen() {
                   <Text
                     style={{
                       fontSize: 14,
-                      color: isDark ? "#D1D5DB" : "#1E40AF",
+                      color: colors.modalBodyText,
                       marginBottom: 4,
                     }}
                   >
@@ -1671,7 +1711,7 @@ export default function SignUpScreen() {
                   <Text
                     style={{
                       fontSize: 14,
-                      color: isDark ? "#D1D5DB" : "#1E40AF",
+                      color: colors.modalBodyText,
                       marginBottom: 4,
                     }}
                   >
@@ -1681,7 +1721,7 @@ export default function SignUpScreen() {
                   <Text
                     style={{
                       fontSize: 14,
-                      color: isDark ? "#D1D5DB" : "#1E40AF",
+                      color: colors.modalBodyText,
                       marginBottom: 4,
                     }}
                   >
@@ -1696,7 +1736,7 @@ export default function SignUpScreen() {
                   style={{
                     fontSize: 16,
                     fontWeight: "600",
-                    color: isDark ? "#D1D5DB" : "#1E40AF",
+                    color: colors.modalBodyText,
                     marginTop: 16,
                   }}
                 >
@@ -1705,7 +1745,7 @@ export default function SignUpScreen() {
                 <Text
                   style={{
                     fontSize: 14,
-                    color: isDark ? "#D1D5DB" : "#1E40AF",
+                    color: colors.modalBodyText,
                     marginTop: 4,
                   }}
                 >
@@ -1720,7 +1760,7 @@ export default function SignUpScreen() {
                   style={{
                     fontSize: 16,
                     fontWeight: "600",
-                    color: isDark ? "#D1D5DB" : "#1E40AF",
+                    color: colors.modalBodyText,
                     marginTop: 16,
                   }}
                 >
@@ -1729,7 +1769,7 @@ export default function SignUpScreen() {
                 <Text
                   style={{
                     fontSize: 14,
-                    color: isDark ? "#D1D5DB" : "#1E40AF",
+                    color: colors.modalBodyText,
                     marginTop: 4,
                   }}
                 >
@@ -1744,7 +1784,7 @@ export default function SignUpScreen() {
                   style={{
                     fontSize: 16,
                     fontWeight: "600",
-                    color: isDark ? "#D1D5DB" : "#1E40AF",
+                    color: colors.modalBodyText,
                     marginTop: 16,
                   }}
                 >
@@ -1753,7 +1793,7 @@ export default function SignUpScreen() {
                 <Text
                   style={{
                     fontSize: 14,
-                    color: isDark ? "#D1D5DB" : "#1E40AF",
+                    color: colors.modalBodyText,
                     marginTop: 4,
                   }}
                 >
@@ -1770,7 +1810,7 @@ export default function SignUpScreen() {
                   style={{
                     fontSize: 16,
                     fontWeight: "600",
-                    color: isDark ? "#D1D5DB" : "#1E40AF",
+                    color: colors.modalBodyText,
                     marginTop: 16,
                   }}
                 >
@@ -1779,7 +1819,7 @@ export default function SignUpScreen() {
                 <Text
                   style={{
                     fontSize: 14,
-                    color: isDark ? "#D1D5DB" : "#1E40AF",
+                    color: colors.modalBodyText,
                     marginTop: 4,
                   }}
                 >
@@ -1794,7 +1834,7 @@ export default function SignUpScreen() {
                   style={{
                     fontSize: 16,
                     fontWeight: "600",
-                    color: isDark ? "#D1D5DB" : "#1E40AF",
+                    color: colors.modalBodyText,
                     marginTop: 16,
                   }}
                 >
@@ -1803,7 +1843,7 @@ export default function SignUpScreen() {
                 <Text
                   style={{
                     fontSize: 14,
-                    color: isDark ? "#D1D5DB" : "#1E40AF",
+                    color: colors.modalBodyText,
                     marginTop: 4,
                   }}
                 >
@@ -1818,7 +1858,7 @@ export default function SignUpScreen() {
                   style={{
                     fontSize: 16,
                     fontWeight: "600",
-                    color: isDark ? "#D1D5DB" : "#1E40AF",
+                    color: colors.modalBodyText,
                     marginTop: 16,
                   }}
                 >
@@ -1827,7 +1867,7 @@ export default function SignUpScreen() {
                 <Text
                   style={{
                     fontSize: 14,
-                    color: isDark ? "#D1D5DB" : "#1E40AF",
+                    color: colors.modalBodyText,
                     marginTop: 4,
                   }}
                 >
@@ -1842,7 +1882,7 @@ export default function SignUpScreen() {
                   style={{
                     fontSize: 16,
                     fontWeight: "600",
-                    color: isDark ? "#D1D5DB" : "#1E40AF",
+                    color: colors.modalBodyText,
                     marginTop: 16,
                   }}
                 >
@@ -1851,7 +1891,7 @@ export default function SignUpScreen() {
                 <Text
                   style={{
                     fontSize: 14,
-                    color: isDark ? "#D1D5DB" : "#1E40AF",
+                    color: colors.modalBodyText,
                     marginTop: 4,
                   }}
                 >
@@ -1877,11 +1917,11 @@ export default function SignUpScreen() {
                 style={{
                   paddingVertical: 8,
                   paddingHorizontal: 16,
-                  backgroundColor: "#3B82F6",
+                  backgroundColor: colors.textSecondary,
                   borderRadius: 8,
                 }}
               >
-                <Text style={{ color: "#FFFFFF", fontWeight: "600" }}>
+                <Text style={{ color: "white", fontWeight: "600" }}>
                   {languageSet.agree}
                 </Text>
               </TouchableOpacity>
@@ -1906,7 +1946,7 @@ export default function SignUpScreen() {
         >
           <View
             style={{
-              backgroundColor: isDark ? "#374151" : "white",
+              backgroundColor: colors.modalBg,
               borderRadius: 12,
               width: "90%",
               padding: 16,
@@ -1925,13 +1965,13 @@ export default function SignUpScreen() {
                 style={{
                   fontSize: 18,
                   fontWeight: "bold",
-                  color: isDark ? "#F9FAFB" : "#1E3A8A",
+                  color: colors.modalTitleText,
                 }}
               >
                 {languageSet.privacyModalTitle}
               </Text>
               <TouchableOpacity onPress={() => setShowPrivacyModal(false)}>
-                <Text style={{ color: "#3B82F6", fontSize: 16 }}>✕</Text>
+                <Text style={{ color: colors.textSecondary, fontSize: 16 }}>✕</Text>
               </TouchableOpacity>
             </View>
             <ScrollView style={{ maxHeight: 400 }}>
@@ -1952,9 +1992,7 @@ export default function SignUpScreen() {
                     justifyContent: "center",
                   }}
                 >
-                  <Text style={{ fontSize: 24, color: "#2563EB" }}>
-                    <Shield color={"blue"} />
-                  </Text>
+                  <Shield size={24} color={colors.textSecondary} />
                 </View>
               </View>
 
@@ -1972,7 +2010,7 @@ export default function SignUpScreen() {
                 <Text
                   style={{
                     fontSize: 14,
-                    color: isDark ? "#D1D5DB" : "#1E40AF",
+                    color: colors.modalBodyText,
                     textAlign: "center",
                     marginTop: 8,
                   }}
@@ -1991,17 +2029,13 @@ export default function SignUpScreen() {
                   marginTop: 16,
                 }}
               >
-                <Text
-                  style={{ fontSize: 20, color: "#2563EB", marginRight: 12 }}
-                >
-                  <Lock color="blue" />
-                </Text>
+                <Lock size={20} color={colors.textSecondary} style={{ marginRight: 12 }} />
                 <View>
                   <Text
                     style={{
                       fontSize: 16,
                       fontWeight: "600",
-                      color: isDark ? "#9CA3AF" : "#1E40AF",
+                      color: colors.modalBodyText,
                     }}
                   >
                     Your privacy is important to us
@@ -2009,7 +2043,7 @@ export default function SignUpScreen() {
                   <Text
                     style={{
                       fontSize: 14,
-                      color: isDark ? "#9CA3AF" : "#1E40AF",
+                      color: colors.modalBodyText,
                       marginTop: 4,
                     }}
                   >
@@ -2024,7 +2058,7 @@ export default function SignUpScreen() {
                   style={{
                     fontSize: 16,
                     fontWeight: "600",
-                    color: isDark ? "#D1D5DB" : "#1E40AF",
+                    color: colors.modalBodyText,
                     marginTop: 16,
                   }}
                 >
@@ -2033,7 +2067,7 @@ export default function SignUpScreen() {
                 <Text
                   style={{
                     fontSize: 14,
-                    color: isDark ? "#D1D5DB" : "#1E40AF",
+                    color: colors.modalBodyText,
                     marginTop: 4,
                   }}
                 >
@@ -2043,7 +2077,7 @@ export default function SignUpScreen() {
                   <Text
                     style={{
                       fontSize: 14,
-                      color: isDark ? "#D1D5DB" : "#1E40AF",
+                      color: colors.modalBodyText,
                       marginBottom: 4,
                     }}
                   >
@@ -2052,7 +2086,7 @@ export default function SignUpScreen() {
                   <Text
                     style={{
                       fontSize: 14,
-                      color: isDark ? "#D1D5DB" : "#1E40AF",
+                      color: colors.modalBodyText,
                       marginBottom: 4,
                     }}
                   >
@@ -2061,7 +2095,7 @@ export default function SignUpScreen() {
                   <Text
                     style={{
                       fontSize: 14,
-                      color: isDark ? "#D1D5DB" : "#1E40AF",
+                      color: colors.modalBodyText,
                       marginBottom: 4,
                     }}
                   >
@@ -2070,7 +2104,7 @@ export default function SignUpScreen() {
                   <Text
                     style={{
                       fontSize: 14,
-                      color: isDark ? "#D1D5DB" : "#1E40AF",
+                      color: colors.modalBodyText,
                       marginBottom: 4,
                     }}
                   >
@@ -2089,7 +2123,7 @@ export default function SignUpScreen() {
                 <Text
                   style={{
                     fontSize: 14,
-                    color: "#2563EB",
+                    color: colors.textSecondary,
                     marginRight: 12,
                     marginTop: 2,
                   }}
@@ -2099,7 +2133,7 @@ export default function SignUpScreen() {
                 <Text
                   style={{
                     fontSize: 14,
-                    color: isDark ? "#D1D5DB" : "#1E40AF",
+                    color: colors.modalBodyText,
                   }}
                 >
                   <Text style={{ fontWeight: "600" }}>Data Protection:</Text> We
@@ -2113,7 +2147,7 @@ export default function SignUpScreen() {
                   style={{
                     fontSize: 16,
                     fontWeight: "600",
-                    color: isDark ? "#D1D5DB" : "#1E40AF",
+                    color: colors.modalBodyText,
                     marginTop: 16,
                   }}
                 >
@@ -2122,7 +2156,7 @@ export default function SignUpScreen() {
                 <Text
                   style={{
                     fontSize: 14,
-                    color: isDark ? "#D1D5DB" : "#1E40AF",
+                    color: colors.modalBodyText,
                     marginTop: 4,
                   }}
                 >
@@ -2132,7 +2166,7 @@ export default function SignUpScreen() {
                   <Text
                     style={{
                       fontSize: 14,
-                      color: isDark ? "#D1D5DB" : "#1E40AF",
+                      color: colors.modalBodyText,
                       marginBottom: 4,
                     }}
                   >
@@ -2141,7 +2175,7 @@ export default function SignUpScreen() {
                   <Text
                     style={{
                       fontSize: 14,
-                      color: isDark ? "#D1D5DB" : "#1E40AF",
+                      color: colors.modalBodyText,
                       marginBottom: 4,
                     }}
                   >
@@ -2150,7 +2184,7 @@ export default function SignUpScreen() {
                   <Text
                     style={{
                       fontSize: 14,
-                      color: isDark ? "#D1D5DB" : "#1E40AF",
+                      color: colors.modalBodyText,
                       marginBottom: 4,
                     }}
                   >
@@ -2159,7 +2193,7 @@ export default function SignUpScreen() {
                   <Text
                     style={{
                       fontSize: 14,
-                      color: isDark ? "#D1D5DB" : "#1E40AF",
+                      color: colors.modalBodyText,
                       marginBottom: 4,
                     }}
                   >
@@ -2168,7 +2202,7 @@ export default function SignUpScreen() {
                   <Text
                     style={{
                       fontSize: 14,
-                      color: isDark ? "#D1D5DB" : "#1E40AF",
+                      color: colors.modalBodyText,
                       marginBottom: 4,
                     }}
                   >
@@ -2187,7 +2221,7 @@ export default function SignUpScreen() {
                 <Text
                   style={{
                     fontSize: 14,
-                    color: "#2563EB",
+                    color: colors.textSecondary,
                     marginRight: 12,
                     marginTop: 2,
                   }}
@@ -2197,7 +2231,7 @@ export default function SignUpScreen() {
                 <Text
                   style={{
                     fontSize: 14,
-                    color: isDark ? "#D1D5DB" : "#1E40AF",
+                    color: colors.modalBodyText,
                   }}
                 >
                   <Text style={{ fontWeight: "600" }}>Transparency:</Text> All
@@ -2211,7 +2245,7 @@ export default function SignUpScreen() {
                   style={{
                     fontSize: 16,
                     fontWeight: "600",
-                    color: isDark ? "#D1D5DB" : "#1E40AF",
+                    color: colors.modalBodyText,
                     marginTop: 16,
                   }}
                 >
@@ -2220,7 +2254,7 @@ export default function SignUpScreen() {
                 <Text
                   style={{
                     fontSize: 14,
-                    color: isDark ? "#D1D5DB" : "#1E40AF",
+                    color: colors.modalBodyText,
                     marginTop: 4,
                   }}
                 >
@@ -2230,7 +2264,7 @@ export default function SignUpScreen() {
                   <Text
                     style={{
                       fontSize: 14,
-                      color: isDark ? "#D1D5DB" : "#1E40AF",
+                      color: colors.modalBodyText,
                       marginBottom: 4,
                     }}
                   >
@@ -2239,7 +2273,7 @@ export default function SignUpScreen() {
                   <Text
                     style={{
                       fontSize: 14,
-                      color: isDark ? "#D1D5DB" : "#1E40AF",
+                      color: colors.modalBodyText,
                       marginBottom: 4,
                     }}
                   >
@@ -2248,7 +2282,7 @@ export default function SignUpScreen() {
                   <Text
                     style={{
                       fontSize: 14,
-                      color: isDark ? "#D1D5DB" : "#1E40AF",
+                      color: colors.modalBodyText,
                       marginBottom: 4,
                     }}
                   >
@@ -2262,7 +2296,7 @@ export default function SignUpScreen() {
                   style={{
                     fontSize: 16,
                     fontWeight: "600",
-                    color: isDark ? "#D1D5DB" : "#1E40AF",
+                    color: colors.modalBodyText,
                     marginTop: 16,
                   }}
                 >
@@ -2271,7 +2305,7 @@ export default function SignUpScreen() {
                 <Text
                   style={{
                     fontSize: 14,
-                    color: isDark ? "#D1D5DB" : "#1E40AF",
+                    color: colors.modalBodyText,
                     marginTop: 4,
                   }}
                 >
@@ -2286,7 +2320,7 @@ export default function SignUpScreen() {
                   style={{
                     fontSize: 16,
                     fontWeight: "600",
-                    color: isDark ? "#D1D5DB" : "#1E40AF",
+                    color: colors.modalBodyText,
                     marginTop: 16,
                   }}
                 >
@@ -2295,7 +2329,7 @@ export default function SignUpScreen() {
                 <Text
                   style={{
                     fontSize: 14,
-                    color: isDark ? "#D1D5DB" : "#1E40AF",
+                    color: colors.modalBodyText,
                     marginTop: 4,
                   }}
                 >
@@ -2305,7 +2339,7 @@ export default function SignUpScreen() {
                   <Text
                     style={{
                       fontSize: 14,
-                      color: isDark ? "#D1D5DB" : "#1E40AF",
+                      color: colors.modalBodyText,
                       marginBottom: 4,
                     }}
                   >
@@ -2314,7 +2348,7 @@ export default function SignUpScreen() {
                   <Text
                     style={{
                       fontSize: 14,
-                      color: isDark ? "#D1D5DB" : "#1E40AF",
+                      color: colors.modalBodyText,
                       marginBottom: 4,
                     }}
                   >
@@ -2323,7 +2357,7 @@ export default function SignUpScreen() {
                   <Text
                     style={{
                       fontSize: 14,
-                      color: isDark ? "#D1D5DB" : "#1E40AF",
+                      color: colors.modalBodyText,
                       marginBottom: 4,
                     }}
                   >
@@ -2332,7 +2366,7 @@ export default function SignUpScreen() {
                   <Text
                     style={{
                       fontSize: 14,
-                      color: isDark ? "#D1D5DB" : "#1E40AF",
+                      color: colors.modalBodyText,
                       marginBottom: 4,
                     }}
                   >
@@ -2341,7 +2375,7 @@ export default function SignUpScreen() {
                   <Text
                     style={{
                       fontSize: 14,
-                      color: isDark ? "#D1D5DB" : "#1E40AF",
+                      color: colors.modalBodyText,
                       marginBottom: 4,
                     }}
                   >
@@ -2355,7 +2389,7 @@ export default function SignUpScreen() {
                   style={{
                     fontSize: 16,
                     fontWeight: "600",
-                    color: isDark ? "#D1D5DB" : "#1E40AF",
+                    color: colors.modalBodyText,
                     marginTop: 16,
                   }}
                 >
@@ -2364,7 +2398,7 @@ export default function SignUpScreen() {
                 <Text
                   style={{
                     fontSize: 14,
-                    color: isDark ? "#D1D5DB" : "#1E40AF",
+                    color: colors.modalBodyText,
                     marginTop: 4,
                   }}
                 >
@@ -2379,7 +2413,7 @@ export default function SignUpScreen() {
                   style={{
                     fontSize: 16,
                     fontWeight: "600",
-                    color: isDark ? "#D1D5DB" : "#1E40AF",
+                    color: colors.modalBodyText,
                     marginTop: 16,
                   }}
                 >
@@ -2388,7 +2422,7 @@ export default function SignUpScreen() {
                 <Text
                   style={{
                     fontSize: 14,
-                    color: isDark ? "#D1D5DB" : "#1E40AF",
+                    color: colors.modalBodyText,
                     marginTop: 4,
                   }}
                 >
@@ -2409,7 +2443,7 @@ export default function SignUpScreen() {
                 <Text
                   style={{
                     fontSize: 14,
-                    color: isDark ? "#9CA3AF" : "#1E40AF",
+                    color: colors.modalBodyText,
                     textAlign: "center",
                     fontWeight: "500",
                   }}
@@ -2435,11 +2469,11 @@ export default function SignUpScreen() {
                 style={{
                   paddingVertical: 8,
                   paddingHorizontal: 16,
-                  backgroundColor: "#3B82F6",
+                  backgroundColor: colors.textSecondary,
                   borderRadius: 8,
                 }}
               >
-                <Text style={{ color: "#FFFFFF", fontWeight: "600" }}>
+                <Text style={{ color: "white", fontWeight: "600" }}>
                   {languageSet.agree}
                 </Text>
               </TouchableOpacity>
@@ -2453,11 +2487,7 @@ export default function SignUpScreen() {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <LinearGradient
-        colors={
-          isDark
-            ? ["#0F172A", "#1E293B", "#334155"]
-            : ["#F1F5F9", "#E2E8F0", "#CBD5E1"]
-        }
+        colors={[colors.gradientStart, colors.gradientMid, colors.gradientEnd]}
         start={[0, 0]}
         end={[0, 1]}
         style={{ flex: 1 }}
@@ -2476,8 +2506,8 @@ export default function SignUpScreen() {
             zIndex: 10,
           }}
         >
-          <ArrowLeft size={20} color="#3B82F6" />
-          <Text style={{ color: "#3B82F6", marginLeft: 4, fontSize: 16 }}>
+          <ArrowLeft size={20} color={colors.iconColor} />
+          <Text style={{ color: colors.textSecondary, marginLeft: 4, fontSize: 16 }}>
             {languageSet.back}
           </Text>
         </TouchableOpacity>
@@ -2517,5 +2547,4 @@ export default function SignUpScreen() {
       </LinearGradient>
     </SafeAreaView>
   );
-
 }

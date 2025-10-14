@@ -5,6 +5,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import {
   ArrowLeft,
+  Camera,
   Clock,
   Edit,
   Plus,
@@ -20,10 +21,11 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+
 interface Service {
   id: number;
   name: string;
-  gender: "All" | "Male" | "Female";
+  gender: "Male" | "Female" | "Child";
   hours: number;
   minutes: number;
   rate: number;
@@ -33,12 +35,46 @@ export default function RateCardPreviewScreen() {
   const router = useRouter();
   const { isDark, toggleTheme, setLanguage, language } = useThemeStore();
   const languageSet = translations[language];
+
+  // Dark mode color palette - MATCHING all other pages
+  const colors = {
+    // Page backgrounds - consistent gradient
+    gradientStart: isDark ? "#111827" : "#F1F5F9", // dark:from-gray-900
+    gradientMid: isDark ? "#1F2937" : "#E2E8F0", // dark:bg-gray-800
+    gradientEnd: isDark ? "#374151" : "#CBD5E1", // dark:border-gray-700
+
+    // Text colors - blue palette
+    textPrimary: isDark ? "#DBEAFE" : "#1E3A8A", // dark:text-blue-100
+    textSecondary: isDark ? "#BFDBFE" : "#3B82F6", // dark:text-blue-200
+    textAccent: isDark ? "#93C5FD" : "#3B82F6", // dark:text-blue-300
+    textMuted: isDark ? "#9CA3AF" : "#6B7280", // dark:text-gray-400
+
+    // Icon colors
+    iconColor: isDark ? "#60A5FA" : "#3B82F6", // dark:text-blue-400
+
+    // Card backgrounds
+    cardBg: isDark ? "rgba(31, 41, 55, 0.95)" : "white", // dark:bg-gray-800/95
+    headerBg: isDark ? "#374151" : "white", // dark:bg-gray-700
+    serviceCardBg: isDark ? "#4B5563" : "#F8FAFC", // dark:bg-gray-600
+
+    // Borders
+    borderColor: isDark ? "#4B5563" : "#E5E7EB", // dark:border-gray-600
+    serviceBorder: isDark ? "#6B7280" : "#E2E8F0", // dark:border-gray-500
+
+    // Action buttons
+    editButtonBg: isDark ? "#1E40AF" : "#EFF6FF", // dark:bg-blue-900
+    editButtonIcon: isDark ? "#93C5FD" : "#3B82F6", // dark:text-blue-300
+    deleteButtonBg: isDark ? "#7F1D1D" : "#FEF2F2", // dark:bg-red-900
+
+    // Empty state
+    emptyIconBg: isDark ? "#1E40AF" : "#EFF6FF",
+  };
+
   const [services, setServices] = useState<Service[]>([]);
 
   useEffect(() => {
     loadServices();
 
-    // Set up focus listener to reload services when screen comes into focus
     const unsubscribe = router.addListener?.("focus", () => {
       loadServices();
     });
@@ -88,7 +124,6 @@ export default function RateCardPreviewScreen() {
       const newServices = services.filter((s) => s.id !== serviceToDelete.id);
       setServices(newServices);
 
-      // Update AsyncStorage
       await AsyncStorage.setItem(
         "rateCardServices",
         JSON.stringify(newServices)
@@ -106,7 +141,6 @@ export default function RateCardPreviewScreen() {
   };
 
   const handleBack = () => {
-    // Navigate back to dashboard or previous screen
     router.back();
   };
 
@@ -121,13 +155,13 @@ export default function RateCardPreviewScreen() {
     return timeString.trim() || "0 min";
   };
 
+  const handleCameraAction = () => {
+    // Camera action implementation
+  };
+
   return (
     <LinearGradient
-      colors={
-        isDark
-          ? ["#1E1B4B", "#312E81", "#3730A3"]
-          : ["#F1F5F9", "#E2E8F0", "#CBD5E1"]
-      }
+      colors={[colors.gradientStart, colors.gradientMid, colors.gradientEnd]}
       start={[0, 0]}
       end={[0, 1]}
       style={{ flex: 1 }}
@@ -135,22 +169,24 @@ export default function RateCardPreviewScreen() {
       {/* Header */}
       <View
         style={{
-          backgroundColor: isDark ? "#374151" : "white",
+          backgroundColor: colors.headerBg,
           paddingHorizontal: 16,
           paddingTop: Platform.OS === "ios" ? 60 : 40,
           paddingBottom: 16,
           flexDirection: "row",
           alignItems: "center",
+          borderBottomWidth: 1,
+          borderBottomColor: colors.borderColor,
         }}
       >
         <TouchableOpacity onPress={handleBack} style={{ marginRight: 12 }}>
-          <ArrowLeft size={20} color="#3B82F6" />
+          <ArrowLeft size={20} color={colors.iconColor} />
         </TouchableOpacity>
         <Text
           style={{
             fontSize: 18,
             fontWeight: "bold",
-            color: isDark ? "#F8FAFC" : "#1E3A8A",
+            color: colors.textPrimary,
           }}
         >
           {languageSet.yourRateCard}
@@ -166,12 +202,12 @@ export default function RateCardPreviewScreen() {
             {/* Services Info Card */}
             <View
               style={{
-                backgroundColor: isDark ? "#374151" : "white",
+                backgroundColor: colors.cardBg,
                 borderRadius: 12,
                 padding: 13,
                 marginBottom: 16,
                 borderWidth: 1,
-                borderColor: isDark ? "#4B5563" : "#E5E7EB",
+                borderColor: colors.borderColor,
               }}
             >
               <View
@@ -186,7 +222,7 @@ export default function RateCardPreviewScreen() {
                   style={{
                     fontSize: 18,
                     fontWeight: "600",
-                    color: isDark ? "#A5B4FC" : "#1E3A8A",
+                    color: colors.textPrimary,
                   }}
                 >
                   {languageSet.yourServices}
@@ -194,7 +230,7 @@ export default function RateCardPreviewScreen() {
                 <Text
                   style={{
                     fontSize: 14,
-                    color: isDark ? "#9CA3AF" : "#3B82F6",
+                    color: colors.textAccent,
                   }}
                 >
                   {services.length} / 20
@@ -207,11 +243,11 @@ export default function RateCardPreviewScreen() {
                   <View
                     key={service.id}
                     style={{
-                      backgroundColor: isDark ? "#4B5563" : "#F8FAFC",
+                      backgroundColor: colors.serviceCardBg,
                       borderRadius: 12,
                       padding: 12,
                       borderWidth: 1,
-                      borderColor: isDark ? "#6B7280" : "#E2E8F0",
+                      borderColor: colors.serviceBorder,
                     }}
                   >
                     <View
@@ -227,7 +263,7 @@ export default function RateCardPreviewScreen() {
                           style={{
                             fontSize: 18,
                             fontWeight: "bold",
-                            color: isDark ? "#F8FAFC" : "#1E3A8A",
+                            color: colors.textPrimary,
                             marginBottom: 8,
                           }}
                         >
@@ -251,13 +287,13 @@ export default function RateCardPreviewScreen() {
                           >
                             <Clock
                               size={16}
-                              color="#3B82F6"
+                              color={colors.iconColor}
                               style={{ marginRight: 4 }}
                             />
                             <Text
                               style={{
                                 fontSize: 14,
-                                color: isDark ? "#A5B4FC" : "#3B82F6",
+                                color: colors.textSecondary,
                               }}
                             >
                               {formatTime(service.hours, service.minutes)}
@@ -273,13 +309,13 @@ export default function RateCardPreviewScreen() {
                           >
                             <User
                               size={16}
-                              color="#3B82F6"
+                              color={colors.iconColor}
                               style={{ marginRight: 4 }}
                             />
                             <Text
                               style={{
                                 fontSize: 14,
-                                color: isDark ? "#A5B4FC" : "#3B82F6",
+                                color: colors.textSecondary,
                               }}
                             >
                               {service.gender}
@@ -296,7 +332,7 @@ export default function RateCardPreviewScreen() {
                             <Text
                               style={{
                                 fontSize: 16,
-                                color: "#3B82F6",
+                                color: colors.iconColor,
                                 marginRight: 2,
                               }}
                             >
@@ -306,7 +342,7 @@ export default function RateCardPreviewScreen() {
                               style={{
                                 fontSize: 16,
                                 fontWeight: "600",
-                                color: isDark ? "#F8FAFC" : "#1E3A8A",
+                                color: colors.textPrimary,
                               }}
                             >
                               {service.rate}
@@ -320,20 +356,20 @@ export default function RateCardPreviewScreen() {
                         <TouchableOpacity
                           onPress={() => handleEditService(service.id)}
                           style={{
-                            backgroundColor: isDark ? "#1E40AF" : "#EFF6FF",
+                            backgroundColor: colors.editButtonBg,
                             padding: 8,
                             borderRadius: 8,
                           }}
                         >
                           <Edit
                             size={16}
-                            color={isDark ? "#93C5FD" : "#3B82F6"}
+                            color={colors.editButtonIcon}
                           />
                         </TouchableOpacity>
                         <TouchableOpacity
                           onPress={() => confirmDeleteService(service)}
                           style={{
-                            backgroundColor: isDark ? "#7F1D1D" : "#FEF2F2",
+                            backgroundColor: colors.deleteButtonBg,
                             padding: 8,
                             borderRadius: 8,
                           }}
@@ -359,33 +395,32 @@ export default function RateCardPreviewScreen() {
           >
             <View
               style={{
-                backgroundColor: isDark ? "#374151" : "white",
+                backgroundColor: colors.cardBg,
                 borderRadius: 12,
                 padding: 16,
                 alignItems: "center",
                 borderWidth: 1,
-                borderColor: isDark ? "#4B5563" : "#E5E7EB",
-                // maxWidth: 300,
+                borderColor: colors.borderColor,
               }}
             >
               <View
                 style={{
                   width: 64,
                   height: 64,
-                  backgroundColor: isDark ? "#1E40AF" : "#EFF6FF",
+                  backgroundColor: colors.emptyIconBg,
                   borderRadius: 32,
                   justifyContent: "center",
                   alignItems: "center",
                   marginBottom: 16,
                 }}
               >
-                <Text style={{ fontSize: 24, color: "#3B82F6" }}>₹</Text>
+                <Text style={{ fontSize: 24, color: colors.iconColor }}>₹</Text>
               </View>
               <Text
                 style={{
                   fontSize: 20,
                   fontWeight: "bold",
-                  color: isDark ? "#F8FAFC" : "#1E3A8A",
+                  color: colors.textPrimary,
                   marginBottom: 8,
                   textAlign: "center",
                 }}
@@ -395,7 +430,7 @@ export default function RateCardPreviewScreen() {
               <Text
                 style={{
                   fontSize: 16,
-                  color: isDark ? "#A5B4FC" : "#3B82F6",
+                  color: colors.textSecondary,
                   textAlign: "center",
                   marginBottom: 8,
                 }}
@@ -405,7 +440,7 @@ export default function RateCardPreviewScreen() {
               <Text
                 style={{
                   fontSize: 14,
-                  color: isDark ? "#9CA3AF" : "#6B7280",
+                  color: colors.textMuted,
                   textAlign: "center",
                 }}
               >
@@ -415,25 +450,48 @@ export default function RateCardPreviewScreen() {
           </View>
         )}
       </ScrollView>
-      {/* 
-      <ThemeWidget isDark={isDark} toggleTheme={toggleTheme} />
 
-      <LanguageWidget
-        setLanguage={setLanguage}
-        isDark={isDark}
-        language={language}
-      /> */}
-
-      {/* Camera */}
+      {/* Floating Action Buttons */}
       <View
         style={{
           position: "absolute",
           right: 16,
-          bottom: 130, // You'll need to define this variable or use a specific value
+          bottom: 130,
           zIndex: 1000,
         }}
       >
-        {/* Floating Add Button */}
+        {/* Camera Button */}
+        <TouchableOpacity
+          onPress={handleCameraAction}
+          style={{
+            width: 56,
+            height: 56,
+            borderRadius: 28,
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: isDark ? 0.4 : 0.3,
+            shadowRadius: 8,
+            elevation: 8,
+            marginBottom: 16,
+          }}
+        >
+          <LinearGradient
+            colors={["#4F7DF7", "#2563EB"]}
+            start={[0, 0]}
+            end={[1, 0]}
+            style={{
+              width: 56,
+              height: 56,
+              borderRadius: 28,
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <Camera size={24} color="white" />
+          </LinearGradient>
+        </TouchableOpacity>
+
+        {/* Add Button */}
         <TouchableOpacity
           onPress={handleAddNewService}
           style={{
@@ -448,7 +506,7 @@ export default function RateCardPreviewScreen() {
           }}
         >
           <LinearGradient
-            colors={isDark ? ["#6366F1", "#4338CA"] : ["#4F7DF7", "#2563EB"]}
+            colors={["#4F7DF7", "#2563EB"]}
             start={[0, 0]}
             end={[1, 0]}
             style={{

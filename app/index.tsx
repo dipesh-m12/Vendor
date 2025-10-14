@@ -52,13 +52,32 @@ export default function Index() {
   const { isDark, toggleTheme, language, setLanguage } = useThemeStore();
   const languageSet = translations[language];
 
+  // Dark mode color palette - MATCHING all other pages
+  const colors = {
+    // Page backgrounds - consistent gradient
+    gradientStart: isDark ? "#111827" : "#F1F5F9", // dark:from-gray-900
+    gradientMid: isDark ? "#1F2937" : "#E2E8F0", // dark:bg-gray-800
+    gradientEnd: isDark ? "#374151" : "#CBD5E1", // dark:border-gray-700
+
+    // Text colors - blue palette
+    textPrimary: isDark ? "#DBEAFE" : "#1E3A8A", // dark:text-blue-100
+    textSecondary: isDark ? "#BFDBFE" : "#3B82F6", // dark:text-blue-200
+    textAccent: isDark ? "#93C5FD" : "#3B82F6", // dark:text-blue-300
+
+    // Button colors
+    signupBorder: isDark ? "#60A5FA" : "#3B82F6", // dark:border-blue-400
+    signupBg: isDark ? "transparent" : "white",
+    signupText: isDark ? "#93C5FD" : "#3B82F6", // dark:text-blue-300
+
+    // Badge backgrounds
+    badgeBg: isDark ? "rgba(55, 65, 81, 0.8)" : "rgba(255, 255, 255, 0.8)",
+    badgeText: isDark ? "#93C5FD" : "#1E40AF", // dark:text-blue-300
+    badgeIcon: isDark ? "#93C5FD" : "#1E40AF", // dark:text-blue-300
+  };
+
   return (
     <LinearGradient
-      colors={
-        isDark
-          ? ["#1E1B4B", "#312E81", "#3730A3"]
-          : ["#F1F5F9", "#E2E8F0", "#CBD5E1"] // Light whitish-blue to darker
-      }
+      colors={[colors.gradientStart, colors.gradientMid, colors.gradientEnd]}
       start={[0, 0]}
       end={[0, 1]}
       style={{ flex: 1 }}
@@ -89,7 +108,7 @@ export default function Index() {
           style={{
             fontSize: 32,
             fontWeight: "bold",
-            color: isDark ? "#F8FAFC" : "#1E3A8A",
+            color: colors.textPrimary,
             marginTop: 16,
           }}
         >
@@ -98,7 +117,7 @@ export default function Index() {
 
         <Text
           style={{
-            color: isDark ? "#CBD5E1" : "#3B82F6",
+            color: colors.textSecondary,
             marginTop: 4,
             textAlign: "center",
             fontSize: 13,
@@ -114,7 +133,7 @@ export default function Index() {
             onPress={() => router.push("/(auth)/signin")}
           >
             <LinearGradient
-              colors={isDark ? ["#6366F1", "#4338CA"] : ["#4F7DF7", "#2563EB"]}
+              colors={["#4F7DF7", "#2563EB"]}
               start={[0, 0]}
               end={[1, 0]}
               style={{
@@ -145,8 +164,8 @@ export default function Index() {
             paddingVertical: 16,
             borderRadius: 12,
             borderWidth: 2,
-            borderColor: isDark ? "#6366F1" : "#3B82F6",
-            backgroundColor: isDark ? "transparent" : "white",
+            borderColor: colors.signupBorder,
+            backgroundColor: colors.signupBg,
             alignItems: "center",
             justifyContent: "center",
           }}
@@ -154,7 +173,7 @@ export default function Index() {
         >
           <Text
             style={{
-              color: isDark ? "#A5B4FC" : "#3B82F6",
+              color: colors.signupText,
               fontWeight: "600",
               fontSize: 16,
             }}
@@ -172,65 +191,47 @@ export default function Index() {
           alignItems="center"
         >
           <Box
-            backgroundColor={
-              isDark ? "rgba(55, 65, 81, 0.8)" : "rgba(255, 255, 255, 0.8)"
-            }
+            backgroundColor={colors.badgeBg}
             paddingHorizontal={12}
             paddingVertical={6}
             borderRadius={20}
           >
-            <Text
-              style={{
-                fontSize: 12,
-                color: isDark ? "#A5B4FC" : "#1E40AF",
-                fontWeight: "500",
-              }}
+            <View
+              style={{ flexDirection: "row", alignItems: "center", gap: 4 }}
             >
-              <View
-                style={{ flexDirection: "row", alignItems: "center", gap: 4 }}
+              <Award size={14} color={colors.badgeIcon} />
+              <Text
+                style={{
+                  fontSize: 12,
+                  color: colors.badgeText,
+                  fontWeight: "500",
+                }}
               >
-                <Award size={14} color={isDark ? "#A5B4FC" : "#1E40AF"} />
-                <Text
-                  style={{
-                    fontSize: 12,
-                    color: isDark ? "#A5B4FC" : "#1E40AF",
-                  }}
-                >
-                  {languageSet.badge1}
-                </Text>
-              </View>
-            </Text>
+                {languageSet.badge1}
+              </Text>
+            </View>
           </Box>
 
           <Box
-            backgroundColor={
-              isDark ? "rgba(55, 65, 81, 0.8)" : "rgba(255, 255, 255, 0.8)"
-            }
+            backgroundColor={colors.badgeBg}
             paddingHorizontal={12}
             paddingVertical={6}
             borderRadius={20}
           >
-            <Text
-              style={{
-                fontSize: 12,
-                color: isDark ? "#A5B4FC" : "#1E40AF",
-                fontWeight: "500",
-              }}
+            <View
+              style={{ flexDirection: "row", alignItems: "center", gap: 4 }}
             >
-              <View
-                style={{ flexDirection: "row", alignItems: "center", gap: 4 }}
+              <Shield size={14} color={colors.badgeIcon} />
+              <Text
+                style={{
+                  fontSize: 12,
+                  color: colors.badgeText,
+                  fontWeight: "500",
+                }}
               >
-                <Shield size={14} color={isDark ? "#A5B4FC" : "#1E40AF"} />
-                <Text
-                  style={{
-                    fontSize: 12,
-                    color: isDark ? "#A5B4FC" : "#1E40AF",
-                  }}
-                >
-                  {languageSet.badge2}
-                </Text>
-              </View>
-            </Text>
+                {languageSet.badge2}
+              </Text>
+            </View>
           </Box>
         </Box>
       </View>

@@ -544,7 +544,7 @@ export default function AddCustomerModal({
                     {languageSet.gender}
                   </Text>
                   <View style={{ flexDirection: "row", gap: 16 }}>
-                    {["Male", "Female", "Other"].map((gender) => (
+                    {["Male", "Female", "Child"].map((gender) => (
                       <TouchableOpacity
                         key={gender}
                         onPress={() =>

@@ -14,8 +14,44 @@ export default function AccountTypeScreen() {
   const { regType, setRegType } = useRegTypeStore();
   const languageSet = accountTypeTranslations[language];
 
+  // Dark mode color palette - MATCHING all other pages
+  const colors = {
+    // Page backgrounds - consistent gradient
+    gradientStart: isDark ? "#111827" : "#F1F5F9", // dark:from-gray-900
+    gradientMid: isDark ? "#1F2937" : "#E2E8F0", // dark:bg-gray-800
+    gradientEnd: isDark ? "#374151" : "#CBD5E1", // dark:border-gray-700
+
+    // Text colors - blue palette
+    textPrimary: isDark ? "#DBEAFE" : "#1E3A8A", // dark:text-blue-100
+    textSecondary: isDark ? "#BFDBFE" : "#6B7280", // dark:text-blue-200
+    textAccent: isDark ? "#93C5FD" : "#3B82F6", // dark:text-blue-300
+    textMuted: isDark ? "#9CA3AF" : "#6B7280", // dark:text-gray-400
+
+    // Icon colors
+    iconColor: isDark ? "#60A5FA" : "#3B82F6", // dark:text-blue-400
+    backButtonColor: isDark ? "#60A5FA" : "#3B82F6", // dark:text-blue-400
+
+    // Card - unselected
+    cardBg: isDark ? "rgba(31, 41, 55, 0.95)" : "white", // dark:bg-gray-800/95
+    cardBorder: isDark ? "#4B5563" : "#E5E7EB", // dark:border-gray-600
+    cardIconBg: isDark ? "#4B5563" : "#F3F4F6", // dark:bg-gray-600
+    cardIconColor: isDark ? "#F9FAFB" : "#3B82F6",
+    cardTextPrimary: isDark ? "#DBEAFE" : "#1E3A8A", // dark:text-blue-100
+    cardTextSecondary: isDark ? "#BFDBFE" : "#6B7280", // dark:text-blue-200
+
+    // Card - selected
+    selectedCardBg: isDark ? "#1E40AF" : "#3B82F6", // dark:bg-blue-900
+    selectedCardBorder: isDark ? "#3B82F6" : "#2563EB", // dark:border-blue-600
+    selectedIconBg: "rgba(255, 255, 255, 0.2)",
+    selectedIconColor: "white",
+    selectedTextPrimary: "white",
+    selectedTextSecondary: "rgba(255, 255, 255, 0.8)",
+
+    // Selected type indicator
+    selectedIndicatorText: isDark ? "#93C5FD" : "#3B82F6", // dark:text-blue-300
+  };
+
   const handleContinue = () => {
-    // Navigate to next step (signup screen)
     router.push("/(auth)/signup");
   };
 
@@ -35,24 +71,12 @@ export default function AccountTypeScreen() {
     >
       <Box
         style={{
-          backgroundColor: isSelected
-            ? isDark
-              ? "#4338CA"
-              : "#3B82F6"
-            : isDark
-            ? "#374151"
-            : "white",
+          backgroundColor: isSelected ? colors.selectedCardBg : colors.cardBg,
           borderRadius: 16,
           padding: 12,
           alignItems: "center",
           borderWidth: isSelected ? 2 : 1,
-          borderColor: isSelected
-            ? isDark
-              ? "#6366F1"
-              : "#2563EB"
-            : isDark
-            ? "#4B5563"
-            : "#E5E7EB",
+          borderColor: isSelected ? colors.selectedCardBorder : colors.cardBorder,
           shadowColor: "#000",
           shadowOffset: {
             width: 0,
@@ -65,11 +89,7 @@ export default function AccountTypeScreen() {
       >
         <View
           style={{
-            backgroundColor: isSelected
-              ? "rgba(255, 255, 255, 0.2)"
-              : isDark
-              ? "#4B5563"
-              : "#F3F4F6",
+            backgroundColor: isSelected ? colors.selectedIconBg : colors.cardIconBg,
             padding: 16,
             borderRadius: 50,
             marginBottom: 16,
@@ -77,7 +97,7 @@ export default function AccountTypeScreen() {
         >
           <Icon
             size={32}
-            color={isSelected ? "white" : isDark ? "#F9FAFB" : "#3B82F6"}
+            color={isSelected ? colors.selectedIconColor : colors.cardIconColor}
           />
         </View>
 
@@ -85,7 +105,7 @@ export default function AccountTypeScreen() {
           style={{
             fontSize: 18,
             fontWeight: "bold",
-            color: isSelected ? "white" : isDark ? "#F8FAFC" : "#1E3A8A",
+            color: isSelected ? colors.selectedTextPrimary : colors.cardTextPrimary,
             marginBottom: 8,
             textAlign: "left",
           }}
@@ -96,11 +116,7 @@ export default function AccountTypeScreen() {
         <Text
           style={{
             fontSize: 14,
-            color: isSelected
-              ? "rgba(255, 255, 255, 0.8)"
-              : isDark
-              ? "#D1D5DB"
-              : "#6B7280",
+            color: isSelected ? colors.selectedTextSecondary : colors.cardTextSecondary,
             textAlign: "center",
             lineHeight: 20,
           }}
@@ -113,11 +129,7 @@ export default function AccountTypeScreen() {
 
   return (
     <LinearGradient
-      colors={
-        isDark
-          ? ["#1E1B4B", "#312E81", "#3730A3"]
-          : ["#F1F5F9", "#E2E8F0", "#CBD5E1"]
-      }
+      colors={[colors.gradientStart, colors.gradientMid, colors.gradientEnd]}
       start={[0, 0]}
       end={[0, 1]}
       style={{ flex: 1 }}
@@ -135,10 +147,10 @@ export default function AccountTypeScreen() {
           zIndex: 1,
         }}
       >
-        <ArrowLeft size={20} color="#3B82F6" />
+        <ArrowLeft size={20} color={colors.backButtonColor} />
         <Text
           style={{
-            color: "#3B82F6",
+            color: colors.backButtonColor,
             marginLeft: 4,
             fontSize: 16,
           }}
@@ -162,7 +174,7 @@ export default function AccountTypeScreen() {
             style={{
               fontSize: 28,
               fontWeight: "bold",
-              color: isDark ? "#F8FAFC" : "#1E3A8A",
+              color: colors.textPrimary,
               marginBottom: 8,
               textAlign: "center",
             }}
@@ -171,7 +183,7 @@ export default function AccountTypeScreen() {
           </Text>
           <Text
             style={{
-              color: "#3B82F6",
+              color: colors.textAccent,
               fontSize: 16,
               textAlign: "center",
               paddingHorizontal: 10,
@@ -210,7 +222,7 @@ export default function AccountTypeScreen() {
         <Box width="100%" paddingHorizontal={16}>
           <TouchableOpacity style={{ width: "100%" }} onPress={handleContinue}>
             <LinearGradient
-              colors={isDark ? ["#6366F1", "#4338CA"] : ["#4F7DF7", "#2563EB"]}
+              colors={["#4F7DF7", "#2563EB"]}
               start={[0, 0]}
               end={[1, 0]}
               style={{
@@ -238,24 +250,17 @@ export default function AccountTypeScreen() {
         <View style={{ marginTop: 24, alignItems: "center" }}>
           <Text
             style={{
-              color: isDark ? "#9CA3AF" : "#6B7280",
+              color: colors.textMuted,
               fontSize: 14,
             }}
           >
             {languageSet.selected}:{" "}
-            <Text style={{ fontWeight: "600", color: "#3B82F6" }}>
+            <Text style={{ fontWeight: "600", color: colors.selectedIndicatorText }}>
               {regType === "owner" ? "Owner Account" : "Helper Account"}
             </Text>
           </Text>
         </View>
       </View>
-      {/* <ThemeWidget isDark={isDark} toggleTheme={toggleTheme} />
-       */}
-      {/* <LanguageWidget
-        setLanguage={setLanguage}
-        isDark={isDark}
-        language={language}
-      /> */}
     </LinearGradient>
   );
 }

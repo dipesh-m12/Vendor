@@ -16,7 +16,8 @@ import {
   History,
   Search,
   SkipForward,
-  User
+  User,
+  X,
 } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
 import {
@@ -37,6 +38,7 @@ export default function CustomerHistoryScreen() {
   const router = useRouter();
   const { isDark, language } = useThemeStore();
   const [selectedDate, setSelectedDate] = useState(new Date());
+
   type CustomerHistoryItem = {
     id: string;
     name: string;
@@ -65,7 +67,7 @@ export default function CustomerHistoryScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [sortOrder, setSortOrder] = useState("newest");
-  const [filteredHistory, setFilteredHistory] = useState([]);
+  const [filteredHistory, setFilteredHistory] = useState<CustomerHistoryItem[]>([]);
   const [dateFilterType, setDateFilterType] = useState("day");
   const [showDateFilterDropdown, setShowDateFilterDropdown] = useState(false);
 
@@ -77,6 +79,23 @@ export default function CustomerHistoryScreen() {
 
   const historyLanguagseSet = translations[language];
   const remLanguageSet = Remtranslations[language];
+
+  const handleApplyFilters = () => {
+    setShowFilterModal(false);
+    if (customerHistory.length > 0) {
+      const sortedHistory = [...customerHistory].sort((a, b) => {
+        const timeA = new Date(a.timestamp).getTime();
+        const timeB = new Date(b.timestamp).getTime();
+        return sortOrder === "newest" ? timeB - timeA : timeA - timeB;
+      });
+      setFilteredHistory(sortedHistory);
+    }
+  };
+
+  const handleResetFilters = () => {
+    setSortOrder("newest");
+    setFilteredHistory(customerHistory);
+  };
 
   // Load customer history
   useEffect(() => {
@@ -215,11 +234,7 @@ export default function CustomerHistoryScreen() {
     }
   };
 
-  // ... (keep all your existing helper functions like generateMockHistory, formatDate, etc.)
-
   const generateMockHistory = (date: Date, count: number | null = null) => {
-    // Your existing generateMockHistory function code here
-    // (I'll skip this for brevity as it's unchanged)
     const dateString = date.toISOString().split("T")[0];
     const dateSeed = dateString
       .split("-")
@@ -314,8 +329,7 @@ export default function CustomerHistoryScreen() {
       history.push({
         id: id,
         name: name,
-        arrivalTime: `${hour}:${minute.toString().padStart(2, "0")} ${hour >= 12 ? "PM" : "AM"
-          }`,
+        arrivalTime: `${hour}:${minute.toString().padStart(2, "0")} ${hour >= 12 ? "PM" : "AM"}`,
         waitTime: `${waitTime} min`,
         status,
         gender,
@@ -764,7 +778,6 @@ export default function CustomerHistoryScreen() {
             >
               {historyLanguagseSet.customersServed}: {filteredHistory.length}
             </Text>
-
           </View>
 
           {/* Loading State */}
@@ -999,7 +1012,215 @@ export default function CustomerHistoryScreen() {
         </View>
       </ScrollView>
 
-      {/* Date Filter Modal with Date Pickers */}
+      {/* Filter History Modal */}
+      <Modal
+        visible={showFilterModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowFilterModal(false)}
+      >
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            justifyContent: "center",
+            alignItems: "center",
+            padding: 20,
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: isDark ? "#374151" : "white",
+              borderRadius: 16,
+              padding: 24,
+              width: "100%",
+              maxWidth: 400,
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.3,
+              shadowRadius: 8,
+              elevation: 8,
+            }}
+          >
+            {/* Header with Close Button */}
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: 24,
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 20,
+                  fontWeight: "600",
+                  color: isDark ? "#F8FAFC" : "#1F2937",
+                }}
+              >
+                Filter History
+              </Text>
+              <TouchableOpacity
+                onPress={() => setShowFilterModal(false)}
+                style={{
+                  padding: 4,
+                }}
+              >
+                <X size={24} color={isDark ? "#9CA3AF" : "#6B7280"} />
+              </TouchableOpacity>
+            </View>
+
+            {/* Sort By Section */}
+            <View style={{ marginBottom: 24 }}>
+              <Text
+                style={{
+                  fontSize: 16,
+                  fontWeight: "600",
+                  color: isDark ? "#E5E7EB" : "#374151",
+                  marginBottom: 16,
+                }}
+              >
+                Sort By
+              </Text>
+
+              {/* Newest First Option */}
+              <TouchableOpacity
+                onPress={() => setSortOrder("newest")}
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  marginBottom: 12,
+                }}
+              >
+                <View
+                  style={{
+                    width: 20,
+                    height: 20,
+                    borderRadius: 10,
+                    borderWidth: 2,
+                    borderColor: sortOrder === "newest" ? "#3B82F6" : isDark ? "#6B7280" : "#D1D5DB",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginRight: 12,
+                  }}
+                >
+                  {sortOrder === "newest" && (
+                    <View
+                      style={{
+                        width: 10,
+                        height: 10,
+                        borderRadius: 5,
+                        backgroundColor: "#3B82F6",
+                      }}
+                    />
+                  )}
+                </View>
+                <Text
+                  style={{
+                    fontSize: 15,
+                    color: isDark ? "#F9FAFB" : "#1F2937",
+                  }}
+                >
+                  Newest First
+                </Text>
+              </TouchableOpacity>
+
+              {/* Oldest First Option */}
+              <TouchableOpacity
+                onPress={() => setSortOrder("oldest")}
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                }}
+              >
+                <View
+                  style={{
+                    width: 20,
+                    height: 20,
+                    borderRadius: 10,
+                    borderWidth: 2,
+                    borderColor: sortOrder === "oldest" ? "#3B82F6" : isDark ? "#6B7280" : "#D1D5DB",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginRight: 12,
+                  }}
+                >
+                  {sortOrder === "oldest" && (
+                    <View
+                      style={{
+                        width: 10,
+                        height: 10,
+                        borderRadius: 5,
+                        backgroundColor: "#3B82F6",
+                      }}
+                    />
+                  )}
+                </View>
+                <Text
+                  style={{
+                    fontSize: 15,
+                    color: isDark ? "#F9FAFB" : "#1F2937",
+                  }}
+                >
+                  Oldest First
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Action Buttons */}
+            <View
+              style={{
+                flexDirection: "row",
+                gap: 12,
+              }}
+            >
+              <TouchableOpacity
+                onPress={handleResetFilters}
+                style={{
+                  flex: 1,
+                  backgroundColor: isDark ? "#4B5563" : "#F3F4F6",
+                  paddingVertical: 14,
+                  borderRadius: 8,
+                  alignItems: "center",
+                }}
+              >
+                <Text
+                  style={{
+                    color: isDark ? "#F8FAFC" : "#1F2937",
+                    fontWeight: "600",
+                    fontSize: 15,
+                  }}
+                >
+                  Reset
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={handleApplyFilters}
+                style={{
+                  flex: 1,
+                  backgroundColor: "#3B82F6",
+                  paddingVertical: 14,
+                  borderRadius: 8,
+                  alignItems: "center",
+                }}
+              >
+                <Text
+                  style={{
+                    color: "white",
+                    fontWeight: "600",
+                    fontSize: 15,
+                  }}
+                >
+                  Apply Filters
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Date Filter Modal */}
       <Modal
         visible={showDateFilterDropdown}
         transparent={true}
@@ -1206,7 +1427,8 @@ export default function CustomerHistoryScreen() {
         />
       )}
 
-      {/* ... Rest of your modals (Customer Details Modal, Call Modal, Filter Modal) remain the same ... */}
+      {/* Customer Details Modal - Add your existing modal code here */}
+      {/* Call Modal - Add your existing modal code here */}
     </LinearGradient>
   );
 }

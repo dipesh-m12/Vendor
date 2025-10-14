@@ -2,7 +2,9 @@ import useThemeStore from "@/store/themeStore";
 import { useRouter } from "expo-router";
 import {
   AlertCircle,
+  ArrowDown,
   ArrowLeft,
+  ArrowUp,
   BarChart3,
   Calendar,
   CheckCircle,
@@ -11,9 +13,9 @@ import {
   Filter,
   Info,
   TrendingDown,
-  TrendingUp,
   User,
   Users,
+  X
 } from "lucide-react-native";
 
 import React, { useState } from "react";
@@ -114,28 +116,63 @@ export default function StatisticsPage() {
     { time: "12:00 PM - 1:00 PM", traffic: "High Traffic" },
   ];
 
-  const containerBg = isDark ? "#1F2937" : "#F3F4F6";
-  const cardBg = isDark ? "#374151" : "#FFFFFF";
-  const textPrimary = isDark ? "#F9FAFB" : "#1F2937";
-  const textSecondary = isDark ? "#9CA3AF" : "#6B7280";
-  const borderColor = isDark ? "#4B5563" : "#E5E7EB";
+  // Dark mode color palette
+  const colors = {
+    // Page backgrounds
+    containerBg: isDark ? "#111827" : "#F3F4F6", // dark:from-gray-900
+    cardBg: isDark ? "rgba(31, 41, 55, 0.95)" : "#FFFFFF", // dark:bg-gray-800/95
+    headerBg: isDark ? "#1F2937" : "white", // dark:bg-gray-800
+
+    // Text colors
+    textPrimary: isDark ? "#DBEAFE" : "#1F2937", // dark:text-blue-100
+    textSecondary: isDark ? "#BFDBFE" : "#6B7280", // dark:text-blue-200
+    textAccent: isDark ? "#93C5FD" : "#3B82F6", // dark:text-blue-300
+    textAccentLight: isDark ? "#60A5FA" : "#1E40AF", // dark:text-blue-400
+
+    // Heading colors
+    headingPrimary: isDark ? "#DBEAFE" : "#1E40AF",
+    headingAccent: isDark ? "#93C5FD" : "#3B82F6",
+
+    // Button colors
+    buttonBg: isDark ? "#1E3A8A" : "#EFF6FF", // dark:bg-blue-900
+    buttonText: isDark ? "#93C5FD" : "#1E40AF",
+
+    // Border colors
+    borderColor: isDark ? "#374151" : "#E5E7EB", // dark:border-gray-700
+    borderBlue: isDark ? "#1E3A8A" : "#3B82F6", // dark:border-blue-900
+
+    // Status colors
+    amberText: isDark ? "#FCD34D" : "#F59E0B", // dark:text-amber-300
+    amberLight: isDark ? "#FBBF24" : "#F59E0B", // dark:text-amber-400
+    redText: isDark ? "#FCA5A5" : "#EF4444", // dark:text-red-300
+    redLight: isDark ? "#F87171" : "#EF4444", // dark:text-red-400
+
+    // Info tooltip
+    tooltipBg: isDark ? "#1E3A8A" : "#EFF6FF", // dark:bg-blue-900
+    tooltipText: isDark ? "#93C5FD" : "#3B82F6",
+
+    // Additional UI colors
+    greenText: "#10B981",
+    progressBar: isDark ? "#60A5FA" : "#3B82F6",
+    progressBg: isDark ? "#374151" : "#E5E7EB",
+  };
 
   return (
-    <View style={{ flex: 1, backgroundColor: containerBg }}>
+    <View style={{ flex: 1, backgroundColor: colors.containerBg }}>
       {/* Header */}
       <View
         style={{
           paddingTop: 60,
           paddingBottom: 16,
           paddingHorizontal: 16,
-          backgroundColor: isDark ? "#374151" : "white",
+          backgroundColor: colors.headerBg,
           shadowColor: "#000",
           shadowOffset: { width: 0, height: 2 },
           shadowOpacity: 0.05,
           shadowRadius: 4,
           elevation: 2,
           borderBottomWidth: 1,
-          borderBottomColor: borderColor,
+          borderBottomColor: colors.borderColor,
         }}
       >
         <View style={{ flexDirection: "row", alignItems: "center" }}>
@@ -143,13 +180,13 @@ export default function StatisticsPage() {
             onPress={() => router.back()}
             style={{ marginRight: 16, padding: 4 }}
           >
-            <ArrowLeft size={24} color="#1E40AF" />
+            <ArrowLeft size={24} color={colors.headingPrimary} />
           </TouchableOpacity>
           <Text
             style={{
               fontSize: 18,
               fontWeight: "700",
-              color: "#1E40AF",
+              color: colors.headingPrimary,
             }}
           >
             Statistics
@@ -165,7 +202,7 @@ export default function StatisticsPage() {
         {/* Time Range Filter */}
         <View
           style={{
-            backgroundColor: cardBg,
+            backgroundColor: colors.cardBg,
             marginHorizontal: 16,
             marginTop: 16,
             marginBottom: 12,
@@ -186,10 +223,10 @@ export default function StatisticsPage() {
             }}
           >
             <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <Filter size={18} color="#1E40AF" />
+              <Filter size={18} color={colors.textAccentLight} />
               <Text
                 style={{
-                  color: "#1E40AF",
+                  color: colors.headingPrimary,
                   fontWeight: "600",
                   marginLeft: 8,
                   fontSize: 14,
@@ -201,7 +238,7 @@ export default function StatisticsPage() {
             <TouchableOpacity
               onPress={() => setShowTimeRangeModal(true)}
               style={{
-                backgroundColor: "#EFF6FF",
+                backgroundColor: colors.buttonBg,
                 paddingHorizontal: 12,
                 paddingVertical: 6,
                 borderRadius: 6,
@@ -210,19 +247,18 @@ export default function StatisticsPage() {
               }}
             >
               <Text
-                style={{ color: "#1E40AF", marginRight: 4, fontSize: 13 }}
+                style={{ color: colors.buttonText, marginRight: 4, fontSize: 13 }}
               >
                 {selectedTimeRange}
               </Text>
-              <ChevronDown size={16} color="#1E40AF" />
+              <ChevronDown size={16} color={colors.buttonText} />
             </TouchableOpacity>
           </View>
-          <Text style={{ color: textSecondary, fontSize: 12, marginTop: 8 }}>
+          <Text style={{ color: colors.textSecondary, fontSize: 12, marginTop: 8 }}>
             Showing statistics for the last 7 days
           </Text>
         </View>
 
-        {/* Stats Grid - 2x2 */}
         {/* Stats Grid - 2x2 */}
         <View
           style={{
@@ -238,7 +274,7 @@ export default function StatisticsPage() {
             style={{
               flex: 1,
               minWidth: (screenWidth - 44) / 2,
-              backgroundColor: cardBg,
+              backgroundColor: colors.cardBg,
               borderRadius: 12,
               padding: 14,
               shadowColor: "#000",
@@ -255,11 +291,11 @@ export default function StatisticsPage() {
                 marginBottom: 12,
               }}
             >
-              <Users size={18} color="#3B82F6" style={{ marginRight: 6 }} />
+              <Users size={18} color={colors.textAccentLight} style={{ marginRight: 6 }} />
               <Text
                 style={{
                   fontSize: 13,
-                  color: "#3B82F6",
+                  color: colors.headingAccent,
                   fontWeight: "500",
                   flex: 1,
                   lineHeight: 18,
@@ -273,13 +309,13 @@ export default function StatisticsPage() {
               style={{
                 fontSize: 32,
                 fontWeight: "bold",
-                color: "#1E40AF",
+                color: colors.headingPrimary,
                 marginBottom: 4,
               }}
             >
               246
             </Text>
-            <Text style={{ fontSize: 11, color: textSecondary }}>
+            <Text style={{ fontSize: 11, color: colors.textSecondary }}>
               Last 7 Days
             </Text>
           </View>
@@ -289,7 +325,7 @@ export default function StatisticsPage() {
             style={{
               flex: 1,
               minWidth: (screenWidth - 44) / 2,
-              backgroundColor: cardBg,
+              backgroundColor: colors.cardBg,
               borderRadius: 12,
               padding: 14,
               shadowColor: "#000",
@@ -306,11 +342,11 @@ export default function StatisticsPage() {
                 marginBottom: 12,
               }}
             >
-              <Clock size={18} color="#3B82F6" style={{ marginRight: 6 }} />
+              <Clock size={18} color={colors.textAccentLight} style={{ marginRight: 6 }} />
               <Text
                 style={{
                   fontSize: 13,
-                  color: "#3B82F6",
+                  color: colors.headingAccent,
                   fontWeight: "500",
                   flex: 1,
                   lineHeight: 18,
@@ -324,13 +360,13 @@ export default function StatisticsPage() {
               style={{
                 fontSize: 32,
                 fontWeight: "bold",
-                color: "#1E40AF",
+                color: colors.headingPrimary,
                 marginBottom: 4,
               }}
             >
               15 min
             </Text>
-            <Text style={{ fontSize: 11, color: textSecondary }}>
+            <Text style={{ fontSize: 11, color: colors.textSecondary }}>
               Last 7 Days
             </Text>
           </View>
@@ -340,7 +376,7 @@ export default function StatisticsPage() {
             style={{
               flex: 1,
               minWidth: (screenWidth - 44) / 2,
-              backgroundColor: cardBg,
+              backgroundColor: colors.cardBg,
               borderRadius: 12,
               padding: 14,
               shadowColor: "#000",
@@ -357,11 +393,11 @@ export default function StatisticsPage() {
                 marginBottom: 12,
               }}
             >
-              <AlertCircle size={18} color="#F59E0B" style={{ marginRight: 6 }} />
+              <AlertCircle size={18} color={colors.amberLight} style={{ marginRight: 6 }} />
               <Text
                 style={{
                   fontSize: 13,
-                  color: "#F59E0B",
+                  color: colors.amberText,
                   fontWeight: "500",
                   flex: 1,
                   lineHeight: 18,
@@ -375,13 +411,13 @@ export default function StatisticsPage() {
               style={{
                 fontSize: 32,
                 fontWeight: "bold",
-                color: "#F59E0B",
+                color: colors.amberText,
                 marginBottom: 4,
               }}
             >
               44
             </Text>
-            <Text style={{ fontSize: 11, color: textSecondary }}>
+            <Text style={{ fontSize: 11, color: colors.textSecondary }}>
               Last 7 Days
             </Text>
           </View>
@@ -391,7 +427,7 @@ export default function StatisticsPage() {
             style={{
               flex: 1,
               minWidth: (screenWidth - 44) / 2,
-              backgroundColor: cardBg,
+              backgroundColor: colors.cardBg,
               borderRadius: 12,
               padding: 14,
               shadowColor: "#000",
@@ -408,11 +444,11 @@ export default function StatisticsPage() {
                 marginBottom: 12,
               }}
             >
-              <ArrowLeft size={18} color="#EF4444" style={{ marginRight: 6 }} />
+              <ArrowLeft size={18} color={colors.redLight} style={{ marginRight: 6 }} />
               <Text
                 style={{
                   fontSize: 13,
-                  color: "#EF4444",
+                  color: colors.redText,
                   fontWeight: "500",
                   flex: 1,
                   lineHeight: 18,
@@ -426,13 +462,13 @@ export default function StatisticsPage() {
               style={{
                 fontSize: 32,
                 fontWeight: "bold",
-                color: "#EF4444",
+                color: colors.redText,
                 marginBottom: 4,
               }}
             >
               30
             </Text>
-            <Text style={{ fontSize: 11, color: textSecondary }}>
+            <Text style={{ fontSize: 11, color: colors.textSecondary }}>
               Last 7 Days
             </Text>
           </View>
@@ -441,7 +477,7 @@ export default function StatisticsPage() {
         {/* Customer Distribution */}
         <View
           style={{
-            backgroundColor: cardBg,
+            backgroundColor: colors.cardBg,
             marginHorizontal: 16,
             marginBottom: 12,
             borderRadius: 12,
@@ -462,10 +498,10 @@ export default function StatisticsPage() {
             }}
           >
             <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <TrendingUp size={18} color="#1E40AF" />
+              <ArrowDown size={18} color={colors.textAccentLight} />
               <Text
                 style={{
-                  color: "#1E40AF",
+                  color: colors.headingPrimary,
                   fontWeight: "600",
                   marginLeft: 8,
                   fontSize: 14,
@@ -474,7 +510,15 @@ export default function StatisticsPage() {
                 Customer Distribution
               </Text>
             </View>
-            <Text style={{ color: "#1E40AF", fontSize: 13, fontWeight: "500", backgroundColor: "#F3F4F6", paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12 }}>
+            <Text style={{
+              color: colors.buttonText,
+              fontSize: 13,
+              fontWeight: "500",
+              backgroundColor: colors.buttonBg,
+              paddingHorizontal: 12,
+              paddingVertical: 6,
+              borderRadius: 12
+            }}>
               373 total
             </Text>
           </View>
@@ -500,7 +544,7 @@ export default function StatisticsPage() {
                   style={{
                     fontSize: 48,
                     fontWeight: "bold",
-                    color: textPrimary,
+                    color: colors.textPrimary,
                   }}
                 >
                   373
@@ -508,7 +552,7 @@ export default function StatisticsPage() {
                 <Text
                   style={{
                     fontSize: 14,
-                    color: textSecondary,
+                    color: colors.textSecondary,
                   }}
                 >
                   total
@@ -538,7 +582,7 @@ export default function StatisticsPage() {
                 style={{
                   fontSize: 12,
                   fontWeight: "500",
-                  color: textPrimary,
+                  color: colors.textPrimary,
                   marginBottom: 2,
                 }}
               >
@@ -548,13 +592,13 @@ export default function StatisticsPage() {
                 style={{
                   fontSize: 16,
                   fontWeight: "bold",
-                  color: textPrimary,
+                  color: colors.textPrimary,
                   marginBottom: 2,
                 }}
               >
                 285
               </Text>
-              <Text style={{ fontSize: 11, color: textSecondary }}>
+              <Text style={{ fontSize: 11, color: colors.textSecondary }}>
                 (76%)
               </Text>
             </View>
@@ -573,7 +617,7 @@ export default function StatisticsPage() {
                 style={{
                   fontSize: 12,
                   fontWeight: "500",
-                  color: textPrimary,
+                  color: colors.textPrimary,
                   marginBottom: 2,
                 }}
               >
@@ -583,13 +627,13 @@ export default function StatisticsPage() {
                 style={{
                   fontSize: 16,
                   fontWeight: "bold",
-                  color: textPrimary,
+                  color: colors.textPrimary,
                   marginBottom: 2,
                 }}
               >
                 53
               </Text>
-              <Text style={{ fontSize: 11, color: textSecondary }}>
+              <Text style={{ fontSize: 11, color: colors.textSecondary }}>
                 (14%)
               </Text>
             </View>
@@ -608,23 +652,23 @@ export default function StatisticsPage() {
                 style={{
                   fontSize: 12,
                   fontWeight: "500",
-                  color: textPrimary,
+                  color: colors.textPrimary,
                   marginBottom: 2,
                 }}
               >
-                Customers  Left
+                Customers Left
               </Text>
               <Text
                 style={{
                   fontSize: 16,
                   fontWeight: "bold",
-                  color: textPrimary,
+                  color: colors.textPrimary,
                   marginBottom: 2,
                 }}
               >
                 35
               </Text>
-              <Text style={{ fontSize: 11, color: textSecondary }}>
+              <Text style={{ fontSize: 11, color: colors.textSecondary }}>
                 (9%)
               </Text>
             </View>
@@ -634,7 +678,7 @@ export default function StatisticsPage() {
         {/* Customer Insights */}
         <View
           style={{
-            backgroundColor: cardBg,
+            backgroundColor: colors.cardBg,
             marginHorizontal: 16,
             marginBottom: 12,
             borderRadius: 12,
@@ -653,10 +697,10 @@ export default function StatisticsPage() {
               marginBottom: 16,
             }}
           >
-            <BarChart3 size={18} color="#1E40AF" />
+            <BarChart3 size={18} color={colors.textAccentLight} />
             <Text
               style={{
-                color: "#1E40AF",
+                color: colors.headingPrimary,
                 fontWeight: "600",
                 marginLeft: 8,
                 flex: 1,
@@ -665,7 +709,7 @@ export default function StatisticsPage() {
             >
               Customer Insights
             </Text>
-            <Info size={18} color="#3B82F6" />
+            <Info size={18} color={colors.headingAccent} />
           </View>
 
           {/* Metrics Row */}
@@ -676,14 +720,14 @@ export default function StatisticsPage() {
               marginBottom: 16,
               paddingBottom: 16,
               borderBottomWidth: 1,
-              borderBottomColor: borderColor,
+              borderBottomColor: colors.borderColor,
             }}
           >
             <View style={{ alignItems: "center", flex: 1 }}>
               <Text
                 style={{
                   fontSize: 11,
-                  color: textSecondary,
+                  color: colors.textSecondary,
                   marginBottom: 4,
                 }}
               >
@@ -693,15 +737,15 @@ export default function StatisticsPage() {
                 style={{
                   fontSize: 24,
                   fontWeight: "bold",
-                  color: textPrimary,
+                  color: colors.textPrimary,
                   marginBottom: 4,
                 }}
               >
                 358
               </Text>
               <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <TrendingDown size={12} color="#EF4444" />
-                <Text style={{ color: "#EF4444", fontSize: 11, marginLeft: 2 }}>
+                <ArrowDown size={12} color={colors.redText} />
+                <Text style={{ color: colors.redText, fontSize: 11, marginLeft: 2 }}>
                   21%
                 </Text>
               </View>
@@ -711,7 +755,7 @@ export default function StatisticsPage() {
               <Text
                 style={{
                   fontSize: 11,
-                  color: textSecondary,
+                  color: colors.textSecondary,
                   marginBottom: 4,
                 }}
               >
@@ -721,15 +765,15 @@ export default function StatisticsPage() {
                 style={{
                   fontSize: 24,
                   fontWeight: "bold",
-                  color: textPrimary,
+                  color: colors.textPrimary,
                   marginBottom: 4,
                 }}
               >
                 285
               </Text>
               <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <TrendingDown size={12} color="#EF4444" />
-                <Text style={{ color: "#EF4444", fontSize: 11, marginLeft: 2 }}>
+                <ArrowDown size={12} color={colors.redText} />
+                <Text style={{ color: colors.redText, fontSize: 11, marginLeft: 2 }}>
                   22%
                 </Text>
               </View>
@@ -739,7 +783,7 @@ export default function StatisticsPage() {
               <Text
                 style={{
                   fontSize: 11,
-                  color: textSecondary,
+                  color: colors.textSecondary,
                   marginBottom: 4,
                 }}
               >
@@ -749,15 +793,15 @@ export default function StatisticsPage() {
                 style={{
                   fontSize: 24,
                   fontWeight: "bold",
-                  color: textPrimary,
+                  color: colors.textPrimary,
                   marginBottom: 4,
                 }}
               >
                 80%
               </Text>
               <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <TrendingUp size={12} color="#10B981" />
-                <Text style={{ color: "#10B981", fontSize: 11, marginLeft: 2 }}>
+                <ArrowUp size={12} color={colors.greenText} />
+                <Text style={{ color: colors.greenText, fontSize: 11, marginLeft: 2 }}>
                   1%
                 </Text>
               </View>
@@ -767,7 +811,7 @@ export default function StatisticsPage() {
               <Text
                 style={{
                   fontSize: 11,
-                  color: textSecondary,
+                  color: colors.textSecondary,
                   marginBottom: 4,
                 }}
               >
@@ -777,15 +821,15 @@ export default function StatisticsPage() {
                 style={{
                   fontSize: 24,
                   fontWeight: "bold",
-                  color: textPrimary,
+                  color: colors.textPrimary,
                   marginBottom: 4,
                 }}
               >
                 41%
               </Text>
               <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <TrendingUp size={12} color="#10B981" />
-                <Text style={{ color: "#10B981", fontSize: 11, marginLeft: 2 }}>
+                <ArrowUp size={12} color={colors.greenText} />
+                <Text style={{ color: colors.greenText, fontSize: 11, marginLeft: 2 }}>
                   8%
                 </Text>
               </View>
@@ -795,7 +839,7 @@ export default function StatisticsPage() {
           {/* What is Conversion Rate */}
           <View
             style={{
-              backgroundColor: "#EFF6FF",
+              backgroundColor: colors.tooltipBg,
               borderRadius: 8,
               padding: 12,
               marginBottom: 16,
@@ -803,7 +847,7 @@ export default function StatisticsPage() {
           >
             <Text
               style={{
-                color: "#1E40AF",
+                color: colors.headingPrimary,
                 fontWeight: "600",
                 marginBottom: 4,
                 fontSize: 13,
@@ -813,14 +857,14 @@ export default function StatisticsPage() {
             </Text>
             <Text
               style={{
-                color: "#3B82F6",
+                color: colors.tooltipText,
                 fontSize: 12,
                 lineHeight: 16,
               }}
             >
               Conversion rate shows what percentage of customers who visited
               were actually served. It&apos;s calculated as (Customers Served ÷
-              Customers Visited) × 100%. A higher conversion rate means you're
+              Customers Visited) × 100%. A higher conversion rate means you&apos;re
               efficiently serving most of the customers who visit.
             </Text>
           </View>
@@ -829,7 +873,7 @@ export default function StatisticsPage() {
           <View>
             <Text
               style={{
-                color: textPrimary,
+                color: colors.textPrimary,
                 fontWeight: "600",
                 marginBottom: 12,
                 fontSize: 13,
@@ -848,19 +892,19 @@ export default function StatisticsPage() {
             >
               <View
                 style={{
-                  backgroundColor: "#FEE2E2",
+                  backgroundColor: isDark ? "rgba(252, 165, 165, 0.2)" : "#FEE2E2",
                   borderRadius: 4,
                   padding: 4,
                   marginRight: 10,
                   marginTop: 2,
                 }}
               >
-                <TrendingDown size={14} color="#EF4444" />
+                <TrendingDown size={14} color={colors.redText} />
               </View>
               <View style={{ flex: 1 }}>
                 <Text
                   style={{
-                    color: textPrimary,
+                    color: colors.textPrimary,
                     fontWeight: "600",
                     fontSize: 13,
                     marginBottom: 2,
@@ -870,7 +914,7 @@ export default function StatisticsPage() {
                 </Text>
                 <Text
                   style={{
-                    color: textSecondary,
+                    color: colors.textSecondary,
                     fontSize: 12,
                     lineHeight: 16,
                   }}
@@ -892,19 +936,19 @@ export default function StatisticsPage() {
             >
               <View
                 style={{
-                  backgroundColor: "#DBEAFE",
+                  backgroundColor: isDark ? "rgba(219, 234, 254, 0.2)" : "#DBEAFE",
                   borderRadius: 4,
                   padding: 4,
                   marginRight: 10,
                   marginTop: 2,
                 }}
               >
-                <User size={14} color="#1E40AF" />
+                <User size={14} color={colors.headingPrimary} />
               </View>
               <View style={{ flex: 1 }}>
                 <Text
                   style={{
-                    color: textPrimary,
+                    color: colors.textPrimary,
                     fontWeight: "600",
                     fontSize: 13,
                     marginBottom: 2,
@@ -914,7 +958,7 @@ export default function StatisticsPage() {
                 </Text>
                 <Text
                   style={{
-                    color: textSecondary,
+                    color: colors.textSecondary,
                     fontSize: 12,
                     lineHeight: 16,
                   }}
@@ -935,7 +979,7 @@ export default function StatisticsPage() {
             >
               <View
                 style={{
-                  backgroundColor: "#F3E8FF",
+                  backgroundColor: isDark ? "rgba(243, 232, 255, 0.2)" : "#F3E8FF",
                   borderRadius: 4,
                   padding: 4,
                   marginRight: 10,
@@ -947,7 +991,7 @@ export default function StatisticsPage() {
               <View style={{ flex: 1 }}>
                 <Text
                   style={{
-                    color: textPrimary,
+                    color: colors.textPrimary,
                     fontWeight: "600",
                     fontSize: 13,
                     marginBottom: 2,
@@ -957,7 +1001,7 @@ export default function StatisticsPage() {
                 </Text>
                 <Text
                   style={{
-                    color: textSecondary,
+                    color: colors.textSecondary,
                     fontSize: 12,
                     lineHeight: 16,
                   }}
@@ -977,19 +1021,19 @@ export default function StatisticsPage() {
             >
               <View
                 style={{
-                  backgroundColor: "#FEF3C7",
+                  backgroundColor: isDark ? "rgba(254, 243, 199, 0.2)" : "#FEF3C7",
                   borderRadius: 4,
                   padding: 4,
                   marginRight: 10,
                   marginTop: 2,
                 }}
               >
-                <AlertCircle size={14} color="#F59E0B" />
+                <AlertCircle size={14} color={colors.amberText} />
               </View>
               <View style={{ flex: 1 }}>
                 <Text
                   style={{
-                    color: textPrimary,
+                    color: colors.textPrimary,
                     fontWeight: "600",
                     fontSize: 13,
                     marginBottom: 2,
@@ -999,7 +1043,7 @@ export default function StatisticsPage() {
                 </Text>
                 <Text
                   style={{
-                    color: textSecondary,
+                    color: colors.textSecondary,
                     fontSize: 12,
                     lineHeight: 16,
                   }}
@@ -1013,7 +1057,7 @@ export default function StatisticsPage() {
 
           <Text
             style={{
-              color: textSecondary,
+              color: colors.textSecondary,
               fontSize: 11,
               textAlign: "center",
               marginTop: 16,
@@ -1026,7 +1070,7 @@ export default function StatisticsPage() {
         {/* Peak Hours */}
         <View
           style={{
-            backgroundColor: cardBg,
+            backgroundColor: colors.cardBg,
             marginHorizontal: 16,
             marginBottom: 12,
             borderRadius: 12,
@@ -1045,10 +1089,10 @@ export default function StatisticsPage() {
               marginBottom: 16,
             }}
           >
-            <Calendar size={18} color="#1E40AF" />
+            <Calendar size={18} color={colors.textAccentLight} />
             <Text
               style={{
-                color: "#1E40AF",
+                color: colors.headingPrimary,
                 fontWeight: "600",
                 marginLeft: 8,
                 fontSize: 14,
@@ -1067,13 +1111,13 @@ export default function StatisticsPage() {
                 alignItems: "center",
                 paddingVertical: 12,
                 borderBottomWidth: index < peakHours.length - 1 ? 1 : 0,
-                borderBottomColor: borderColor,
+                borderBottomColor: colors.borderColor,
               }}
             >
-              <Text style={{ color: textPrimary, fontWeight: "500", fontSize: 13 }}>
+              <Text style={{ color: colors.textPrimary, fontWeight: "500", fontSize: 13 }}>
                 {hour.time}
               </Text>
-              <Text style={{ color: "#3B82F6", fontSize: 13 }}>
+              <Text style={{ color: colors.headingAccent, fontSize: 13 }}>
                 {hour.traffic}
               </Text>
             </View>
@@ -1083,7 +1127,7 @@ export default function StatisticsPage() {
         {/* Service Completion */}
         <View
           style={{
-            backgroundColor: cardBg,
+            backgroundColor: colors.cardBg,
             marginHorizontal: 16,
             marginBottom: 20,
             borderRadius: 12,
@@ -1102,10 +1146,10 @@ export default function StatisticsPage() {
               marginBottom: 16,
             }}
           >
-            <CheckCircle size={18} color="#10B981" />
+            <CheckCircle size={18} color={colors.greenText} />
             <Text
               style={{
-                color: "#1E40AF",
+                color: colors.headingPrimary,
                 fontWeight: "600",
                 marginLeft: 8,
                 fontSize: 14,
@@ -1117,7 +1161,7 @@ export default function StatisticsPage() {
 
           <View
             style={{
-              backgroundColor: "#E5E7EB",
+              backgroundColor: colors.progressBg,
               borderRadius: 8,
               height: 8,
               marginBottom: 12,
@@ -1125,7 +1169,7 @@ export default function StatisticsPage() {
           >
             <View
               style={{
-                backgroundColor: "#3B82F6",
+                backgroundColor: colors.progressBar,
                 borderRadius: 8,
                 height: 8,
                 width: "85%",
@@ -1140,17 +1184,17 @@ export default function StatisticsPage() {
               alignItems: "center",
             }}
           >
-            <Text style={{ color: textSecondary, fontSize: 12 }}>0%</Text>
+            <Text style={{ color: colors.textSecondary, fontSize: 12 }}>0%</Text>
             <Text
               style={{
-                color: "#3B82F6",
+                color: colors.headingAccent,
                 fontWeight: "600",
                 fontSize: 14,
               }}
             >
               85% Completed
             </Text>
-            <Text style={{ color: textSecondary, fontSize: 12 }}>100%</Text>
+            <Text style={{ color: colors.textSecondary, fontSize: 12 }}>100%</Text>
           </View>
         </View>
       </ScrollView>
@@ -1172,24 +1216,45 @@ export default function StatisticsPage() {
         >
           <View
             style={{
-              backgroundColor: cardBg,
+              backgroundColor: colors.cardBg,
               borderRadius: 12,
               padding: 20,
               width: "80%",
               maxWidth: 300,
             }}
           >
-            <Text
+            {/* Header with Close Button */}
+            <View
               style={{
-                fontSize: 16,
-                fontWeight: "600",
-                color: textPrimary,
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
                 marginBottom: 16,
-                textAlign: "center",
               }}
             >
-              Select Time Range
-            </Text>
+              <Text
+                style={{
+                  fontSize: 16,
+                  fontWeight: "600",
+                  color: colors.textPrimary,
+                  flex: 1,
+                  textAlign: "center",
+                }}
+              >
+                Select Time Range
+              </Text>
+              <TouchableOpacity
+                onPress={() => setShowTimeRangeModal(false)}
+                style={{
+                  position: "absolute",
+                  right: 0,
+                  padding: 4,
+                }}
+              >
+                <X size={24} color={colors.textSecondary} />
+              </TouchableOpacity>
+            </View>
+
             {timeRangeOptions.map((option) => (
               <TouchableOpacity
                 key={option}
@@ -1202,7 +1267,7 @@ export default function StatisticsPage() {
                   paddingHorizontal: 16,
                   backgroundColor:
                     selectedTimeRange === option
-                      ? "#EFF6FF"
+                      ? colors.buttonBg
                       : "transparent",
                   borderRadius: 8,
                   marginBottom: 4,
@@ -1210,7 +1275,7 @@ export default function StatisticsPage() {
               >
                 <Text
                   style={{
-                    color: selectedTimeRange === option ? "#1E40AF" : textPrimary,
+                    color: selectedTimeRange === option ? colors.buttonText : colors.textPrimary,
                     fontWeight: selectedTimeRange === option ? "600" : "400",
                     fontSize: 14,
                   }}

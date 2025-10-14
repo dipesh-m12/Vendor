@@ -34,6 +34,56 @@ export default function PremiumPage() {
   const [selectedPlan, setSelectedPlan] = useState<PlanType>("monthly");
   const [hasActivePlan, setHasActivePlan] = useState(false);
 
+  // Dark mode color palette - MATCHING all other pages
+  const colors = {
+    // Page backgrounds - consistent gradient
+    gradientStart: isDark ? "#111827" : "#EFF6FF", // dark:from-gray-900
+    gradientMid: isDark ? "#1F2937" : "#DBEAFE", // dark:bg-gray-800
+    gradientEnd: isDark ? "#374151" : "#BFDBFE", // dark:border-gray-700
+
+    // Container and card backgrounds
+    containerBg: isDark ? "#111827" : "#F1F5F9", // dark:from-gray-900
+    cardBg: isDark ? "rgba(31, 41, 55, 0.95)" : "#FFFFFF", // dark:bg-gray-800/95
+    headerBg: isDark ? "rgba(55, 65, 81, 0.95)" : "rgba(255, 255, 255, 0.95)", // dark:bg-gray-700
+
+    // Text colors - blue palette
+    textPrimary: isDark ? "#DBEAFE" : "#1E293B", // dark:text-blue-100
+    textSecondary: isDark ? "#BFDBFE" : "#64748B", // dark:text-blue-200
+    textAccent: isDark ? "#93C5FD" : "#4285F4", // dark:text-blue-300
+    textMuted: isDark ? "#9CA3AF" : "#64748B", // dark:text-gray-400
+
+    // Border colors
+    borderColor: isDark ? "#374151" : "#E2E8F0", // dark:border-gray-700
+
+    // Feature icons
+    featureIcon: isDark ? "#60A5FA" : "#4285F4", // dark:text-blue-400
+    featureIconActive: isDark ? "#4ADE80" : "#10B981", // dark:text-green-400
+
+    // Plan toggle
+    toggleBg: isDark ? "rgba(96, 165, 250, 0.15)" : "#EFF6FF", // dark:bg-blue-400/15
+
+    // Info section
+    infoBg: isDark ? "rgba(59, 130, 246, 0.1)" : "#EFF6FF", // dark:bg-blue-600/10
+    infoText: isDark ? "#60A5FA" : "#4285F4", // dark:text-blue-400
+
+    // Active badge
+    activeBadgeBg: isDark ? "rgba(34, 197, 94, 0.2)" : "#D1FAE5",
+    activeBadgeText: isDark ? "#4ADE80" : "#059669",
+    activeDotBg: isDark ? "#4ADE80" : "#10B981",
+
+    // Savings badge
+    savingsBadgeBg: isDark ? "rgba(34, 197, 94, 0.2)" : "#D1FAE5",
+    savingsBadgeText: isDark ? "#4ADE80" : "#059669",
+
+    // Author avatar
+    avatarBg: isDark ? "rgba(96, 165, 250, 0.2)" : "#EFF6FF",
+    avatarIcon: isDark ? "#60A5FA" : "#4285F4",
+
+    // Bottom nav
+    navActive: isDark ? "#60A5FA" : "#4285F4",
+    navInactive: isDark ? "#9CA3AF" : "#9CA3AF",
+  };
+
   const plans: Record<PlanType, { price: string; period: any; savings: string }> = {
     monthly: {
       price: "$9.99",
@@ -49,32 +99,26 @@ export default function PremiumPage() {
 
   const features = [
     {
-      icon: <Shield color={hasActivePlan ? "#10B981" : "#4285F4"} size={18} />,
+      icon: <Shield color={hasActivePlan ? colors.featureIconActive : colors.featureIcon} size={18} />,
       title: languageSet.feature1Title,
       description: languageSet.feature1Description,
     },
     {
-      icon: <Zap color={hasActivePlan ? "#10B981" : "#4285F4"} size={18} />,
+      icon: <Zap color={hasActivePlan ? colors.featureIconActive : colors.featureIcon} size={18} />,
       title: languageSet.feature2Title,
       description: languageSet.feature2Description,
     },
     {
-      icon: <Clock color={hasActivePlan ? "#10B981" : "#4285F4"} size={18} />,
+      icon: <Clock color={hasActivePlan ? colors.featureIconActive : colors.featureIcon} size={18} />,
       title: languageSet.feature3Title,
       description: languageSet.feature3Description,
     },
     {
-      icon: <Users color={hasActivePlan ? "#10B981" : "#4285F4"} size={18} />,
+      icon: <Users color={hasActivePlan ? colors.featureIconActive : colors.featureIcon} size={18} />,
       title: languageSet.feature4Title,
       description: languageSet.feature4Description,
     },
   ];
-
-  const containerBg = isDark ? "#1F2937" : "#F1F5F9";
-  const cardBg = isDark ? "#374151" : "#FFFFFF";
-  const textPrimary = isDark ? "#F9FAFB" : "#1E293B";
-  const textSecondary = isDark ? "#9CA3AF" : "#64748B";
-  const borderColor = isDark ? "#4B5563" : "#E2E8F0";
 
   // Simulated active plan data
   const activePlanData = {
@@ -96,25 +140,21 @@ export default function PremiumPage() {
     <View style={styles.featureItem}>
       <View style={styles.featureIcon}>{feature.icon}</View>
       <View style={styles.featureContent}>
-        <Text style={[styles.featureTitle, { color: textPrimary }]}>
+        <Text style={[styles.featureTitle, { color: colors.textPrimary }]}>
           {feature.title}
         </Text>
-        <Text style={[styles.featureDescription, { color: textSecondary }]}>
+        <Text style={[styles.featureDescription, { color: colors.textSecondary }]}>
           {feature.description}
         </Text>
       </View>
-      {hasActivePlan && <CheckCircle size={18} color="#10B981" />}
+      {hasActivePlan && <CheckCircle size={18} color={colors.featureIconActive} />}
     </View>
   );
 
   return (
-    <View style={{ flex: 1, backgroundColor: containerBg }}>
+    <View style={{ flex: 1, backgroundColor: colors.containerBg }}>
       <LinearGradient
-        colors={
-          isDark
-            ? ["#1E1B4B", "#312E81", "#3730A3"]
-            : ["#EFF6FF", "#DBEAFE", "#BFDBFE"]
-        }
+        colors={[colors.gradientStart, colors.gradientMid, colors.gradientEnd]}
         start={[0, 0]}
         end={[0, 1]}
         style={{ flex: 1 }}
@@ -124,10 +164,8 @@ export default function PremiumPage() {
           style={[
             styles.header,
             {
-              backgroundColor: isDark
-                ? "rgba(55, 65, 81, 0.95)"
-                : "rgba(255, 255, 255, 0.95)",
-              borderBottomColor: borderColor,
+              backgroundColor: colors.headerBg,
+              borderBottomColor: colors.borderColor,
             },
           ]}
         >
@@ -136,9 +174,9 @@ export default function PremiumPage() {
               onPress={() => router.back()}
               style={styles.backButton}
             >
-              <ArrowLeft size={20} color="#4285F4" />
+              <ArrowLeft size={20} color={colors.featureIcon} />
             </TouchableOpacity>
-            <Text style={[styles.headerTitle, { color: textPrimary }]}>
+            <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>
               {hasActivePlan
                 ? languageSet.activePlan || "Your Active Plan"
                 : languageSet.premiumPlans}
@@ -173,11 +211,11 @@ export default function PremiumPage() {
           )}
 
           {/* Premium Card */}
-          <View style={[styles.premiumCard, { backgroundColor: cardBg }]}>
+          <View style={[styles.premiumCard, { backgroundColor: colors.cardBg, borderColor: colors.borderColor }]}>
             {/* Header with Star */}
             <View style={styles.premiumHeader}>
               <Star color="#F59E0B" size={24} fill={hasActivePlan ? "#F59E0B" : "none"} />
-              <Text style={[styles.premiumTitle, { color: textPrimary }]}>
+              <Text style={[styles.premiumTitle, { color: colors.textPrimary }]}>
                 {hasActivePlan
                   ? selectedPlan === "yearly"
                     ? "Premium Yearly"
@@ -185,14 +223,14 @@ export default function PremiumPage() {
                   : languageSet.premiumTitle}
               </Text>
               {hasActivePlan && (
-                <View style={styles.activeBadge}>
-                  <View style={styles.activeDot} />
-                  <Text style={styles.activeBadgeText}>Active</Text>
+                <View style={[styles.activeBadge, { backgroundColor: colors.activeBadgeBg }]}>
+                  <View style={[styles.activeDot, { backgroundColor: colors.activeDotBg }]} />
+                  <Text style={[styles.activeBadgeText, { color: colors.activeBadgeText }]}>Active</Text>
                 </View>
               )}
             </View>
 
-            <Text style={[styles.premiumSubtitle, { color: textSecondary }]}>
+            <Text style={[styles.premiumSubtitle, { color: colors.textSecondary }]}>
               {hasActivePlan
                 ? "Everything you have access to with your premium plan"
                 : languageSet.premiumSubtitle}
@@ -205,9 +243,7 @@ export default function PremiumPage() {
                   style={[
                     styles.planToggle,
                     {
-                      backgroundColor: isDark
-                        ? "rgba(66, 133, 244, 0.2)"
-                        : "#EFF6FF",
+                      backgroundColor: colors.toggleBg,
                     },
                   ]}
                 >
@@ -216,7 +252,7 @@ export default function PremiumPage() {
                     style={[
                       styles.planButton,
                       selectedPlan === "monthly" && {
-                        backgroundColor: cardBg,
+                        backgroundColor: colors.cardBg,
                         shadowColor: "#000",
                         shadowOffset: { width: 0, height: 2 },
                         shadowOpacity: 0.1,
@@ -231,8 +267,8 @@ export default function PremiumPage() {
                         {
                           color:
                             selectedPlan === "monthly"
-                              ? "#4285F4"
-                              : textSecondary,
+                              ? colors.featureIcon
+                              : colors.textSecondary,
                           fontWeight: selectedPlan === "monthly" ? "600" : "400",
                         },
                       ]}
@@ -245,7 +281,7 @@ export default function PremiumPage() {
                     style={[
                       styles.planButton,
                       selectedPlan === "yearly" && {
-                        backgroundColor: cardBg,
+                        backgroundColor: colors.cardBg,
                         shadowColor: "#000",
                         shadowOffset: { width: 0, height: 2 },
                         shadowOpacity: 0.1,
@@ -259,7 +295,7 @@ export default function PremiumPage() {
                         styles.planButtonText,
                         {
                           color:
-                            selectedPlan === "yearly" ? "#4285F4" : textSecondary,
+                            selectedPlan === "yearly" ? colors.featureIcon : colors.textSecondary,
                           fontWeight: selectedPlan === "yearly" ? "600" : "400",
                         },
                       ]}
@@ -274,16 +310,16 @@ export default function PremiumPage() {
             {/* Price */}
             <View style={styles.priceContainer}>
               <View style={styles.priceRow}>
-                <Text style={[styles.price, { color: textPrimary }]}>
+                <Text style={[styles.price, { color: colors.textPrimary }]}>
                   {plans[selectedPlan].price}
                 </Text>
-                <Text style={[styles.pricePeriod, { color: textSecondary }]}>
+                <Text style={[styles.pricePeriod, { color: colors.textSecondary }]}>
                   / {plans[selectedPlan].period}
                 </Text>
               </View>
               {plans[selectedPlan].savings && (
-                <View style={styles.savingsBadge}>
-                  <Text style={styles.savingsText}>
+                <View style={[styles.savingsBadge, { backgroundColor: colors.savingsBadgeBg }]}>
+                  <Text style={[styles.savingsText, { color: colors.savingsBadgeText }]}>
                     {plans[selectedPlan].savings}
                   </Text>
                 </View>
@@ -292,23 +328,23 @@ export default function PremiumPage() {
 
             {/* Subscription Info - Only shown when active */}
             {hasActivePlan && (
-              <View style={[styles.infoSection, { borderTopColor: borderColor }]}>
+              <View style={[styles.infoSection, { borderTopColor: colors.borderColor }]}>
                 <View style={styles.infoRow}>
                   <View style={styles.infoItem}>
-                    <Calendar size={18} color="#4285F4" />
-                    <Text style={[styles.infoLabel, { color: textSecondary }]}>
+                    <Calendar size={18} color={colors.featureIcon} />
+                    <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>
                       Started
                     </Text>
-                    <Text style={[styles.infoValue, { color: textPrimary }]}>
+                    <Text style={[styles.infoValue, { color: colors.textPrimary }]}>
                       {activePlanData.startDate}
                     </Text>
                   </View>
                   <View style={styles.infoItem}>
-                    <Calendar size={18} color="#10B981" />
-                    <Text style={[styles.infoLabel, { color: textSecondary }]}>
+                    <Calendar size={18} color={colors.featureIconActive} />
+                    <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>
                       Renews
                     </Text>
-                    <Text style={[styles.infoValue, { color: textPrimary }]}>
+                    <Text style={[styles.infoValue, { color: colors.textPrimary }]}>
                       {activePlanData.renewalDate}
                     </Text>
                   </View>
@@ -318,14 +354,12 @@ export default function PremiumPage() {
                   style={[
                     styles.renewalNotice,
                     {
-                      backgroundColor: isDark
-                        ? "rgba(59, 130, 246, 0.1)"
-                        : "#EFF6FF",
+                      backgroundColor: colors.infoBg,
                     },
                   ]}
                 >
-                  <AlertCircle size={16} color="#4285F4" />
-                  <Text style={[styles.renewalText, { color: "#4285F4" }]}>
+                  <AlertCircle size={16} color={colors.infoText} />
+                  <Text style={[styles.renewalText, { color: colors.infoText }]}>
                     Auto-renews on {activePlanData.renewalDate}
                   </Text>
                 </View>
@@ -334,7 +368,7 @@ export default function PremiumPage() {
 
             {/* Features */}
             <View style={styles.featuresContainer}>
-              <Text style={[styles.sectionTitle, { color: textPrimary }]}>
+              <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
                 {hasActivePlan ? "Premium Features" : "Features Included"}
               </Text>
               {features.map((feature, index) => (
@@ -357,8 +391,8 @@ export default function PremiumPage() {
 
           {/* Testimonial - Only shown when not active */}
           {!hasActivePlan && (
-            <View style={[styles.testimonialCard, { backgroundColor: cardBg }]}>
-              <Text style={[styles.testimonialText, { color: textSecondary }]}>
+            <View style={[styles.testimonialCard, { backgroundColor: colors.cardBg, borderColor: colors.borderColor }]}>
+              <Text style={[styles.testimonialText, { color: colors.textSecondary }]}>
                 {`"${languageSet.testimonialText}"`}
               </Text>
               <View style={styles.testimonialAuthor}>
@@ -366,19 +400,17 @@ export default function PremiumPage() {
                   style={[
                     styles.authorAvatar,
                     {
-                      backgroundColor: isDark
-                        ? "rgba(66, 133, 244, 0.2)"
-                        : "#EFF6FF",
+                      backgroundColor: colors.avatarBg,
                     },
                   ]}
                 >
-                  <Users size={16} color="#4285F4" />
+                  <Users size={16} color={colors.avatarIcon} />
                 </View>
                 <View style={styles.authorInfo}>
-                  <Text style={[styles.authorName, { color: textPrimary }]}>
+                  <Text style={[styles.authorName, { color: colors.textPrimary }]}>
                     Sarah Johnson
                   </Text>
-                  <Text style={[styles.authorTitle, { color: textSecondary }]}>
+                  <Text style={[styles.authorTitle, { color: colors.textSecondary }]}>
                     Salon Owner
                   </Text>
                 </View>
@@ -392,10 +424,8 @@ export default function PremiumPage() {
           style={[
             styles.bottomNav,
             {
-              backgroundColor: isDark
-                ? "rgba(55, 65, 81, 0.95)"
-                : "rgba(255, 255, 255, 0.95)",
-              borderTopColor: borderColor,
+              backgroundColor: colors.headerBg,
+              borderTopColor: colors.borderColor,
             },
           ]}
         >
@@ -403,8 +433,8 @@ export default function PremiumPage() {
             onPress={() => router.push("/(tabs)/queue")}
             style={styles.navButton}
           >
-            <Users size={20} color="#9CA3AF" />
-            <Text style={[styles.navButtonText, { color: "#9CA3AF" }]}>
+            <Users size={20} color={colors.navInactive} />
+            <Text style={[styles.navButtonText, { color: colors.navInactive }]}>
               Queue
             </Text>
           </TouchableOpacity>
@@ -412,14 +442,14 @@ export default function PremiumPage() {
             onPress={() => router.push("/stats")}
             style={styles.navButton}
           >
-            <BarChart2 size={20} color="#9CA3AF" />
-            <Text style={[styles.navButtonText, { color: "#9CA3AF" }]}>
+            <BarChart2 size={20} color={colors.navInactive} />
+            <Text style={[styles.navButtonText, { color: colors.navInactive }]}>
               Stats
             </Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.navButton}>
-            <Star size={20} color="#4285F4" />
-            <Text style={[styles.navButtonText, { color: "#4285F4" }]}>
+            <Star size={20} color={colors.navActive} />
+            <Text style={[styles.navButtonText, { color: colors.navActive }]}>
               Premium
             </Text>
           </TouchableOpacity>
@@ -427,8 +457,8 @@ export default function PremiumPage() {
             onPress={() => router.push("/settings")}
             style={styles.navButton}
           >
-            <Settings size={20} color="#9CA3AF" />
-            <Text style={[styles.navButtonText, { color: "#9CA3AF" }]}>
+            <Settings size={20} color={colors.navInactive} />
+            <Text style={[styles.navButtonText, { color: colors.navInactive }]}>
               Settings
             </Text>
           </TouchableOpacity>
@@ -439,8 +469,8 @@ export default function PremiumPage() {
             }}
             style={styles.navButton}
           >
-            <LogOut size={20} color="#9CA3AF" />
-            <Text style={[styles.navButtonText, { color: "#9CA3AF" }]}>
+            <LogOut size={20} color={colors.navInactive} />
+            <Text style={[styles.navButtonText, { color: colors.navInactive }]}>
               Logout
             </Text>
           </TouchableOpacity>
@@ -509,6 +539,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 20,
     marginBottom: 16,
+    borderWidth: 1,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
@@ -529,7 +560,6 @@ const styles = StyleSheet.create({
   activeBadge: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#D1FAE5",
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
@@ -539,11 +569,9 @@ const styles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: "#10B981",
     marginRight: 6,
   },
   activeBadgeText: {
-    color: "#059669",
     fontSize: 11,
     fontWeight: "600",
   },
@@ -588,14 +616,12 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   savingsBadge: {
-    backgroundColor: "#D1FAE5",
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 12,
     marginTop: 8,
   },
   savingsText: {
-    color: "#059669",
     fontSize: 12,
     fontWeight: "600",
   },
@@ -681,6 +707,7 @@ const styles = StyleSheet.create({
   testimonialCard: {
     borderRadius: 16,
     padding: 16,
+    borderWidth: 1,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,

@@ -12,11 +12,57 @@ import {
 interface TakeBreakModalProps {
   visible: boolean;
   onClose: () => void;
-  onStartBreak: (duration: number, reason: string) => void; // Fixed order
+  onStartBreak: (duration: number, reason: string) => void;
   isDark?: boolean;
 }
 
 const TakeBreakModal = ({ visible, onClose, onStartBreak, isDark = false }: TakeBreakModalProps) => {
+  // Dark mode color palette - MATCHING all other pages
+  const colors = {
+    // Modal backgrounds
+    modalBg: isDark ? "#374151" : "white", // dark:bg-gray-700
+    modalOverlay: "rgba(0, 0, 0, 0.5)",
+
+    // Text colors - blue palette
+    textPrimary: isDark ? "#DBEAFE" : "#1E3A8A", // dark:text-blue-100
+    textSecondary: isDark ? "#BFDBFE" : "#3B82F6", // dark:text-blue-200
+    textAccent: isDark ? "#93C5FD" : "#3B82F6", // dark:text-blue-300
+    textMuted: isDark ? "#9CA3AF" : "#6B7280", // dark:text-gray-400
+
+    // Icon colors
+    iconColor: isDark ? "#60A5FA" : "#3B82F6", // dark:text-blue-400
+    closeIcon: isDark ? "#9CA3AF" : "#3B82F6",
+
+    // Input fields
+    inputBg: isDark ? "#1F2937" : "white", // dark:bg-gray-800
+    inputBorder: isDark ? "#4B5563" : "#D1D5DB", // dark:border-gray-600
+    inputText: isDark ? "#F9FAFB" : "#1E3A8A",
+    placeholderColor: isDark ? "#9CA3AF" : "#6B7280",
+
+    // Reason buttons
+    reasonUnselected: isDark ? "rgba(96, 165, 250, 0.15)" : "#EFF6FF",
+    reasonSelected: "#2563EB",
+    reasonEmergencyUnselected: isDark ? "rgba(239, 68, 68, 0.2)" : "#FEF2F2",
+    reasonEmergencySelected: "#FEE2E2",
+    reasonText: isDark ? "#93C5FD" : "#3B82F6",
+
+    // Duration buttons
+    durationUnselected: isDark ? "rgba(96, 165, 250, 0.15)" : "#EFF6FF",
+    durationSelected: "#2563EB",
+    durationText: isDark ? "#93C5FD" : "#3B82F6",
+
+    // Preview box
+    previewBg: isDark ? "#1F2937" : "#F3F4F6", // dark:bg-gray-800
+
+    // Cancel button
+    cancelBorder: isDark ? "#4B5563" : "#D1D5DB",
+    cancelBg: isDark ? "transparent" : "white",
+    cancelText: isDark ? "#93C5FD" : "#3B82F6",
+
+    // Disabled button
+    disabledBg: "#9CA3AF",
+  };
+
   const [selectedReason, setSelectedReason] = useState('');
   const [selectedDuration, setSelectedDuration] = useState<number | null>(null);
   const [customReason, setCustomReason] = useState('');
@@ -38,7 +84,7 @@ const TakeBreakModal = ({ visible, onClose, onStartBreak, isDark = false }: Take
     const duration = showCustomDuration ? parseInt(customDuration) : selectedDuration;
 
     if (reason && duration) {
-      onStartBreak(duration, reason); // Fixed order
+      onStartBreak(duration, reason);
       resetModal();
     }
   };
@@ -72,13 +118,13 @@ const TakeBreakModal = ({ visible, onClose, onStartBreak, isDark = false }: Take
     >
       <View style={{
         flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        backgroundColor: colors.modalOverlay,
         justifyContent: 'center',
         alignItems: 'center',
         padding: 20,
       }}>
         <View style={{
-          backgroundColor: 'white',
+          backgroundColor: colors.modalBg,
           borderRadius: 12,
           padding: 24,
           width: '100%',
@@ -96,12 +142,12 @@ const TakeBreakModal = ({ visible, onClose, onStartBreak, isDark = false }: Take
               <Text style={{
                 fontSize: 20,
                 fontWeight: '600',
-                color: '#1E3A8A',
+                color: colors.textPrimary,
               }}>
                 Take a Break
               </Text>
               <TouchableOpacity onPress={resetModal}>
-                <X size={24} color="#3B82F6" />
+                <X size={24} color={colors.closeIcon} />
               </TouchableOpacity>
             </View>
 
@@ -109,7 +155,7 @@ const TakeBreakModal = ({ visible, onClose, onStartBreak, isDark = false }: Take
             <Text style={{
               fontSize: 14,
               fontWeight: '600',
-              color: '#3B82F6',
+              color: colors.textSecondary,
               marginBottom: 12,
             }}>
               Select break reason:
@@ -134,15 +180,15 @@ const TakeBreakModal = ({ visible, onClose, onStartBreak, isDark = false }: Take
                       paddingHorizontal: 16,
                       borderRadius: 8,
                       backgroundColor: reason.isEmergency
-                        ? (isSelected ? '#FEE2E2' : '#FEF2F2')
-                        : (isSelected ? '#2563EB' : '#EFF6FF'),
+                        ? (isSelected ? colors.reasonEmergencySelected : colors.reasonEmergencyUnselected)
+                        : (isSelected ? colors.reasonSelected : colors.reasonUnselected),
                     }}
                   >
                     <Icon
                       size={18}
                       color={reason.isEmergency
                         ? '#DC2626'
-                        : (isSelected ? 'white' : '#3B82F6')
+                        : (isSelected ? 'white' : colors.reasonText)
                       }
                       style={{ marginRight: 10 }}
                     />
@@ -151,7 +197,7 @@ const TakeBreakModal = ({ visible, onClose, onStartBreak, isDark = false }: Take
                       fontWeight: isSelected ? '600' : '400',
                       color: reason.isEmergency
                         ? '#DC2626'
-                        : (isSelected ? 'white' : '#3B82F6'),
+                        : (isSelected ? 'white' : colors.reasonText),
                     }}>
                       {reason.label}
                     </Text>
@@ -171,18 +217,18 @@ const TakeBreakModal = ({ visible, onClose, onStartBreak, isDark = false }: Take
                   paddingVertical: 12,
                   paddingHorizontal: 16,
                   borderRadius: 8,
-                  backgroundColor: showCustomReason ? '#2563EB' : '#EFF6FF',
+                  backgroundColor: showCustomReason ? colors.reasonSelected : colors.reasonUnselected,
                 }}
               >
                 <Plus
                   size={18}
-                  color={showCustomReason ? 'white' : '#3B82F6'}
+                  color={showCustomReason ? 'white' : colors.reasonText}
                   style={{ marginRight: 10 }}
                 />
                 <Text style={{
                   fontSize: 15,
                   fontWeight: showCustomReason ? '600' : '400',
-                  color: showCustomReason ? 'white' : '#3B82F6',
+                  color: showCustomReason ? 'white' : colors.reasonText,
                 }}>
                   Custom Reason
                 </Text>
@@ -193,15 +239,16 @@ const TakeBreakModal = ({ visible, onClose, onStartBreak, isDark = false }: Take
                   value={customReason}
                   onChangeText={setCustomReason}
                   placeholder="Enter custom reason"
+                  placeholderTextColor={colors.placeholderColor}
                   style={{
                     borderWidth: 1,
-                    borderColor: '#D1D5DB',
+                    borderColor: colors.inputBorder,
                     borderRadius: 8,
                     paddingHorizontal: 16,
                     paddingVertical: 12,
                     fontSize: 15,
-                    color: '#1E3A8A',
-                    backgroundColor: 'white',
+                    color: colors.inputText,
+                    backgroundColor: colors.inputBg,
                   }}
                 />
               )}
@@ -211,7 +258,7 @@ const TakeBreakModal = ({ visible, onClose, onStartBreak, isDark = false }: Take
             <Text style={{
               fontSize: 14,
               fontWeight: '600',
-              color: '#3B82F6',
+              color: colors.textSecondary,
               marginBottom: 12,
             }}>
               Select duration:
@@ -236,7 +283,7 @@ const TakeBreakModal = ({ visible, onClose, onStartBreak, isDark = false }: Take
                       paddingVertical: 12,
                       paddingHorizontal: 20,
                       borderRadius: 8,
-                      backgroundColor: isSelected ? '#2563EB' : '#EFF6FF',
+                      backgroundColor: isSelected ? colors.durationSelected : colors.durationUnselected,
                       minWidth: 100,
                       alignItems: 'center',
                     }}
@@ -244,7 +291,7 @@ const TakeBreakModal = ({ visible, onClose, onStartBreak, isDark = false }: Take
                     <Text style={{
                       fontSize: 14,
                       fontWeight: isSelected ? '600' : '400',
-                      color: isSelected ? 'white' : '#3B82F6',
+                      color: isSelected ? 'white' : colors.durationText,
                     }}>
                       {duration >= 60 ? `${duration / 60} hr` : `${duration} min`}
                     </Text>
@@ -264,20 +311,20 @@ const TakeBreakModal = ({ visible, onClose, onStartBreak, isDark = false }: Take
                   paddingVertical: 12,
                   paddingHorizontal: 20,
                   borderRadius: 8,
-                  backgroundColor: showCustomDuration ? '#2563EB' : '#EFF6FF',
+                  backgroundColor: showCustomDuration ? colors.durationSelected : colors.durationUnselected,
                   minWidth: 100,
                   justifyContent: 'center',
                 }}
               >
                 <Plus
                   size={16}
-                  color={showCustomDuration ? 'white' : '#3B82F6'}
+                  color={showCustomDuration ? 'white' : colors.durationText}
                   style={{ marginRight: 6 }}
                 />
                 <Text style={{
                   fontSize: 14,
                   fontWeight: showCustomDuration ? '600' : '400',
-                  color: showCustomDuration ? 'white' : '#3B82F6',
+                  color: showCustomDuration ? 'white' : colors.durationText,
                 }}>
                   Custom Duration
                 </Text>
@@ -296,22 +343,23 @@ const TakeBreakModal = ({ visible, onClose, onStartBreak, isDark = false }: Take
                   value={customDuration}
                   onChangeText={setCustomDuration}
                   placeholder="12"
+                  placeholderTextColor={colors.placeholderColor}
                   keyboardType="numeric"
                   style={{
                     flex: 1,
                     borderWidth: 1,
-                    borderColor: '#D1D5DB',
+                    borderColor: colors.inputBorder,
                     borderRadius: 8,
                     paddingHorizontal: 16,
                     paddingVertical: 12,
                     fontSize: 15,
-                    color: '#1E3A8A',
-                    backgroundColor: 'white',
+                    color: colors.inputText,
+                    backgroundColor: colors.inputBg,
                   }}
                 />
                 <Text style={{
                   fontSize: 15,
-                  color: '#6B7280',
+                  color: colors.textMuted,
                 }}>
                   minutes
                 </Text>
@@ -322,21 +370,21 @@ const TakeBreakModal = ({ visible, onClose, onStartBreak, isDark = false }: Take
             <Text style={{
               fontSize: 14,
               fontWeight: '600',
-              color: '#3B82F6',
+              color: colors.textSecondary,
               marginBottom: 12,
             }}>
               Customer notification preview:
             </Text>
 
             <View style={{
-              backgroundColor: '#F3F4F6',
+              backgroundColor: colors.previewBg,
               padding: 16,
               borderRadius: 8,
               marginBottom: 24,
             }}>
               <Text style={{
                 fontSize: 14,
-                color: '#1E3A8A',
+                color: colors.textPrimary,
                 lineHeight: 20,
               }}>
                 We&apos;re on a {getDisplayReason()} ({getDisplayDuration()} min). Please stay queued. Service will resume shortly.
@@ -356,14 +404,14 @@ const TakeBreakModal = ({ visible, onClose, onStartBreak, isDark = false }: Take
                   borderRadius: 8,
                   alignItems: 'center',
                   borderWidth: 1,
-                  borderColor: '#D1D5DB',
-                  backgroundColor: 'white',
+                  borderColor: colors.cancelBorder,
+                  backgroundColor: colors.cancelBg,
                 }}
               >
                 <Text style={{
                   fontSize: 15,
                   fontWeight: '600',
-                  color: '#3B82F6',
+                  color: colors.cancelText,
                 }}>
                   Cancel
                 </Text>
@@ -381,7 +429,7 @@ const TakeBreakModal = ({ visible, onClose, onStartBreak, isDark = false }: Take
                   backgroundColor: ((selectedReason || (showCustomReason && customReason)) &&
                     (selectedDuration || (showCustomDuration && customDuration)))
                     ? '#2563EB'
-                    : '#9CA3AF',
+                    : colors.disabledBg,
                 }}
               >
                 <Text style={{

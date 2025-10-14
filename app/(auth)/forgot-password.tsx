@@ -1,14 +1,12 @@
-import React, { useState, useRef, useEffect } from "react";
-import { View, TouchableOpacity, Text, TextInput, Alert } from "react-native";
+import useThemeStore from "@/store/themeStore";
+import { forgotPassTranslations } from "@/translations/forgotPassTranslations";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import useThemeStore from "@/store/themeStore";
-import ThemeWidget from "@/components/ThemeWidget";
-import LanguageWidget from "@/components/LanguageWidget";
-import { ArrowLeft, Mail, Lock } from "lucide-react-native";
-import { forgotPassTranslations } from "@/translations/forgotPassTranslations";
-import { z } from "zod";
+import { ArrowLeft, Lock, Mail } from "lucide-react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { Alert, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { z } from "zod";
 
 const emailSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -32,6 +30,44 @@ export default function ForgotPasswordScreen() {
   const router = useRouter();
   const { isDark, language } = useThemeStore();
   const languageSet = forgotPassTranslations[language];
+
+  // Dark mode color palette - MATCHING all other pages
+  const colors = {
+    // Page backgrounds - consistent gradient
+    gradientStart: isDark ? "#111827" : "#F1F5F9", // dark:from-gray-900
+    gradientMid: isDark ? "#1F2937" : "#E2E8F0", // dark:bg-gray-800
+    gradientEnd: isDark ? "#374151" : "#CBD5E1", // dark:border-gray-700
+
+    // Text colors - blue palette
+    textPrimary: isDark ? "#DBEAFE" : "#1E3A8A", // dark:text-blue-100
+    textSecondary: isDark ? "#BFDBFE" : "#3B82F6", // dark:text-blue-200
+    textAccent: isDark ? "#93C5FD" : "#3B82F6", // dark:text-blue-300
+
+    // Icon colors
+    iconColor: isDark ? "#60A5FA" : "#3B82F6", // dark:text-blue-400
+    backButtonColor: isDark ? "#60A5FA" : "#3B82F6", // dark:text-blue-400
+
+    // Input fields
+    inputBg: isDark ? "#374151" : "white", // dark:bg-gray-700
+    inputBorder: isDark ? "#4B5563" : "#E5E7EB", // dark:border-gray-600
+    inputText: isDark ? "#F9FAFB" : "#111827", // dark:text-white
+    placeholderColor: isDark ? "#9CA3AF" : "#6B7280",
+
+    // Code inputs
+    codeBg: isDark ? "#4B5563" : "#F9FAFB", // dark:bg-gray-600
+    codeBorder: isDark ? "#6B7280" : "#D1D5DB", // dark:border-gray-500
+    codeText: isDark ? "#F9FAFB" : "#111827",
+
+    // Step indicator
+    stepActive: "#3B82F6",
+    stepInactive: isDark ? "#4B5563" : "#E5E7EB", // dark:bg-gray-600
+    stepText: isDark ? "#93C5FD" : "#3B82F6", // dark:text-blue-300
+
+    // Card backgrounds
+    cardBg: isDark ? "#374151" : "white", // dark:bg-gray-700
+    cardBorder: isDark ? "#4B5563" : "#E5E7EB", // dark:border-gray-600
+  };
+
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState("");
   const [verificationCode, setVerificationCode] = useState(["", "", "", ""]);
@@ -137,14 +173,13 @@ export default function ForgotPasswordScreen() {
             style={{
               flex: 1,
               height: 4,
-              backgroundColor:
-                step >= stepNum ? "#3B82F6" : isDark ? "#4B5563" : "#E5E7EB",
+              backgroundColor: step >= stepNum ? colors.stepActive : colors.stepInactive,
               borderRadius: 2,
             }}
           />
         ))}
       </View>
-      <Text style={{ color: "#3B82F6", fontSize: 14 }}>
+      <Text style={{ color: colors.stepText, fontSize: 14 }}>
         {languageSet[`step${step}`]}
       </Text>
     </View>
@@ -156,7 +191,7 @@ export default function ForgotPasswordScreen() {
         style={{
           fontSize: 28,
           fontWeight: "bold",
-          color: isDark ? "#F8FAFC" : "#1E3A8A",
+          color: colors.textPrimary,
           marginBottom: 8,
         }}
       >
@@ -164,7 +199,7 @@ export default function ForgotPasswordScreen() {
       </Text>
       <Text
         style={{
-          color: "#3B82F6",
+          color: colors.textSecondary,
           fontSize: 16,
           marginBottom: 32,
         }}
@@ -176,31 +211,31 @@ export default function ForgotPasswordScreen() {
           style={{
             flexDirection: "row",
             alignItems: "center",
-            backgroundColor: isDark ? "#374151" : "white",
+            backgroundColor: colors.inputBg,
             borderRadius: 12,
             paddingHorizontal: 16,
             paddingVertical: 8,
             borderWidth: 1,
-            borderColor: isDark ? "#4B5563" : "#E5E7EB",
+            borderColor: colors.inputBorder,
           }}
         >
-          <Mail size={20} color="#3B82F6" />
+          <Mail size={20} color={colors.iconColor} />
           <TextInput
             style={{
               flex: 1,
               marginLeft: 12,
               fontSize: 16,
-              color: isDark ? "#F9FAFB" : "#111827",
+              color: colors.inputText,
             }}
             placeholder={languageSet.emailAddress}
-            placeholderTextColor={isDark ? "#9CA3AF" : "#6B7280"}
+            placeholderTextColor={colors.placeholderColor}
             value={email}
             onChangeText={setEmail}
             keyboardType="email-address"
             autoCapitalize="none"
           />
         </View>
-        <View className="h-5">
+        <View style={{ height: 20 }}>
           {errors.email ? (
             <Text
               style={{
@@ -220,7 +255,7 @@ export default function ForgotPasswordScreen() {
         onPress={handleNextStep}
       >
         <LinearGradient
-          colors={isDark ? ["#6366F1", "#4338CA"] : ["#4F7DF7", "#2563EB"]}
+          colors={["#4F7DF7", "#2563EB"]}
           start={[0, 0]}
           end={[1, 0]}
           style={{
@@ -237,11 +272,11 @@ export default function ForgotPasswordScreen() {
       </TouchableOpacity>
       <Text
         style={{
-          color: "#3B82F6",
+          color: colors.textAccent,
           fontSize: 14,
           textAlign: "center",
+          width: "100%",
         }}
-        className=" w-full"
       >
         {languageSet.verificationSent}
       </Text>
@@ -254,7 +289,7 @@ export default function ForgotPasswordScreen() {
         style={{
           fontSize: 28,
           fontWeight: "bold",
-          color: isDark ? "#F8FAFC" : "#1E3A8A",
+          color: colors.textPrimary,
           marginBottom: 8,
         }}
       >
@@ -262,7 +297,7 @@ export default function ForgotPasswordScreen() {
       </Text>
       <Text
         style={{
-          color: "#3B82F6",
+          color: colors.textSecondary,
           fontSize: 16,
           marginBottom: 32,
         }}
@@ -271,12 +306,12 @@ export default function ForgotPasswordScreen() {
       </Text>
       <View
         style={{
-          backgroundColor: isDark ? "#374151" : "white",
+          backgroundColor: colors.cardBg,
           borderRadius: 12,
           padding: 20,
           marginBottom: 8,
           borderWidth: 1,
-          borderColor: isDark ? "#4B5563" : "#E5E7EB",
+          borderColor: colors.cardBorder,
           width: "100%",
         }}
       >
@@ -284,7 +319,7 @@ export default function ForgotPasswordScreen() {
           style={{
             fontSize: 16,
             fontWeight: "600",
-            color: isDark ? "#F9FAFB" : "#111827",
+            color: colors.inputText,
             marginBottom: 8,
           }}
         >
@@ -292,7 +327,7 @@ export default function ForgotPasswordScreen() {
         </Text>
         <Text
           style={{
-            color: "#3B82F6",
+            color: colors.textSecondary,
             fontSize: 14,
             marginBottom: 16,
           }}
@@ -309,14 +344,14 @@ export default function ForgotPasswordScreen() {
               style={{
                 width: 50,
                 height: 50,
-                backgroundColor: isDark ? "#4B5563" : "#F9FAFB",
+                backgroundColor: colors.codeBg,
                 borderRadius: 8,
                 textAlign: "center",
                 fontSize: 18,
                 fontWeight: "600",
-                color: isDark ? "#F9FAFB" : "#111827",
+                color: colors.codeText,
                 borderWidth: 1,
-                borderColor: isDark ? "#6B7280" : "#D1D5DB",
+                borderColor: colors.codeBorder,
               }}
               value={digit}
               onChangeText={(value) => handleCodeChange(value, index)}
@@ -326,7 +361,7 @@ export default function ForgotPasswordScreen() {
           ))}
         </View>
       </View>
-      <View className="h-5 w-full">
+      <View style={{ height: 20, width: "100%" }}>
         {errors.code ? (
           <Text
             style={{
@@ -346,7 +381,7 @@ export default function ForgotPasswordScreen() {
         disabled={!verificationCode.every((d) => d !== "")}
       >
         <LinearGradient
-          colors={isDark ? ["#6366F1", "#4338CA"] : ["#4F7DF7", "#2563EB"]}
+          colors={["#4F7DF7", "#2563EB"]}
           start={[0, 0]}
           end={[1, 0]}
           style={{
@@ -369,7 +404,7 @@ export default function ForgotPasswordScreen() {
       >
         <Text
           style={{
-            color: "#3B82F6",
+            color: colors.textAccent,
             fontSize: 14,
             textAlign: "center",
           }}
@@ -387,7 +422,7 @@ export default function ForgotPasswordScreen() {
         style={{
           fontSize: 28,
           fontWeight: "bold",
-          color: isDark ? "#F8FAFC" : "#1E3A8A",
+          color: colors.textPrimary,
           marginBottom: 8,
         }}
       >
@@ -395,7 +430,7 @@ export default function ForgotPasswordScreen() {
       </Text>
       <Text
         style={{
-          color: "#3B82F6",
+          color: colors.textSecondary,
           fontSize: 16,
           marginBottom: 32,
         }}
@@ -407,30 +442,30 @@ export default function ForgotPasswordScreen() {
           style={{
             flexDirection: "row",
             alignItems: "center",
-            backgroundColor: isDark ? "#374151" : "white",
+            backgroundColor: colors.inputBg,
             borderRadius: 12,
             paddingHorizontal: 16,
             paddingVertical: 8,
             borderWidth: 1,
-            borderColor: isDark ? "#4B5563" : "#E5E7EB",
+            borderColor: colors.inputBorder,
           }}
         >
-          <Lock size={20} color="#3B82F6" />
+          <Lock size={20} color={colors.iconColor} />
           <TextInput
             style={{
               flex: 1,
               marginLeft: 12,
               fontSize: 16,
-              color: isDark ? "#F9FAFB" : "#111827",
+              color: colors.inputText,
             }}
             placeholder={languageSet.newPassword}
-            placeholderTextColor={isDark ? "#9CA3AF" : "#6B7280"}
+            placeholderTextColor={colors.placeholderColor}
             value={newPassword}
             onChangeText={setNewPassword}
             secureTextEntry={true}
           />
         </View>
-        <View className="h-5">
+        <View style={{ height: 20 }}>
           {errors.newPassword ? (
             <Text
               style={{
@@ -450,30 +485,30 @@ export default function ForgotPasswordScreen() {
           style={{
             flexDirection: "row",
             alignItems: "center",
-            backgroundColor: isDark ? "#374151" : "white",
+            backgroundColor: colors.inputBg,
             borderRadius: 12,
             paddingHorizontal: 16,
             paddingVertical: 8,
             borderWidth: 1,
-            borderColor: isDark ? "#4B5563" : "#E5E7EB",
+            borderColor: colors.inputBorder,
           }}
         >
-          <Lock size={20} color="#3B82F6" />
+          <Lock size={20} color={colors.iconColor} />
           <TextInput
             style={{
               flex: 1,
               marginLeft: 12,
               fontSize: 16,
-              color: isDark ? "#F9FAFB" : "#111827",
+              color: colors.inputText,
             }}
             placeholder={languageSet.confirmNewPassword}
-            placeholderTextColor={isDark ? "#9CA3AF" : "#6B7280"}
+            placeholderTextColor={colors.placeholderColor}
             value={confirmPassword}
             onChangeText={setConfirmPassword}
             secureTextEntry={true}
           />
         </View>
-        <View className="h-5">
+        <View style={{ height: 20 }}>
           {errors.confirmPassword ? (
             <Text
               style={{
@@ -493,7 +528,7 @@ export default function ForgotPasswordScreen() {
         onPress={handleNextStep}
       >
         <LinearGradient
-          colors={isDark ? ["#6366F1", "#4338CA"] : ["#4F7DF7", "#2563EB"]}
+          colors={["#4F7DF7", "#2563EB"]}
           start={[0, 0]}
           end={[1, 0]}
           style={{
@@ -514,7 +549,7 @@ export default function ForgotPasswordScreen() {
       >
         <Text
           style={{
-            color: "#3B82F6",
+            color: colors.textAccent,
             fontSize: 14,
             textAlign: "center",
           }}
@@ -529,23 +564,13 @@ export default function ForgotPasswordScreen() {
   );
 
   return (
-    <SafeAreaView className="flex-1">
+    <SafeAreaView style={{ flex: 1 }}>
       <LinearGradient
-        colors={
-          isDark
-            ? ["#1E1B4B", "#312E81", "#3730A3"]
-            : ["#F1F5F9", "#E2E8F0", "#CBD5E1"]
-        }
+        colors={[colors.gradientStart, colors.gradientMid, colors.gradientEnd]}
         start={[0, 0]}
         end={[0, 1]}
         style={{ flex: 1 }}
       >
-        {/* <ThemeWidget isDark={isDark} toggleTheme={toggleTheme} /> */}
-        {/* <LanguageWidget
-          setLanguage={setLanguage}
-          isDark={isDark}
-          language={language}
-        /> */}
         <TouchableOpacity
           onPress={() => (step === 1 ? router.back() : setStep(step - 1))}
           style={{
@@ -555,12 +580,13 @@ export default function ForgotPasswordScreen() {
             flexDirection: "row",
             alignItems: "center",
             paddingVertical: 0,
+            zIndex: 10,
           }}
         >
-          <ArrowLeft size={20} color="#3B82F6" />
+          <ArrowLeft size={20} color={colors.backButtonColor} />
           <Text
             style={{
-              color: "#3B82F6",
+              color: colors.backButtonColor,
               marginLeft: 4,
               fontSize: 16,
             }}
@@ -574,7 +600,6 @@ export default function ForgotPasswordScreen() {
           style={{
             flex: 1,
             alignItems: "flex-start",
-            // justifyContent: "",
             paddingHorizontal: 16,
             marginTop: 40,
             width: "100%",

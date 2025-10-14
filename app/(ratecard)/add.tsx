@@ -6,13 +6,14 @@ import { useRouter } from "expo-router";
 import {
   AlertCircle,
   ArrowLeft,
+  Baby,
   ChevronDown,
   Info,
+  Mars,
   Plus,
   Trash2,
-  UserCheck,
   Users,
-  UserX,
+  Venus
 } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
 import {
@@ -31,13 +32,12 @@ import {
 interface Service {
   id: number;
   name: string;
-  gender: "Child" | "Male" | "Female";
+  gender: "Male" | "Female" | "Child";
   hours: number;
   minutes: number;
   rate: string;
 }
 
-// Predefined service names
 const SERVICE_NAMES = [
   "Haircut",
   "Facial",
@@ -56,21 +56,72 @@ const SERVICE_NAMES = [
   "Makeup",
 ];
 
-// Hour options (0-5)
 const HOUR_OPTIONS = [0, 1, 2, 3, 4, 5];
-
-// Minute options (0, 15, 30, 45)
 const MINUTE_OPTIONS = [0, 15, 30, 45];
 
 export default function AddServiceScreen() {
   const router = useRouter();
   const { isDark, language } = useThemeStore();
+
+  // Dark mode color palette - MATCHING all other pages
+  const colors = {
+    // Page backgrounds - consistent gradient
+    gradientStart: isDark ? "#111827" : "#F1F5F9", // dark:from-gray-900
+    gradientMid: isDark ? "#1F2937" : "#E2E8F0", // dark:bg-gray-800
+    gradientEnd: isDark ? "#374151" : "#CBD5E1", // dark:border-gray-700
+
+    // Text colors - blue palette
+    textPrimary: isDark ? "#DBEAFE" : "#1E3A8A", // dark:text-blue-100
+    textSecondary: isDark ? "#BFDBFE" : "#3B82F6", // dark:text-blue-200
+    textAccent: isDark ? "#93C5FD" : "#3B82F6", // dark:text-blue-300
+    textMuted: isDark ? "#9CA3AF" : "#6B7280", // dark:text-gray-400
+
+    // Icon colors
+    iconColor: isDark ? "#60A5FA" : "#3B82F6", // dark:text-blue-400
+
+    // Card backgrounds
+    cardBg: isDark ? "rgba(31, 41, 55, 0.95)" : "white", // dark:bg-gray-800/95
+    headerBg: isDark ? "#374151" : "white", // dark:bg-gray-700
+    serviceCardBg: isDark ? "#4B5563" : "#F9FAFB", // dark:bg-gray-600
+
+    // Input fields
+    inputBg: isDark ? "#374151" : "white", // dark:bg-gray-700
+    inputBorder: isDark ? "#4B5563" : "#E5E7EB", // dark:border-gray-600
+    inputText: isDark ? "#F9FAFB" : "#111827", // dark:text-white
+    placeholderColor: isDark ? "#9CA3AF" : "#6B7280",
+
+    // Borders
+    borderColor: isDark ? "#4B5563" : "#E5E7EB", // dark:border-gray-600
+    serviceBorder: isDark ? "#6B7280" : "#E5E7EB", // dark:border-gray-500
+
+    // Error backgrounds
+    errorBg: isDark ? "#7F1D1D" : "#FEF2F2", // dark:bg-red-900
+    errorBorder: isDark ? "#DC2626" : "#FECACA",
+
+    // Delete button
+    deleteBg: isDark ? "#7F1D1D" : "#FEF2F2",
+
+    // Gender button selected
+    genderSelected: "#3B82F6",
+    genderUnselected: isDark ? "#374151" : "white",
+    genderBorder: isDark ? "#4B5563" : "#E5E7EB",
+    genderIcon: isDark ? "#9CA3AF" : "#6B7280",
+
+    // Add button
+    addButtonBg: isDark ? "#1E40AF" : "#EFF6FF", // dark:bg-blue-900
+    addButtonText: isDark ? "white" : "#3B82F6",
+
+    // Modal
+    modalBg: isDark ? "#374151" : "white",
+    modalTitle: isDark ? "#DBEAFE" : "#1E3A8A",
+  };
+
   const [existingServices, setExistingServices] = useState<Service[]>([]);
   const [newServices, setNewServices] = useState<Service[]>([
     {
       id: Date.now(),
       name: "",
-      gender: "Child",
+      gender: "Male",
       hours: 0,
       minutes: 15,
       rate: "",
@@ -186,7 +237,7 @@ export default function AddServiceScreen() {
         {
           id: Date.now(),
           name: "",
-          gender: "Child",
+          gender: "Male",
           hours: 0,
           minutes: 15,
           rate: "",
@@ -251,12 +302,12 @@ export default function AddServiceScreen() {
 
   const renderGenderIcon = (gender: string) => {
     switch (gender) {
-      case "Child":
-        return <Users size={18} color="white" />;
       case "Male":
-        return <UserCheck size={18} color="white" />;
+        return <Mars size={18} color="white" />;
       case "Female":
-        return <UserX size={18} color="white" />;
+        return <Venus size={18} color="white" />;
+      case "Child":
+        return <Baby size={18} color="white" />;
       default:
         return <Users size={18} color="white" />;
     }
@@ -264,11 +315,7 @@ export default function AddServiceScreen() {
 
   return (
     <LinearGradient
-      colors={
-        isDark
-          ? ["#1E1B4B", "#312E81", "#3730A3"]
-          : ["#F1F5F9", "#E2E8F0", "#CBD5E1"]
-      }
+      colors={[colors.gradientStart, colors.gradientMid, colors.gradientEnd]}
       start={[0, 0]}
       end={[0, 1]}
       style={{ flex: 1 }}
@@ -281,25 +328,27 @@ export default function AddServiceScreen() {
         {/* Header */}
         <View
           style={{
-            backgroundColor: isDark ? "#374151" : "white",
+            backgroundColor: colors.headerBg,
             paddingHorizontal: 16,
             paddingTop: Platform.OS === "ios" ? 60 : 40,
             paddingBottom: 16,
             flexDirection: "row",
             alignItems: "center",
+            borderBottomWidth: 1,
+            borderBottomColor: colors.borderColor,
           }}
         >
           <TouchableOpacity
             onPress={() => router.back()}
             style={{ marginRight: 12 }}
           >
-            <ArrowLeft size={20} color="#3B82F6" />
+            <ArrowLeft size={20} color={colors.iconColor} />
           </TouchableOpacity>
           <Text
             style={{
               fontSize: 18,
               fontWeight: "bold",
-              color: isDark ? "#F8FAFC" : "#1E3A8A",
+              color: colors.textPrimary,
             }}
           >
             {languageSet.addServices}
@@ -314,12 +363,12 @@ export default function AddServiceScreen() {
           {/* Info Card */}
           <View
             style={{
-              backgroundColor: isDark ? "#374151" : "white",
+              backgroundColor: colors.cardBg,
               borderRadius: 12,
               padding: 8,
               marginBottom: 16,
               borderWidth: 1,
-              borderColor: isDark ? "#4B5563" : "#E5E7EB",
+              borderColor: colors.borderColor,
             }}
           >
             <View
@@ -329,10 +378,10 @@ export default function AddServiceScreen() {
                 marginBottom: 16,
               }}
             >
-              <Info size={16} color="#3B82F6" style={{ marginRight: 8 }} />
+              <Info size={16} color={colors.iconColor} style={{ marginRight: 8 }} />
               <Text
                 style={{
-                  color: isDark ? "#9CA3AF" : "#6B7280",
+                  color: colors.textMuted,
                   fontSize: 14,
                 }}
               >
@@ -344,8 +393,8 @@ export default function AddServiceScreen() {
             {formErrors.general && (
               <View
                 style={{
-                  backgroundColor: isDark ? "#7F1D1D" : "#FEF2F2",
-                  borderColor: isDark ? "#DC2626" : "#FECACA",
+                  backgroundColor: colors.errorBg,
+                  borderColor: colors.errorBorder,
                   borderWidth: 1,
                   borderRadius: 8,
                   padding: 12,
@@ -369,12 +418,12 @@ export default function AddServiceScreen() {
               <View
                 key={service.id}
                 style={{
-                  backgroundColor: isDark ? "#4B5563" : "#F9FAFB",
+                  backgroundColor: colors.serviceCardBg,
                   borderRadius: 12,
                   padding: 16,
                   marginBottom: 16,
                   borderWidth: 1,
-                  borderColor: isDark ? "#6B7280" : "#E5E7EB",
+                  borderColor: colors.serviceBorder,
                 }}
               >
                 {/* Service Header */}
@@ -390,7 +439,7 @@ export default function AddServiceScreen() {
                     style={{
                       fontSize: 16,
                       fontWeight: "600",
-                      color: isDark ? "#F8FAFC" : "#1E3A8A",
+                      color: colors.textPrimary,
                     }}
                   >
                     Service {index + 1}
@@ -399,7 +448,7 @@ export default function AddServiceScreen() {
                     <TouchableOpacity
                       onPress={() => handleRemoveService(index)}
                       style={{
-                        backgroundColor: isDark ? "#7F1D1D" : "#FEF2F2",
+                        backgroundColor: colors.deleteBg,
                         padding: 8,
                         borderRadius: 8,
                       }}
@@ -409,124 +458,137 @@ export default function AddServiceScreen() {
                   )}
                 </View>
 
-                {/* Service Name Dropdown */}
-                <View style={{ marginBottom: 16 }}>
+                {/* Service Name with Autocomplete */}
+                <View style={{ marginBottom: 16, zIndex: 1000 - index }}>
                   <Text
                     style={{
                       fontSize: 14,
                       fontWeight: "500",
-                      color: isDark ? "#A5B4FC" : "#3B82F6",
+                      color: colors.textSecondary,
                       marginBottom: 4,
                     }}
                   >
                     {languageSet.serviceNameLabel}
                   </Text>
-                  <TouchableOpacity
-                    onPress={() => setShowServiceDropdown(index)}
-                    style={{
-                      backgroundColor: isDark ? "#374151" : "white",
-                      borderColor: formErrors[`${index}-name`]
-                        ? "#DC2626"
-                        : isDark
-                          ? "#4B5563"
-                          : "#E5E7EB",
-                      borderWidth: 1,
-                      borderRadius: 8,
-                      paddingHorizontal: 12,
-                      paddingVertical: 12,
-                      flexDirection: "row",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Text
-                      style={{
-                        fontSize: 16,
-                        color: service.name
-                          ? isDark
-                            ? "#F9FAFB"
-                            : "#111827"
-                          : isDark
-                            ? "#9CA3AF"
-                            : "#6B7280",
+                  <View style={{ position: "relative" }}>
+                    <TextInput
+                      value={service.name}
+                      onChangeText={(text) => {
+                        handleInputChange(index, "name", text);
+                        if (text.trim()) {
+                          setShowServiceDropdown(index);
+                        } else {
+                          setShowServiceDropdown(null);
+                        }
                       }}
-                    >
-                      {service.name || "Select or enter service"}
-                    </Text>
-                    <ChevronDown size={20} color={isDark ? "#9CA3AF" : "#6B7280"} />
-                  </TouchableOpacity>
+                      onFocus={() => {
+                        if (service.name.trim()) {
+                          setShowServiceDropdown(index);
+                        }
+                      }}
+                      onBlur={() => {
+                        setTimeout(() => setShowServiceDropdown(null), 200);
+                      }}
+                      placeholder="Type or select service name"
+                      placeholderTextColor={colors.placeholderColor}
+                      style={{
+                        backgroundColor: colors.inputBg,
+                        borderColor: formErrors[`${index}-name`]
+                          ? "#DC2626"
+                          : colors.inputBorder,
+                        borderWidth: 1,
+                        borderRadius: 8,
+                        paddingHorizontal: 12,
+                        paddingVertical: 12,
+                        fontSize: 16,
+                        color: colors.inputText,
+                      }}
+                    />
+
+                    {/* Filtered Suggestions Dropdown */}
+                    {showServiceDropdown === index && (
+                      <View
+                        style={{
+                          backgroundColor: colors.inputBg,
+                          borderRadius: 8,
+                          marginTop: 4,
+                          borderWidth: 1,
+                          borderColor: colors.inputBorder,
+                          maxHeight: 200,
+                          position: "absolute",
+                          top: 50,
+                          left: 0,
+                          right: 0,
+                          zIndex: 9999,
+                          elevation: 5,
+                          shadowColor: "#000",
+                          shadowOffset: { width: 0, height: 2 },
+                          shadowOpacity: 0.25,
+                          shadowRadius: 3.84,
+                        }}
+                      >
+                        <ScrollView
+                          keyboardShouldPersistTaps="always"
+                          nestedScrollEnabled={true}
+                        >
+                          {SERVICE_NAMES.filter((serviceName) =>
+                            serviceName.toLowerCase().includes(service.name.toLowerCase())
+                          ).length > 0 ? (
+                            SERVICE_NAMES.filter((serviceName) =>
+                              serviceName.toLowerCase().includes(service.name.toLowerCase())
+                            ).map((serviceName) => (
+                              <TouchableOpacity
+                                key={serviceName}
+                                onPress={() => {
+                                  handleInputChange(index, "name", serviceName);
+                                  setShowServiceDropdown(null);
+                                }}
+                                style={{
+                                  paddingVertical: 12,
+                                  paddingHorizontal: 16,
+                                  borderBottomWidth: 1,
+                                  borderBottomColor: colors.borderColor,
+                                }}
+                              >
+                                <Text
+                                  style={{
+                                    fontSize: 16,
+                                    color: colors.inputText,
+                                  }}
+                                >
+                                  {serviceName}
+                                </Text>
+                              </TouchableOpacity>
+                            ))
+                          ) : (
+                            <View
+                              style={{
+                                paddingVertical: 12,
+                                paddingHorizontal: 16,
+                              }}
+                            >
+                              <Text
+                                style={{
+                                  fontSize: 14,
+                                  color: colors.textMuted,
+                                  fontStyle: "italic",
+                                }}
+                              >
+                                No suggestions found. Keep typing to add custom service.
+                              </Text>
+                            </View>
+                          )}
+                        </ScrollView>
+                      </View>
+                    )}
+                  </View>
+
                   {formErrors[`${index}-name`] && (
-                    <Text
-                      style={{ color: "#DC2626", fontSize: 12, marginTop: 4 }}
-                    >
+                    <Text style={{ color: "#DC2626", fontSize: 12, marginTop: 4 }}>
                       {formErrors[`${index}-name`]}
                     </Text>
                   )}
                 </View>
-
-                {/* Service Name Dropdown Modal */}
-                <Modal
-                  visible={showServiceDropdown === index}
-                  transparent
-                  animationType="fade"
-                  onRequestClose={() => setShowServiceDropdown(null)}
-                >
-                  <Pressable
-                    style={{
-                      flex: 1,
-                      backgroundColor: "rgba(0,0,0,0.5)",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                    onPress={() => setShowServiceDropdown(null)}
-                  >
-                    <View
-                      style={{
-                        backgroundColor: isDark ? "#374151" : "white",
-                        borderRadius: 12,
-                        padding: 16,
-                        width: "80%",
-                        maxHeight: "60%",
-                      }}
-                    >
-                      <Text
-                        style={{
-                          fontSize: 18,
-                          fontWeight: "bold",
-                          color: isDark ? "#F8FAFC" : "#1E3A8A",
-                          marginBottom: 16,
-                        }}
-                      >
-                        Select Service
-                      </Text>
-                      <ScrollView>
-                        {SERVICE_NAMES.map((serviceName) => (
-                          <TouchableOpacity
-                            key={serviceName}
-                            onPress={() => {
-                              handleInputChange(index, "name", serviceName);
-                              setShowServiceDropdown(null);
-                            }}
-                            style={{
-                              paddingVertical: 12,
-                              borderBottomWidth: 1,
-                              borderBottomColor: isDark ? "#4B5563" : "#E5E7EB",
-                            }}
-                          >
-                            <Text
-                              style={{
-                                fontSize: 16,
-                                color: isDark ? "#F9FAFB" : "#111827",
-                              }}
-                            >
-                              {serviceName}
-                            </Text>
-                          </TouchableOpacity>
-                        ))}
-                      </ScrollView>
-                    </View>
-                  </Pressable>
-                </Modal>
 
                 {/* Gender with Icons */}
                 <View style={{ marginBottom: 16 }}>
@@ -534,7 +596,7 @@ export default function AddServiceScreen() {
                     style={{
                       fontSize: 14,
                       fontWeight: "500",
-                      color: isDark ? "#A5B4FC" : "#3B82F6",
+                      color: colors.textSecondary,
                       marginBottom: 8,
                     }}
                   >
@@ -542,9 +604,9 @@ export default function AddServiceScreen() {
                   </Text>
                   <View style={{ flexDirection: "row", gap: 8 }}>
                     {[
-                      { value: "Child", icon: Users },
-                      { value: "Male", icon: UserCheck },
-                      { value: "Female", icon: UserX },
+                      { value: "Male", icon: Mars },
+                      { value: "Female", icon: Venus },
+                      { value: "Child", icon: Baby },
                     ].map(({ value, icon: Icon }) => (
                       <TouchableOpacity
                         key={value}
@@ -557,16 +619,12 @@ export default function AddServiceScreen() {
                           paddingHorizontal: 16,
                           backgroundColor:
                             service.gender === value
-                              ? "#3B82F6"
-                              : isDark
-                                ? "#374151"
-                                : "white",
+                              ? colors.genderSelected
+                              : colors.genderUnselected,
                           borderColor:
                             service.gender === value
-                              ? "#3B82F6"
-                              : isDark
-                                ? "#4B5563"
-                                : "#E5E7EB",
+                              ? colors.genderSelected
+                              : colors.genderBorder,
                           borderWidth: 1,
                           borderRadius: 8,
                           alignItems: "center",
@@ -580,9 +638,7 @@ export default function AddServiceScreen() {
                           color={
                             service.gender === value
                               ? "white"
-                              : isDark
-                                ? "#9CA3AF"
-                                : "#6B7280"
+                              : colors.genderIcon
                           }
                         />
                         <Text
@@ -590,9 +646,7 @@ export default function AddServiceScreen() {
                             color:
                               service.gender === value
                                 ? "white"
-                                : isDark
-                                  ? "#F9FAFB"
-                                  : "#111827",
+                                : colors.inputText,
                             fontSize: 14,
                             fontWeight: service.gender === value ? "600" : "400",
                           }}
@@ -610,7 +664,7 @@ export default function AddServiceScreen() {
                     style={{
                       fontSize: 14,
                       fontWeight: "500",
-                      color: isDark ? "#A5B4FC" : "#3B82F6",
+                      color: colors.textSecondary,
                       marginBottom: 8,
                     }}
                   >
@@ -622,7 +676,7 @@ export default function AddServiceScreen() {
                       <Text
                         style={{
                           fontSize: 12,
-                          color: isDark ? "#9CA3AF" : "#6B7280",
+                          color: colors.textMuted,
                           marginBottom: 4,
                         }}
                       >
@@ -631,8 +685,8 @@ export default function AddServiceScreen() {
                       <TouchableOpacity
                         onPress={() => setShowHoursDropdown(index)}
                         style={{
-                          backgroundColor: isDark ? "#374151" : "white",
-                          borderColor: isDark ? "#4B5563" : "#E5E7EB",
+                          backgroundColor: colors.inputBg,
+                          borderColor: colors.inputBorder,
                           borderWidth: 1,
                           borderRadius: 8,
                           paddingHorizontal: 12,
@@ -645,12 +699,12 @@ export default function AddServiceScreen() {
                         <Text
                           style={{
                             fontSize: 16,
-                            color: isDark ? "#F9FAFB" : "#111827",
+                            color: colors.inputText,
                           }}
                         >
                           {service.hours}
                         </Text>
-                        <ChevronDown size={16} color={isDark ? "#9CA3AF" : "#6B7280"} />
+                        <ChevronDown size={16} color={colors.textMuted} />
                       </TouchableOpacity>
                     </View>
 
@@ -659,7 +713,7 @@ export default function AddServiceScreen() {
                       <Text
                         style={{
                           fontSize: 12,
-                          color: isDark ? "#9CA3AF" : "#6B7280",
+                          color: colors.textMuted,
                           marginBottom: 4,
                         }}
                       >
@@ -668,8 +722,8 @@ export default function AddServiceScreen() {
                       <TouchableOpacity
                         onPress={() => setShowMinutesDropdown(index)}
                         style={{
-                          backgroundColor: isDark ? "#374151" : "white",
-                          borderColor: isDark ? "#4B5563" : "#E5E7EB",
+                          backgroundColor: colors.inputBg,
+                          borderColor: colors.inputBorder,
                           borderWidth: 1,
                           borderRadius: 8,
                           paddingHorizontal: 12,
@@ -682,12 +736,12 @@ export default function AddServiceScreen() {
                         <Text
                           style={{
                             fontSize: 16,
-                            color: isDark ? "#F9FAFB" : "#111827",
+                            color: colors.inputText,
                           }}
                         >
                           {service.minutes}
                         </Text>
-                        <ChevronDown size={16} color={isDark ? "#9CA3AF" : "#6B7280"} />
+                        <ChevronDown size={16} color={colors.textMuted} />
                       </TouchableOpacity>
                     </View>
                   </View>
@@ -711,7 +765,7 @@ export default function AddServiceScreen() {
                   >
                     <View
                       style={{
-                        backgroundColor: isDark ? "#374151" : "white",
+                        backgroundColor: colors.modalBg,
                         borderRadius: 12,
                         padding: 16,
                         width: "50%",
@@ -721,7 +775,7 @@ export default function AddServiceScreen() {
                         style={{
                           fontSize: 18,
                           fontWeight: "bold",
-                          color: isDark ? "#F8FAFC" : "#1E3A8A",
+                          color: colors.modalTitle,
                           marginBottom: 16,
                         }}
                       >
@@ -737,13 +791,13 @@ export default function AddServiceScreen() {
                           style={{
                             paddingVertical: 12,
                             borderBottomWidth: 1,
-                            borderBottomColor: isDark ? "#4B5563" : "#E5E7EB",
+                            borderBottomColor: colors.borderColor,
                           }}
                         >
                           <Text
                             style={{
                               fontSize: 16,
-                              color: isDark ? "#F9FAFB" : "#111827",
+                              color: colors.inputText,
                               textAlign: "center",
                             }}
                           >
@@ -773,7 +827,7 @@ export default function AddServiceScreen() {
                   >
                     <View
                       style={{
-                        backgroundColor: isDark ? "#374151" : "white",
+                        backgroundColor: colors.modalBg,
                         borderRadius: 12,
                         padding: 16,
                         width: "50%",
@@ -783,7 +837,7 @@ export default function AddServiceScreen() {
                         style={{
                           fontSize: 18,
                           fontWeight: "bold",
-                          color: isDark ? "#F8FAFC" : "#1E3A8A",
+                          color: colors.modalTitle,
                           marginBottom: 16,
                         }}
                       >
@@ -799,13 +853,13 @@ export default function AddServiceScreen() {
                           style={{
                             paddingVertical: 12,
                             borderBottomWidth: 1,
-                            borderBottomColor: isDark ? "#4B5563" : "#E5E7EB",
+                            borderBottomColor: colors.borderColor,
                           }}
                         >
                           <Text
                             style={{
                               fontSize: 16,
-                              color: isDark ? "#F9FAFB" : "#111827",
+                              color: colors.inputText,
                               textAlign: "center",
                             }}
                           >
@@ -823,7 +877,7 @@ export default function AddServiceScreen() {
                     style={{
                       fontSize: 14,
                       fontWeight: "500",
-                      color: isDark ? "#A5B4FC" : "#3B82F6",
+                      color: colors.textSecondary,
                       marginBottom: 4,
                     }}
                   >
@@ -832,29 +886,26 @@ export default function AddServiceScreen() {
                   <TextInput
                     value={service.rate}
                     onChangeText={(text) => {
-                      // Only allow numbers and limit to 100000
                       const numericValue = text.replace(/[^0-9]/g, "");
                       if (Number(numericValue) <= 100000) {
                         handleInputChange(index, "rate", numericValue);
                       }
                     }}
                     placeholder="e.g., 500 (Max: ₹1,00,000)"
-                    placeholderTextColor={isDark ? "#9CA3AF" : "#6B7280"}
+                    placeholderTextColor={colors.placeholderColor}
                     keyboardType="numeric"
                     maxLength={6}
                     style={{
-                      backgroundColor: isDark ? "#374151" : "white",
+                      backgroundColor: colors.inputBg,
                       borderColor: formErrors[`${index}-rate`]
                         ? "#DC2626"
-                        : isDark
-                          ? "#4B5563"
-                          : "#E5E7EB",
+                        : colors.inputBorder,
                       borderWidth: 1,
                       borderRadius: 8,
                       paddingHorizontal: 12,
                       paddingVertical: 12,
                       fontSize: 16,
-                      color: isDark ? "#F9FAFB" : "#111827",
+                      color: colors.inputText,
                     }}
                   />
                   {formErrors[`${index}-rate`] && (
@@ -873,7 +924,7 @@ export default function AddServiceScreen() {
               <TouchableOpacity
                 onPress={handleAddService}
                 style={{
-                  backgroundColor: isDark ? "#1E40AF" : "#EFF6FF",
+                  backgroundColor: colors.addButtonBg,
                   paddingVertical: 12,
                   paddingHorizontal: 16,
                   borderRadius: 8,
@@ -885,12 +936,13 @@ export default function AddServiceScreen() {
               >
                 <Plus
                   size={18}
-                  color={isDark ? "white" : "#3B82F6"}
+                  color={colors.addButtonText}
                   style={{ marginRight: 8 }}
                 />
+
                 <Text
                   style={{
-                    color: isDark ? "white" : "#3B82F6",
+                    color: colors.addButtonText,
                     fontSize: 16,
                     fontWeight: "500",
                   }}
@@ -903,7 +955,7 @@ export default function AddServiceScreen() {
             {/* Save Button */}
             <TouchableOpacity onPress={handleSaveServices}>
               <LinearGradient
-                colors={isDark ? ["#6366F1", "#4338CA"] : ["#4F7DF7", "#2563EB"]}
+                colors={["#4F7DF7", "#2563EB"]}
                 start={[0, 0]}
                 end={[1, 0]}
                 style={{

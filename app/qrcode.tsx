@@ -1,58 +1,76 @@
-import React, { useEffect, useState } from "react";
-import { View, TouchableOpacity, Text, ScrollView } from "react-native";
+import useThemeStore from "@/store/themeStore";
+import { translations } from "@/translations/qrcodeTranslations";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import useThemeStore from "@/store/themeStore";
 import { ArrowLeft, QrCode } from "lucide-react-native";
+import React, { useEffect, useState } from "react";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import QRCode from "react-native-qrcode-svg";
-import ThemeWidget from "@/components/ThemeWidget";
-import LanguageWidget from "@/components/LanguageWidget";
-import { translations } from "@/translations/qrcodeTranslations";
-
-// You'll need to replace this with your actual auth context/store
-// import { useAuth } from "@/context/AuthContext";
 
 export default function QRCodePage() {
   const router = useRouter();
   const { isDark, toggleTheme, setLanguage, language } = useThemeStore();
-  // const { user, isAuthenticated } = useAuth();
   const [businessName, setBusinessName] = useState("Your Business Name");
   const [qrValue, setQrValue] = useState(
     "https://yourapp.com/queue/join/business123"
   );
   const languageSet = translations[language];
+
+  // Dark mode color palette - MATCHING all other pages
+  const colors = {
+    // Page backgrounds - consistent gradient
+    gradientStart: isDark ? "#111827" : "#F1F5F9", // dark:from-gray-900
+    gradientMid: isDark ? "#1F2937" : "#E2E8F0", // dark:bg-gray-800
+    gradientEnd: isDark ? "#374151" : "#CBD5E1", // dark:border-gray-700
+
+    // Card backgrounds
+    cardBg: isDark ? "rgba(31, 41, 55, 0.95)" : "white", // dark:bg-gray-800/95
+    headerBg: isDark ? "rgba(55, 65, 81, 0.95)" : "white", // dark:bg-gray-700/95
+
+    // Text colors - blue palette
+    textPrimary: isDark ? "#DBEAFE" : "#1E3A8A", // dark:text-blue-100
+    textSecondary: isDark ? "#BFDBFE" : "#374151", // dark:text-blue-200
+    textAccent: isDark ? "#93C5FD" : "#3B82F6", // dark:text-blue-300
+    textMuted: isDark ? "#9CA3AF" : "#6B7280", // dark:text-gray-400
+
+    // Icon colors
+    iconColor: isDark ? "#60A5FA" : "#3B82F6", // dark:text-blue-400
+
+    // Card header
+    cardHeaderBg: isDark ? "rgba(96, 165, 250, 0.15)" : "#EFF6FF",
+    cardHeaderBorder: isDark ? "#4B5563" : "#DBEAFE",
+
+    // Border colors
+    borderColor: isDark ? "#374151" : "#E2E8F0", // dark:border-gray-700
+
+    // Step number badge
+    stepBadgeBg: isDark ? "rgba(96, 165, 250, 0.15)" : "#EFF6FF",
+    stepBadgeText: isDark ? "#60A5FA" : "#3B82F6",
+
+    // Instructions section title
+    instructionsTitle: isDark ? "#93C5FD" : "#1E40AF", // dark:text-blue-300
+
+    // Refresh button (if used)
+    refreshBg: isDark ? "rgba(96, 165, 250, 0.15)" : "#EFF6FF",
+    refreshBorder: isDark ? "#4B5563" : "#DBEAFE",
+    refreshText: isDark ? "#60A5FA" : "#3B82F6",
+  };
+
   const generateQRCode = (value: string) => {
     setQrValue(value);
   };
 
   useEffect(() => {
-    // Redirect to login if not authenticated
-    // if (!isAuthenticated) {
-    //   router.push("/(auth)/login");
-    //   return;
-    // }
-
-    // Set business name from user data
-    // if (user?.businessName) {
-    //   setBusinessName(user.businessName);
-    // }
-
-    // Generate QR code value (replace with your actual logic)
-    // This could be a unique URL for your queue system
     setQrValue(`https://yourapp.com/queue/join/${Date.now()}`);
   }, []);
 
   const handleBack = () => {
-    router.back(); // or router.back()
+    router.back();
   };
 
   return (
     <LinearGradient
-      colors={
-        isDark
-          ? ["#1E1B4B", "#312E81", "#3730A3"]
-          : ["#F1F5F9", "#E2E8F0", "#CBD5E1"]
-      }
+      colors={[colors.gradientStart, colors.gradientMid, colors.gradientEnd]}
       start={[0, 0]}
       end={[0, 1]}
       style={{ flex: 1 }}
@@ -60,7 +78,7 @@ export default function QRCodePage() {
       {/* Header */}
       <View
         style={{
-          backgroundColor: isDark ? "rgba(255, 255, 255, 0.1)" : "white",
+          backgroundColor: colors.headerBg,
           paddingTop: 60,
           paddingBottom: 16,
           paddingHorizontal: 16,
@@ -69,6 +87,8 @@ export default function QRCodePage() {
           shadowOpacity: 0.1,
           shadowRadius: 4,
           elevation: 3,
+          borderBottomWidth: 1,
+          borderBottomColor: colors.borderColor,
         }}
       >
         <View style={{ flexDirection: "row", alignItems: "center" }}>
@@ -79,14 +99,14 @@ export default function QRCodePage() {
               padding: 4,
             }}
           >
-            <ArrowLeft size={20} color="#3B82F6" />
+            <ArrowLeft size={20} color={colors.iconColor} />
           </TouchableOpacity>
           <View>
             <Text
               style={{
                 fontSize: 18,
                 fontWeight: "bold",
-                color: isDark ? "#F8FAFC" : "#1E3A8A",
+                color: colors.textPrimary,
               }}
             >
               {languageSet.qrCodeDisplay}
@@ -94,7 +114,7 @@ export default function QRCodePage() {
             <Text
               style={{
                 fontSize: 12,
-                color: "#3B82F6",
+                color: colors.textAccent,
                 marginTop: 2,
               }}
             >
@@ -103,15 +123,7 @@ export default function QRCodePage() {
           </View>
         </View>
       </View>
-      {/* Simple Theme Toggle */}
-      {/* <ThemeWidget isDark={isDark} toggleTheme={toggleTheme} /> */}
 
-      {/* Language Widget */}
-      {/* <LanguageWidget
-        setLanguage={setLanguage}
-        isDark={isDark}
-        language={language}
-      /> */}
       {/* Main Content */}
       <ScrollView
         style={{ flex: 1 }}
@@ -127,9 +139,11 @@ export default function QRCodePage() {
           {/* QR Code Card */}
           <View
             style={{
-              backgroundColor: isDark ? "rgba(255, 255, 255, 0.1)" : "white",
+              backgroundColor: colors.cardBg,
               borderRadius: 12,
               marginBottom: 16,
+              borderWidth: 1,
+              borderColor: colors.borderColor,
               shadowColor: "#000",
               shadowOffset: { width: 0, height: 4 },
               shadowOpacity: 0.1,
@@ -141,23 +155,21 @@ export default function QRCodePage() {
             {/* Card Header */}
             <View
               style={{
-                backgroundColor: isDark ? "rgba(59, 130, 246, 0.2)" : "#EFF6FF",
+                backgroundColor: colors.cardHeaderBg,
                 paddingVertical: 12,
                 paddingHorizontal: 12,
                 borderBottomWidth: 1,
-                borderBottomColor: isDark
-                  ? "rgba(59, 130, 246, 0.3)"
-                  : "#DBEAFE",
+                borderBottomColor: colors.cardHeaderBorder,
                 flexDirection: "row",
                 alignItems: "center",
               }}
             >
-              <QrCode size={18} color="#3B82F6" />
+              <QrCode size={18} color={colors.iconColor} />
               <Text
                 style={{
                   marginLeft: 8,
                   fontWeight: "500",
-                  color: "#3B82F6",
+                  color: colors.iconColor,
                   fontSize: 16,
                 }}
               >
@@ -196,7 +208,7 @@ export default function QRCodePage() {
                 style={{
                   marginTop: 12,
                   fontSize: 12,
-                  color: isDark ? "#9CA3AF" : "#6B7280",
+                  color: colors.textMuted,
                   textAlign: "center",
                 }}
               >
@@ -208,9 +220,11 @@ export default function QRCodePage() {
           {/* Instructions Card */}
           <View
             style={{
-              backgroundColor: isDark ? "rgba(255, 255, 255, 0.1)" : "white",
+              backgroundColor: colors.cardBg,
               borderRadius: 12,
               padding: 16,
+              borderWidth: 1,
+              borderColor: colors.borderColor,
               shadowColor: "#000",
               shadowOffset: { width: 0, height: 4 },
               shadowOpacity: 0.1,
@@ -222,7 +236,7 @@ export default function QRCodePage() {
               style={{
                 fontSize: 16,
                 fontWeight: "500",
-                color: isDark ? "#A5B4FC" : "#1E40AF",
+                color: colors.instructionsTitle,
                 marginBottom: 12,
               }}
             >
@@ -248,9 +262,7 @@ export default function QRCodePage() {
                     width: 20,
                     height: 20,
                     borderRadius: 10,
-                    backgroundColor: isDark
-                      ? "rgba(59, 130, 246, 0.2)"
-                      : "#EFF6FF",
+                    backgroundColor: colors.stepBadgeBg,
                     alignItems: "center",
                     justifyContent: "center",
                     marginRight: 12,
@@ -261,7 +273,7 @@ export default function QRCodePage() {
                     style={{
                       fontSize: 12,
                       fontWeight: "600",
-                      color: "#3B82F6",
+                      color: colors.stepBadgeText,
                     }}
                   >
                     {index + 1}
@@ -271,7 +283,7 @@ export default function QRCodePage() {
                   style={{
                     flex: 1,
                     fontSize: 14,
-                    color: isDark ? "#CBD5E1" : "#374151",
+                    color: colors.textSecondary,
                     lineHeight: 20,
                   }}
                 >
@@ -282,7 +294,7 @@ export default function QRCodePage() {
           </View>
 
           {/* Refresh Button (Optional) */}
-          {/* <TouchableOpacity
+          <TouchableOpacity
             onPress={() => {
               const newValue = `https://yourapp.com/queue/join/${Date.now()}`;
               setQrValue(newValue);
@@ -290,25 +302,25 @@ export default function QRCodePage() {
             }}
             style={{
               marginTop: 16,
-              backgroundColor: isDark ? "rgba(59, 130, 246, 0.2)" : "#EFF6FF",
+              backgroundColor: colors.refreshBg,
               paddingVertical: 12,
               paddingHorizontal: 24,
               borderRadius: 8,
               alignItems: "center",
               borderWidth: 1,
-              borderColor: isDark ? "rgba(59, 130, 246, 0.3)" : "#DBEAFE",
+              borderColor: colors.refreshBorder,
             }}
           >
             <Text
               style={{
-                color: "#3B82F6",
+                color: colors.refreshText,
                 fontWeight: "500",
                 fontSize: 14,
               }}
             >
               Refresh QR Code
             </Text>
-          </TouchableOpacity> */}
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </LinearGradient>

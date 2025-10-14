@@ -43,6 +43,7 @@ const CusDetails_serviceTime_AllView__break = ({
   addExtraTime,
   showTakeBreakModal,
   setShowTakeBreakModal,
+  
 }: any) => {
   const { isDark, language } = useThemeStore();
   const languageSet = translations[language];

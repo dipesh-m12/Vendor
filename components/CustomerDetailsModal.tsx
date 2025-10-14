@@ -27,6 +27,7 @@ interface Customer {
     totalCharge?: number;
     isReturning?: boolean;
 }
+
 interface CustomerDetailsModalProps {
     visible: boolean;
     onClose: () => void;
@@ -34,6 +35,8 @@ interface CustomerDetailsModalProps {
     onCall: (customer: Customer) => void;
     updateQueuePositions: (queue: Customer[]) => Customer[];
     setGlobalQueue: React.Dispatch<React.SetStateAction<Customer[]>>;
+    globalQueue: Customer[];
+    addToUndoHistory: (type: "next" | "skip" | "remove", customer: Customer, previousQueue: Customer[]) => void;
 }
 
 const quickTimes = [
@@ -53,8 +56,11 @@ const CustomerDetailsModal: React.FC<CustomerDetailsModalProps> = ({
     onCall,
     updateQueuePositions,
     setGlobalQueue,
+    globalQueue,
+    addToUndoHistory,
 }) => {
     const [extraTimeInput, setExtraTimeInput] = useState("0");
+
     if (!customer) return null;
     const isCurrentCustomer = customer.position === 1;
 
@@ -78,33 +84,43 @@ const CustomerDetailsModal: React.FC<CustomerDetailsModalProps> = ({
         }
         onClose();
     };
+
     const handleSkip = () => {
+        const currentQueue = [...globalQueue];
+
+        // Add to global undo history
+        addToUndoHistory("skip", customer, currentQueue);
+
+        // Skip customer (move to end of queue)
+        setGlobalQueue((prev: Customer[]) =>
+            updateQueuePositions([
+                ...prev.filter((c) => c.id !== customer.id),
+                { ...customer, position: prev.length }
+            ])
+        );
+
+        // Alert.alert("Customer Skipped", `${customer.name} moved to end of queue`);
+        onClose();
+    };
+
+    const handleRemove = () => {
+        const currentQueue = [...globalQueue];
+
+        // Add to global undo history
+        addToUndoHistory("remove", customer, currentQueue);
+
+        // Remove customer from queue
         setGlobalQueue((prev: Customer[]) =>
             updateQueuePositions(prev.filter((c) => c.id !== customer.id))
         );
-        Alert.alert("Customer Skipped", `${customer.name} removed from queue`);
+
         onClose();
+
+        
+        
     };
-    const handleRemove = () => {
-        Alert.alert(
-            "Remove Customer",
-            `Remove ${customer.name} from queue?`,
-            [
-                { text: "Cancel", style: "cancel" },
-                {
-                    text: "Remove",
-                    style: "destructive",
-                    onPress: () => {
-                        setGlobalQueue((prev: Customer[]) =>
-                            updateQueuePositions(prev.filter((c) => c.id !== customer.id))
-                        );
-                        onClose();
-                        Alert.alert("Customer Removed", `${customer.name} has been removed from queue`);
-                    },
-                },
-            ]
-        );
-    };
+
+
     const handleAddTime = () => {
         const minutes = parseInt(extraTimeInput) || 0;
         if (minutes !== 0) {

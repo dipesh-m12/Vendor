@@ -246,6 +246,31 @@ export default function SettingsScreen() {
     "Others",
   ];
 
+  const colors = {
+    // Page backgrounds
+    gradientStart: isDark ? "#111827" : "#F1F5F9", // dark:from-gray-900
+    gradientEnd: isDark ? "#1F2937" : "#E2E8F0", // dark:bg-gray-800
+
+    // Card backgrounds
+    cardBg: isDark ? "rgba(31, 41, 55, 0.95)" : "#FFFFFF", // dark:bg-gray-800/95
+
+    // Text colors
+    textPrimary: isDark ? "#DBEAFE" : "#1E293B", // dark:text-blue-100
+    textSecondary: isDark ? "#BFDBFE" : "#64748B", // dark:text-blue-200
+    textAccent: isDark ? "#93C5FD" : "#3B82F6", // dark:text-blue-300
+    iconColor: isDark ? "#60A5FA" : "#3B82F6", // dark:text-blue-400
+
+    // Borders
+    borderColor: isDark ? "#374151" : "#E2E8F0", // dark:border-gray-700
+
+    // Input fields
+    inputBg: isDark ? "#374151" : "#FFFFFF", // dark:bg-gray-700
+    inputBorder: isDark ? "#4B5563" : "#BFDBFE", // dark:border-gray-600
+    inputText: isDark ? "#F9FAFB" : "#1F2937", // dark:text-white
+
+    // Section headers
+    sectionTitle: isDark ? "#93C5FD" : "#1E40AF", // dark:text-blue-300
+  };
   // Helper functions
   const openModal = (modalName: any) => {
     setModals((prev) => ({ ...prev, [modalName]: true }));
@@ -478,18 +503,15 @@ export default function SettingsScreen() {
 
   return (
     <LinearGradient
-      colors={isDark ? ["#1E1B4B", "#312E81"] : ["#F1F5F9", "#E2E8F0"]}
+      colors={[colors.gradientStart, colors.gradientEnd]}
       style={{ flex: 1 }}
     >
       {/* Header */}
       <View className="pt-12 pb-4 px-4 flex-row items-center">
         <TouchableOpacity onPress={() => router.back()} className="mr-3">
-          <ArrowLeft size={24} color={isDark ? "#60A5FA" : "#3B82F6"} />
+          <ArrowLeft size={24} color={colors.iconColor} />
         </TouchableOpacity>
-        <Text
-          className={`text-xl font-bold ${isDark ? "text-white" : "text-blue-900"
-            }`}
-        >
+        <Text style={{ fontSize: 20, fontWeight: "bold", color: colors.textPrimary }}>
           {profileLanguageSet.settings}
         </Text>
       </View>
