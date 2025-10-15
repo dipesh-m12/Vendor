@@ -12,7 +12,7 @@ import {
   Phone,
   Play,
   Users,
-  X
+  X,
 } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
 import {
@@ -269,9 +269,7 @@ export default function QVuewScreen() {
       estimatedWait: 16,
       joinTime: "20:54",
       position: 3,
-      services: [
-        { name: "Facial", price: 300 },
-      ],
+      services: [{ name: "Facial", price: 300 }],
       totalCharge: 300,
     },
     {
@@ -314,18 +312,19 @@ export default function QVuewScreen() {
 
   // Add missing customDuration state
   const [customDuration, setCustomDuration] = useState<number>(0);
-  const [userType, setUserType] = useState<'owner' | 'helper'>('helper');
-  const [showChairManagementModal, setShowChairManagementModal] = useState(false);
+  const [userType, setUserType] = useState<"owner" | "helper">("helper");
+  const [showChairManagementModal, setShowChairManagementModal] =
+    useState(false);
 
   // Add these state variables for break functionality
   const [isOnBreak, setIsOnBreak] = useState(false);
   const [breakDuration, setBreakDuration] = useState<number>(0);
-  const [breakReason, setBreakReason] = useState<string>('');
+  const [breakReason, setBreakReason] = useState<string>("");
   const [remainingTime, setRemainingTime] = useState<number>(0);
-  const [customReason, setCustomReason] = useState<string>('');
+  const [customReason, setCustomReason] = useState<string>("");
   const [showCustomFields, setShowCustomFields] = useState(false);
   const [selectedBreakDuration, setSelectedBreakDuration] = useState<number>(0);
-  const [selectedBreakReason, setSelectedBreakReason] = useState<string>('');
+  const [selectedBreakReason, setSelectedBreakReason] = useState<string>("");
 
   const [showUndoNotification, setShowUndoNotification] = useState(false);
   const [showUndoHistory, setShowUndoHistory] = useState(false);
@@ -423,8 +422,11 @@ export default function QVuewScreen() {
 
     Alert.alert(
       langaugeSet.BreakStarted || "Break Started",
-      langaugeSet.TakingAXMinuteBreakForY?.replace("{X}", duration.toString()).replace("{Y}", reason)
-      || `Taking a ${duration} minute break for ${reason}`
+      langaugeSet.TakingAXMinuteBreakForY?.replace(
+        "{X}",
+        duration.toString()
+      ).replace("{Y}", reason) ||
+        `Taking a ${duration} minute break for ${reason}`
     );
 
     setShowTakeBreakModal(false);
@@ -437,7 +439,7 @@ export default function QVuewScreen() {
   const handleResumeBreak = () => {
     setIsOnBreak(false);
     setBreakDuration(0);
-    setBreakReason('');
+    setBreakReason("");
     setIsActive(true);
 
     Alert.alert(
@@ -504,7 +506,9 @@ export default function QVuewScreen() {
   const handleUndo = () => {
     if (latestUndoAction) {
       setGlobalQueue(latestUndoAction.previousQueue);
-      setUndoHistory((prev) => prev.filter((a) => a.id !== latestUndoAction.id));
+      setUndoHistory((prev) =>
+        prev.filter((a) => a.id !== latestUndoAction.id)
+      );
       setShowUndoNotification(false);
     }
   };
@@ -584,9 +588,17 @@ export default function QVuewScreen() {
                   {isActive ? langaugeSet.Active : langaugeSet.Paused}
                 </Text>
                 {isActive ? (
-                  <Pause size={12} color={colors.activeText} fill={colors.activeText} />
+                  <Pause
+                    size={12}
+                    color={colors.activeText}
+                    fill={colors.activeText}
+                  />
                 ) : (
-                  <Play size={12} color={colors.pausedText} fill={colors.pausedText} />
+                  <Play
+                    size={12}
+                    color={colors.pausedText}
+                    fill={colors.pausedText}
+                  />
                 )}
               </TouchableOpacity>
 
@@ -619,7 +631,7 @@ export default function QVuewScreen() {
 
           {/* Action Buttons */}
           <View style={{ flexDirection: "row", gap: 12, marginBottom: 24 }}>
-            {userType === 'owner' ? (
+            {userType !== "owner" ? (
               <TouchableOpacity
                 onPress={() => router.push("/(ratecard)/preview" as any)}
                 style={{ flex: 1 }}
@@ -636,19 +648,24 @@ export default function QVuewScreen() {
                     justifyContent: "center",
                   }}
                 >
-                  <FileText size={18} color="white" style={{ marginRight: 6 }} />
-                  <Text style={{ color: "white", fontWeight: "600", fontSize: 15 }}>
+                  <FileText
+                    size={18}
+                    color="white"
+                    style={{ marginRight: 6 }}
+                  />
+                  <Text
+                    style={{ color: "white", fontWeight: "600", fontSize: 15 }}
+                  >
                     {langaugeSet.RateCard}
                   </Text>
                 </LinearGradient>
               </TouchableOpacity>
             ) : (
-              <TouchableOpacity
-                onPress={toggleStatus}
-                style={{ flex: 1 }}
-              >
+              <TouchableOpacity onPress={toggleStatus} style={{ flex: 1 }}>
                 <LinearGradient
-                  colors={isActive ? ["#10B981", "#059669"] : ["#EF4444", "#DC2626"]}
+                  colors={
+                    isActive ? ["#10B981", "#059669"] : ["#EF4444", "#DC2626"]
+                  }
                   start={[0, 0]}
                   end={[1, 0]}
                   style={{
@@ -664,7 +681,9 @@ export default function QVuewScreen() {
                   ) : (
                     <Play size={18} color="white" style={{ marginRight: 6 }} />
                   )}
-                  <Text style={{ color: "white", fontWeight: "600", fontSize: 15 }}>
+                  <Text
+                    style={{ color: "white", fontWeight: "600", fontSize: 15 }}
+                  >
                     {isActive ? langaugeSet.Active : langaugeSet.Paused}
                   </Text>
                 </LinearGradient>
@@ -685,8 +704,18 @@ export default function QVuewScreen() {
                   borderColor: colors.breakBorder,
                 }}
               >
-                <Coffee size={18} color={colors.breakIcon} style={{ marginRight: 6 }} />
-                <Text style={{ color: colors.breakText, fontWeight: "600", fontSize: 15 }}>
+                <Coffee
+                  size={18}
+                  color={colors.breakIcon}
+                  style={{ marginRight: 6 }}
+                />
+                <Text
+                  style={{
+                    color: colors.breakText,
+                    fontWeight: "600",
+                    fontSize: 15,
+                  }}
+                >
                   {langaugeSet.TakeABreak}
                 </Text>
               </View>
@@ -731,7 +760,14 @@ export default function QVuewScreen() {
                   alignItems: "center",
                 }}
               >
-                <Text style={{ color: "white", fontWeight: "600", marginRight: 4, fontSize: 14 }}>
+                <Text
+                  style={{
+                    color: "white",
+                    fontWeight: "600",
+                    marginRight: 4,
+                    fontSize: 14,
+                  }}
+                >
                   {langaugeSet.NextCustomer}
                 </Text>
                 <ChevronRight size={14} color="white" />
@@ -805,7 +841,9 @@ export default function QVuewScreen() {
                     >
                       {currentCustomer.name}
                     </Text>
-                    <TouchableOpacity onPress={() => handleCallCustomer(currentCustomer)}>
+                    <TouchableOpacity
+                      onPress={() => handleCallCustomer(currentCustomer)}
+                    >
                       <Text
                         style={{
                           fontSize: 14,
@@ -870,10 +908,12 @@ export default function QVuewScreen() {
                         borderRadius: 8,
                       }}
                     >
-                      <Text style={{
-                        color: colors.buttonSuccessText,
-                        fontWeight: "600"
-                      }}>
+                      <Text
+                        style={{
+                          color: colors.buttonSuccessText,
+                          fontWeight: "600",
+                        }}
+                      >
                         {langaugeSet.Next}
                       </Text>
                     </TouchableOpacity>
@@ -948,7 +988,13 @@ export default function QVuewScreen() {
                   borderColor: colors.borderColor,
                 }}
               >
-                <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 10 }}>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    marginBottom: 10,
+                  }}
+                >
                   <View
                     style={{
                       width: 32,
@@ -960,7 +1006,13 @@ export default function QVuewScreen() {
                       marginRight: 12,
                     }}
                   >
-                    <Text style={{ color: "white", fontWeight: "bold", fontSize: 14 }}>
+                    <Text
+                      style={{
+                        color: "white",
+                        fontWeight: "bold",
+                        fontSize: 14,
+                      }}
+                    >
                       {customer.position}
                     </Text>
                   </View>
@@ -982,11 +1034,20 @@ export default function QVuewScreen() {
                         color: colors.textMuted,
                       }}
                     >
-                      {langaugeSet.EstWaitXMin.replace("{X}", customer.estimatedWait)}
+                      {langaugeSet.EstWaitXMin.replace(
+                        "{X}",
+                        customer.estimatedWait
+                      )}
                     </Text>
                   </View>
 
-                  <View style={{ flexDirection: "row", gap: 8, alignItems: "center" }}>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      gap: 8,
+                      alignItems: "center",
+                    }}
+                  >
                     <TouchableOpacity
                       onPress={() => handleCallCustomer(customer)}
                       style={{
@@ -1007,7 +1068,13 @@ export default function QVuewScreen() {
                           borderRadius: 8,
                         }}
                       >
-                        <Text style={{ color: "white", fontWeight: "600", fontSize: 13 }}>
+                        <Text
+                          style={{
+                            color: "white",
+                            fontWeight: "600",
+                            fontSize: 13,
+                          }}
+                        >
                           Next
                         </Text>
                       </TouchableOpacity>
@@ -1056,7 +1123,10 @@ export default function QVuewScreen() {
                     fontSize: 14,
                   }}
                 >
-                  {langaugeSet.ViewAllXCustomers.replace("{X}", queueCustomers.length)}
+                  {langaugeSet.ViewAllXCustomers.replace(
+                    "{X}",
+                    queueCustomers.length
+                  )}
                 </Text>
               </TouchableOpacity>
             )}
@@ -1360,10 +1430,7 @@ export default function QVuewScreen() {
                 </Text>
               </TouchableOpacity>
 
-              <TouchableOpacity
-                onPress={confirmCall}
-                style={{ flex: 1 }}
-              >
+              <TouchableOpacity onPress={confirmCall} style={{ flex: 1 }}>
                 <LinearGradient
                   colors={["#4F7DF7", "#2563EB"]}
                   start={[0, 0]}
@@ -1417,11 +1484,7 @@ export default function QVuewScreen() {
       />
 
       {/* Queue Paused Modal */}
-      <Modal
-        visible={isOnBreak}
-        transparent
-        animationType="fade"
-      >
+      <Modal visible={isOnBreak} transparent animationType="fade">
         <View
           style={{
             flex: 1,
@@ -1485,7 +1548,10 @@ export default function QVuewScreen() {
                   color: colors.buttonPrimaryText,
                 }}
               >
-                {Math.floor(remainingTime / 60).toString().padStart(2, '0')}:{(remainingTime % 60).toString().padStart(2, '0')}
+                {Math.floor(remainingTime / 60)
+                  .toString()
+                  .padStart(2, "0")}
+                :{(remainingTime % 60).toString().padStart(2, "0")}
               </Text>
             </View>
 
@@ -1498,7 +1564,8 @@ export default function QVuewScreen() {
                 lineHeight: 20,
               }}
             >
-              You're currently on a break. Queue operations are paused until you resume.
+              You're currently on a break. Queue operations are paused until you
+              resume.
             </Text>
 
             <TouchableOpacity

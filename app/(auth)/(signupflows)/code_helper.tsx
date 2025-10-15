@@ -19,7 +19,7 @@ import {
   UserPlus,
   X,
 } from "lucide-react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Alert,
   Modal,
@@ -27,9 +27,9 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
-
+import QRCode from "react-native-qrcode-svg";
 // Mock data - replace with actual data from your store/API
 const mockServices = [
   { id: 1, name: "Haircut", duration: 30, price: 500 },
@@ -81,8 +81,10 @@ const mockCurrentHelpers = [
 export default function ManageEmployeePage() {
   const router = useRouter();
   const { isDark } = useThemeStore();
-  const { regType } = useRegTypeStore();
-
+  const { regType, setRegType } = useRegTypeStore();
+  useEffect(() => {
+    setRegType("helper");
+  }, []);
   // Dark mode color palette - MATCHING all other pages
   const colors = {
     // Page backgrounds - consistent gradient
@@ -138,6 +140,21 @@ export default function ManageEmployeePage() {
   const [selectedHelper, setSelectedHelper] = useState<any>(null);
   const [selectedServices, setSelectedServices] = useState<number[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+
+  const [activeTab, setActiveTab] = useState<"qr" | "code">("qr");
+  const [businessCode, setBusinessCode] = useState("SALON2024"); // Replace with actual business code
+  const qrValue = JSON.stringify({
+    businessCode: businessCode,
+  });
+
+  // Add these state variables after existing useState declarations (around line 132)
+  const [isConnectedToBusiness, setIsConnectedToBusiness] = useState(true); // Change to false if not connected
+  const [businessInfo, setBusinessInfo] = useState({
+    name: "Elite Hair Salon",
+    code: "SALON2024",
+    joinedDate: "2024-01-15",
+  });
+  const [leaveModalVisible, setLeaveModalVisible] = useState(false);
 
   // Filter services based on search
   const filteredServices = mockServices.filter((service) =>
@@ -398,7 +415,9 @@ export default function ManageEmployeePage() {
                     style={{
                       flexDirection: "row",
                       alignItems: "center",
-                      backgroundColor: isSelected ? colors.selectedBg : colors.inputBg,
+                      backgroundColor: isSelected
+                        ? colors.selectedBg
+                        : colors.inputBg,
                       borderRadius: 12,
                       padding: 14,
                       marginBottom: 8,
@@ -559,6 +578,26 @@ export default function ManageEmployeePage() {
     </Modal>
   );
 
+  // Add this helper function before the return statement
+  const handleLeaveBusiness = () => {
+    Alert.alert(
+      "Leave Business",
+      `Are you sure you want to leave ${businessInfo.name}?`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Leave",
+          style: "destructive",
+          onPress: () => {
+            setIsConnectedToBusiness(false);
+            setLeaveModalVisible(false);
+            Alert.alert("Success", "You have left the business");
+          },
+        },
+      ]
+    );
+  };
+
   return (
     <LinearGradient
       colors={[colors.gradientStart, colors.gradientMid, colors.gradientEnd]}
@@ -609,9 +648,167 @@ export default function ManageEmployeePage() {
         contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* New Requests Section */}
-        {newRequests.length > 0 && (
-          <View style={{ marginBottom: 24 }}>
+        {regType === "owner" && (
+          <View style={{ paddingHorizontal: 4, marginBottom: 16 }}>
+            {/* Tab Switcher */}
+            <View
+              style={{
+                flexDirection: "row",
+                backgroundColor: colors.cardBg,
+                borderRadius: 12,
+                padding: 4,
+                marginBottom: 16,
+                borderWidth: 1,
+                borderColor: colors.borderColor,
+              }}
+            >
+              <TouchableOpacity
+                onPress={() => setActiveTab("qr")}
+                style={{
+                  flex: 1,
+                  paddingVertical: 10,
+                  borderRadius: 8,
+                  backgroundColor:
+                    activeTab === "qr" ? "#3B82F6" : "transparent",
+                  alignItems: "center",
+                }}
+              >
+                <Text
+                  style={{
+                    fontSize: 15,
+                    fontWeight: "600",
+                    color: activeTab === "qr" ? "white" : colors.textSecondary,
+                  }}
+                >
+                  QR Code
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => setActiveTab("code")}
+                style={{
+                  flex: 1,
+                  paddingVertical: 10,
+                  borderRadius: 8,
+                  backgroundColor:
+                    activeTab === "code" ? "#3B82F6" : "transparent",
+                  alignItems: "center",
+                }}
+              >
+                <Text
+                  style={{
+                    fontSize: 15,
+                    fontWeight: "600",
+                    color:
+                      activeTab === "code" ? "white" : colors.textSecondary,
+                  }}
+                >
+                  Admin Code
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* QR/Code Display Card */}
+            <View
+              style={{
+                backgroundColor: colors.cardBg,
+                borderRadius: 12,
+                padding: 24,
+                alignItems: "center",
+                borderWidth: 1,
+                borderColor: colors.borderColor,
+              }}
+            >
+              {activeTab === "qr" ? (
+                <>
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      fontWeight: "600",
+                      color: colors.textPrimary,
+                      marginBottom: 16,
+                      textAlign: "center",
+                    }}
+                  >
+                    Scan to Join Business
+                  </Text>
+                  <View
+                    style={{
+                      padding: 16,
+                      backgroundColor: "white",
+                      borderRadius: 12,
+                    }}
+                  >
+                    <QRCode
+                      value={qrValue}
+                      size={200}
+                      color="black"
+                      backgroundColor="white"
+                    />
+                  </View>
+                  <Text
+                    style={{
+                      fontSize: 13,
+                      color: colors.textMuted,
+                      marginTop: 12,
+                      textAlign: "center",
+                    }}
+                  >
+                    Helpers can scan this QR code to join
+                  </Text>
+                </>
+              ) : (
+                <>
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      fontWeight: "600",
+                      color: colors.textPrimary,
+                      marginBottom: 16,
+                      textAlign: "center",
+                    }}
+                  >
+                    Admin Code for Helpers
+                  </Text>
+                  <View
+                    style={{
+                      backgroundColor: colors.inputBg,
+                      paddingVertical: 16,
+                      paddingHorizontal: 32,
+                      borderRadius: 12,
+                      borderWidth: 2,
+                      borderColor: "#3B82F6",
+                      borderStyle: "dashed",
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontSize: 32,
+                        fontWeight: "bold",
+                        color: colors.textPrimary,
+                        letterSpacing: 2,
+                      }}
+                    >
+                      {businessCode}
+                    </Text>
+                  </View>
+                  <Text
+                    style={{
+                      fontSize: 13,
+                      color: colors.textMuted,
+                      marginTop: 12,
+                      textAlign: "center",
+                    }}
+                  >
+                    Share this code with helpers to join your business
+                  </Text>
+                </>
+              )}
+            </View>
+          </View>
+        )}
+
+        {regType === "helper" && (
+          <View style={{ paddingHorizontal: 4, marginBottom: 16 }}>
             <View
               style={{
                 flexDirection: "row",
@@ -619,7 +816,7 @@ export default function ManageEmployeePage() {
                 marginBottom: 12,
               }}
             >
-              <UserPlus size={20} color={colors.iconColor} />
+              <Briefcase size={20} color={colors.iconColor} />
               <Text
                 style={{
                   fontSize: 18,
@@ -628,326 +825,573 @@ export default function ManageEmployeePage() {
                   marginLeft: 8,
                 }}
               >
-                New Requests ({newRequests.length})
+                Business Connection
               </Text>
             </View>
 
-            {newRequests.map((request) => (
-              <View
-                key={request.id}
-                style={{
-                  backgroundColor: colors.cardBg,
-                  borderRadius: 12,
-                  padding: 16,
-                  marginBottom: 12,
-                  borderWidth: 1,
-                  borderColor: colors.borderColor,
-                }}
-              >
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "flex-start",
-                    marginBottom: 12,
-                  }}
-                >
-                  <View
-                    style={{
-                      width: 48,
-                      height: 48,
-                      borderRadius: 24,
-                      backgroundColor: colors.requestAvatarBg,
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <UserPlus size={24} color="#F59E0B" />
-                  </View>
-                  <View style={{ flex: 1, marginLeft: 12 }}>
-                    <Text
-                      style={{
-                        fontSize: 16,
-                        fontWeight: "600",
-                        color: colors.textPrimary,
-                        marginBottom: 4,
-                      }}
-                    >
-                      {request.name}
-                    </Text>
-                    <View
-                      style={{
-                        flexDirection: "row",
-                        alignItems: "center",
-                        marginBottom: 2,
-                      }}
-                    >
-                      <Mail size={14} color={colors.textMuted} />
-                      <Text
-                        style={{
-                          fontSize: 14,
-                          color: colors.textSecondary,
-                          marginLeft: 6,
-                        }}
-                      >
-                        {request.email}
-                      </Text>
-                    </View>
-                    <View
-                      style={{
-                        flexDirection: "row",
-                        alignItems: "center",
-                        marginBottom: 2,
-                      }}
-                    >
-                      <Phone size={14} color={colors.textMuted} />
-                      <Text
-                        style={{
-                          fontSize: 14,
-                          color: colors.textSecondary,
-                          marginLeft: 6,
-                        }}
-                      >
-                        {request.phone}
-                      </Text>
-                    </View>
-                    <View
-                      style={{ flexDirection: "row", alignItems: "center" }}
-                    >
-                      <Calendar size={14} color={colors.textMuted} />
-                      <Text
-                        style={{
-                          fontSize: 14,
-                          color: colors.textSecondary,
-                          marginLeft: 6,
-                        }}
-                      >
-                        Requested: {request.requestedDate}
-                      </Text>
-                    </View>
-                  </View>
-                </View>
-
-                <View style={{ flexDirection: "row", gap: 12 }}>
-                  <TouchableOpacity
-                    onPress={() => handleAcceptRequest(request)}
-                    style={{
-                      flex: 1,
-                      backgroundColor: "#10B981",
-                      paddingVertical: 12,
-                      borderRadius: 8,
-                      alignItems: "center",
-                      flexDirection: "row",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <CheckCircle2 size={18} color="white" />
-                    <Text
-                      style={{
-                        color: "white",
-                        fontWeight: "600",
-                        fontSize: 15,
-                        marginLeft: 6,
-                      }}
-                    >
-                      Accept
-                    </Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    onPress={() => handleRejectRequest(request)}
-                    style={{
-                      flex: 1,
-                      backgroundColor: "#EF4444",
-                      paddingVertical: 12,
-                      borderRadius: 8,
-                      alignItems: "center",
-                      flexDirection: "row",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <X size={18} color="white" />
-                    <Text
-                      style={{
-                        color: "white",
-                        fontWeight: "600",
-                        fontSize: 15,
-                        marginLeft: 6,
-                      }}
-                    >
-                      Reject
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            ))}
-          </View>
-        )}
-
-        {/* Current Helpers Section */}
-        <View>
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              marginBottom: 12,
-            }}
-          >
-            <UserCheck size={20} color={colors.iconColor} />
-            <Text
-              style={{
-                fontSize: 18,
-                fontWeight: "600",
-                color: colors.textPrimary,
-                marginLeft: 8,
-              }}
-            >
-              Current Helpers ({currentHelpers.length})
-            </Text>
-          </View>
-
-          {currentHelpers.map((helper) => (
             <TouchableOpacity
-              key={helper.id}
-              onPress={() => handleEditHelper(helper)}
+              onPress={() =>
+                isConnectedToBusiness && setLeaveModalVisible(true)
+              }
+              disabled={!isConnectedToBusiness}
               style={{
                 backgroundColor: colors.cardBg,
                 borderRadius: 12,
                 padding: 16,
-                marginBottom: 12,
                 borderWidth: 1,
                 borderColor: colors.borderColor,
               }}
             >
-              <View
-                style={{ flexDirection: "row", alignItems: "flex-start" }}
-              >
-                <View
-                  style={{
-                    width: 48,
-                    height: 48,
-                    borderRadius: 24,
-                    backgroundColor: colors.helperAvatarBg,
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <UserCheck size={24} color="#10B981" />
-                </View>
-                <View style={{ flex: 1, marginLeft: 12 }}>
+              {isConnectedToBusiness ? (
+                <>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      marginBottom: 12,
+                    }}
+                  >
+                    <View
+                      style={{
+                        width: 48,
+                        height: 48,
+                        borderRadius: 24,
+                        backgroundColor: colors.helperAvatarBg,
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <Briefcase size={24} color="#10B981" />
+                    </View>
+                    <View style={{ flex: 1, marginLeft: 12 }}>
+                      <Text
+                        style={{
+                          fontSize: 16,
+                          fontWeight: "600",
+                          color: colors.textPrimary,
+                          marginBottom: 4,
+                        }}
+                      >
+                        {businessInfo.name}
+                      </Text>
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          alignItems: "center",
+                          marginBottom: 2,
+                        }}
+                      >
+                        <Text
+                          style={{
+                            fontSize: 14,
+                            color: colors.textSecondary,
+                          }}
+                        >
+                          Code: {businessInfo.code}
+                        </Text>
+                      </View>
+                      <View
+                        style={{ flexDirection: "row", alignItems: "center" }}
+                      >
+                        <Calendar size={14} color={colors.textMuted} />
+                        <Text
+                          style={{
+                            fontSize: 14,
+                            color: colors.textSecondary,
+                            marginLeft: 6,
+                          }}
+                        >
+                          Joined: {businessInfo.joinedDate}
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+                  <View
+                    style={{
+                      backgroundColor: colors.infoBg,
+                      paddingVertical: 8,
+                      paddingHorizontal: 12,
+                      borderRadius: 6,
+                      alignItems: "center",
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontSize: 13,
+                        color: "#EF4444",
+                        fontWeight: "500",
+                      }}
+                    >
+                      Tap to leave business
+                    </Text>
+                  </View>
+                </>
+              ) : (
+                <View style={{ alignItems: "center", paddingVertical: 16 }}>
+                  <Briefcase
+                    size={48}
+                    color={colors.emptyIconColor}
+                    style={{ marginBottom: 12 }}
+                  />
                   <Text
                     style={{
                       fontSize: 16,
                       fontWeight: "600",
-                      color: colors.textPrimary,
+                      color: colors.textMuted,
                       marginBottom: 4,
                     }}
                   >
-                    {helper.name}
+                    Not Connected
                   </Text>
-                  <View
+                  <Text
                     style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      marginBottom: 2,
+                      fontSize: 14,
+                      color: colors.textMuted,
+                      textAlign: "center",
                     }}
                   >
-                    <Mail size={14} color={colors.textMuted} />
-                    <Text
-                      style={{
-                        fontSize: 14,
-                        color: colors.textSecondary,
-                        marginLeft: 6,
-                      }}
-                    >
-                      {helper.email}
-                    </Text>
-                  </View>
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      marginBottom: 6,
-                    }}
-                  >
-                    <Calendar size={14} color={colors.textMuted} />
-                    <Text
-                      style={{
-                        fontSize: 14,
-                        color: colors.textSecondary,
-                        marginLeft: 6,
-                      }}
-                    >
-                      Joined: {helper.joinedDate}
-                    </Text>
-                  </View>
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      backgroundColor: colors.serviceBadgeBg,
-                      paddingHorizontal: 10,
-                      paddingVertical: 6,
-                      borderRadius: 6,
-                      alignSelf: "flex-start",
-                    }}
-                  >
-                    <Briefcase size={14} color={colors.iconColor} />
-                    <Text
-                      style={{
-                        fontSize: 13,
-                        color: colors.iconColor,
-                        fontWeight: "500",
-                        marginLeft: 4,
-                      }}
-                    >
-                      {helper.assignedServices.length} service
-                      {helper.assignedServices.length !== 1 ? "s" : ""} assigned
-                    </Text>
-                  </View>
+                    You are not connected to any business
+                  </Text>
                 </View>
-                <Edit2 size={20} color={colors.iconColor} />
-              </View>
+              )}
             </TouchableOpacity>
-          ))}
+          </View>
+        )}
 
-          {currentHelpers.length === 0 && (
+        {/* Leave Business Confirmation Modal - Add before closing LinearGradient */}
+        {regType === "helper" && (
+          <Modal visible={leaveModalVisible} animationType="fade" transparent>
             <View
               style={{
-                backgroundColor: colors.cardBg,
-                borderRadius: 12,
-                padding: 32,
-                alignItems: "center",
-                borderWidth: 1,
-                borderColor: colors.borderColor,
+                flex: 1,
+                backgroundColor: "rgba(0, 0, 0, 0.5)",
+                justifyContent: "center",
+                padding: 16,
               }}
             >
-              <UserCheck
-                size={48}
-                color={colors.emptyIconColor}
-                style={{ marginBottom: 12 }}
-              />
-              <Text
+              <View
                 style={{
-                  fontSize: 16,
-                  fontWeight: "600",
-                  color: colors.textMuted,
-                  marginBottom: 4,
+                  backgroundColor: colors.modalBg,
+                  borderRadius: 16,
+                  padding: 24,
+                  borderWidth: 1,
+                  borderColor: colors.borderColor,
                 }}
               >
-                No helpers yet
-              </Text>
-              <Text
-                style={{
-                  fontSize: 14,
-                  color: colors.textMuted,
-                  textAlign: "center",
-                }}
-              >
-                Accept requests to add helpers to your team
-              </Text>
+                <Text
+                  style={{
+                    fontSize: 20,
+                    fontWeight: "600",
+                    color: colors.textPrimary,
+                    marginBottom: 12,
+                    textAlign: "center",
+                  }}
+                >
+                  Leave Business?
+                </Text>
+                <Text
+                  style={{
+                    fontSize: 15,
+                    color: colors.textSecondary,
+                    textAlign: "center",
+                    marginBottom: 24,
+                  }}
+                >
+                  Are you sure you want to leave {businessInfo.name}?
+                </Text>
+                <View style={{ flexDirection: "row", gap: 12 }}>
+                  <TouchableOpacity
+                    onPress={() => setLeaveModalVisible(false)}
+                    style={{
+                      flex: 1,
+                      backgroundColor: colors.inputBg,
+                      paddingVertical: 14,
+                      borderRadius: 8,
+                      alignItems: "center",
+                      borderWidth: 1,
+                      borderColor: colors.borderColor,
+                    }}
+                  >
+                    <Text
+                      style={{
+                        color: colors.textPrimary,
+                        fontWeight: "600",
+                        fontSize: 16,
+                      }}
+                    >
+                      Cancel
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={handleLeaveBusiness}
+                    style={{
+                      flex: 1,
+                      backgroundColor: "#EF4444",
+                      paddingVertical: 14,
+                      borderRadius: 8,
+                      alignItems: "center",
+                    }}
+                  >
+                    <Text
+                      style={{
+                        color: "white",
+                        fontWeight: "600",
+                        fontSize: 16,
+                      }}
+                    >
+                      Leave
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
             </View>
-          )}
-        </View>
+          </Modal>
+        )}
+
+        {regType === "owner" && (
+          <>
+            {/* New Requests Section */}
+            {newRequests.length > 0 && (
+              <View style={{ marginBottom: 24 }}>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    marginBottom: 12,
+                  }}
+                >
+                  <UserPlus size={20} color={colors.iconColor} />
+                  <Text
+                    style={{
+                      fontSize: 18,
+                      fontWeight: "600",
+                      color: colors.textPrimary,
+                      marginLeft: 8,
+                    }}
+                  >
+                    New Requests ({newRequests.length})
+                  </Text>
+                </View>
+
+                {newRequests.map((request) => (
+                  <View
+                    key={request.id}
+                    style={{
+                      backgroundColor: colors.cardBg,
+                      borderRadius: 12,
+                      padding: 16,
+                      marginBottom: 12,
+                      borderWidth: 1,
+                      borderColor: colors.borderColor,
+                    }}
+                  >
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "flex-start",
+                        marginBottom: 12,
+                      }}
+                    >
+                      <View
+                        style={{
+                          width: 48,
+                          height: 48,
+                          borderRadius: 24,
+                          backgroundColor: colors.requestAvatarBg,
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <UserPlus size={24} color="#F59E0B" />
+                      </View>
+                      <View style={{ flex: 1, marginLeft: 12 }}>
+                        <Text
+                          style={{
+                            fontSize: 16,
+                            fontWeight: "600",
+                            color: colors.textPrimary,
+                            marginBottom: 4,
+                          }}
+                        >
+                          {request.name}
+                        </Text>
+                        <View
+                          style={{
+                            flexDirection: "row",
+                            alignItems: "center",
+                            marginBottom: 2,
+                          }}
+                        >
+                          <Mail size={14} color={colors.textMuted} />
+                          <Text
+                            style={{
+                              fontSize: 14,
+                              color: colors.textSecondary,
+                              marginLeft: 6,
+                            }}
+                          >
+                            {request.email}
+                          </Text>
+                        </View>
+                        <View
+                          style={{
+                            flexDirection: "row",
+                            alignItems: "center",
+                            marginBottom: 2,
+                          }}
+                        >
+                          <Phone size={14} color={colors.textMuted} />
+                          <Text
+                            style={{
+                              fontSize: 14,
+                              color: colors.textSecondary,
+                              marginLeft: 6,
+                            }}
+                          >
+                            {request.phone}
+                          </Text>
+                        </View>
+                        <View
+                          style={{ flexDirection: "row", alignItems: "center" }}
+                        >
+                          <Calendar size={14} color={colors.textMuted} />
+                          <Text
+                            style={{
+                              fontSize: 14,
+                              color: colors.textSecondary,
+                              marginLeft: 6,
+                            }}
+                          >
+                            Requested: {request.requestedDate}
+                          </Text>
+                        </View>
+                      </View>
+                    </View>
+
+                    <View style={{ flexDirection: "row", gap: 12 }}>
+                      <TouchableOpacity
+                        onPress={() => handleAcceptRequest(request)}
+                        style={{
+                          flex: 1,
+                          backgroundColor: "#10B981",
+                          paddingVertical: 12,
+                          borderRadius: 8,
+                          alignItems: "center",
+                          flexDirection: "row",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <CheckCircle2 size={18} color="white" />
+                        <Text
+                          style={{
+                            color: "white",
+                            fontWeight: "600",
+                            fontSize: 15,
+                            marginLeft: 6,
+                          }}
+                        >
+                          Accept
+                        </Text>
+                      </TouchableOpacity>
+
+                      <TouchableOpacity
+                        onPress={() => handleRejectRequest(request)}
+                        style={{
+                          flex: 1,
+                          backgroundColor: "#EF4444",
+                          paddingVertical: 12,
+                          borderRadius: 8,
+                          alignItems: "center",
+                          flexDirection: "row",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <X size={18} color="white" />
+                        <Text
+                          style={{
+                            color: "white",
+                            fontWeight: "600",
+                            fontSize: 15,
+                            marginLeft: 6,
+                          }}
+                        >
+                          Reject
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                ))}
+              </View>
+            )}
+
+            {/* Current Helpers Section */}
+            <View>
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  marginBottom: 12,
+                }}
+              >
+                <UserCheck size={20} color={colors.iconColor} />
+                <Text
+                  style={{
+                    fontSize: 18,
+                    fontWeight: "600",
+                    color: colors.textPrimary,
+                    marginLeft: 8,
+                  }}
+                >
+                  Current Helpers ({currentHelpers.length})
+                </Text>
+              </View>
+
+              {currentHelpers.map((helper) => (
+                <TouchableOpacity
+                  key={helper.id}
+                  onPress={() => handleEditHelper(helper)}
+                  style={{
+                    backgroundColor: colors.cardBg,
+                    borderRadius: 12,
+                    padding: 16,
+                    marginBottom: 12,
+                    borderWidth: 1,
+                    borderColor: colors.borderColor,
+                  }}
+                >
+                  <View
+                    style={{ flexDirection: "row", alignItems: "flex-start" }}
+                  >
+                    <View
+                      style={{
+                        width: 48,
+                        height: 48,
+                        borderRadius: 24,
+                        backgroundColor: colors.helperAvatarBg,
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <UserCheck size={24} color="#10B981" />
+                    </View>
+                    <View style={{ flex: 1, marginLeft: 12 }}>
+                      <Text
+                        style={{
+                          fontSize: 16,
+                          fontWeight: "600",
+                          color: colors.textPrimary,
+                          marginBottom: 4,
+                        }}
+                      >
+                        {helper.name}
+                      </Text>
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          alignItems: "center",
+                          marginBottom: 2,
+                        }}
+                      >
+                        <Mail size={14} color={colors.textMuted} />
+                        <Text
+                          style={{
+                            fontSize: 14,
+                            color: colors.textSecondary,
+                            marginLeft: 6,
+                          }}
+                        >
+                          {helper.email}
+                        </Text>
+                      </View>
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          alignItems: "center",
+                          marginBottom: 6,
+                        }}
+                      >
+                        <Calendar size={14} color={colors.textMuted} />
+                        <Text
+                          style={{
+                            fontSize: 14,
+                            color: colors.textSecondary,
+                            marginLeft: 6,
+                          }}
+                        >
+                          Joined: {helper.joinedDate}
+                        </Text>
+                      </View>
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          alignItems: "center",
+                          backgroundColor: colors.serviceBadgeBg,
+                          paddingHorizontal: 10,
+                          paddingVertical: 6,
+                          borderRadius: 6,
+                          alignSelf: "flex-start",
+                        }}
+                      >
+                        <Briefcase size={14} color={colors.iconColor} />
+                        <Text
+                          style={{
+                            fontSize: 13,
+                            color: colors.iconColor,
+                            fontWeight: "500",
+                            marginLeft: 4,
+                          }}
+                        >
+                          {helper.assignedServices.length} service
+                          {helper.assignedServices.length !== 1 ? "s" : ""}{" "}
+                          assigned
+                        </Text>
+                      </View>
+                    </View>
+                    <Edit2 size={20} color={colors.iconColor} />
+                  </View>
+                </TouchableOpacity>
+              ))}
+
+              {currentHelpers.length === 0 && (
+                <View
+                  style={{
+                    backgroundColor: colors.cardBg,
+                    borderRadius: 12,
+                    padding: 32,
+                    alignItems: "center",
+                    borderWidth: 1,
+                    borderColor: colors.borderColor,
+                  }}
+                >
+                  <UserCheck
+                    size={48}
+                    color={colors.emptyIconColor}
+                    style={{ marginBottom: 12 }}
+                  />
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      fontWeight: "600",
+                      color: colors.textMuted,
+                      marginBottom: 4,
+                    }}
+                  >
+                    No helpers yet
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      color: colors.textMuted,
+                      textAlign: "center",
+                    }}
+                  >
+                    Accept requests to add helpers to your team
+                  </Text>
+                </View>
+              )}
+            </View>
+          </>
+        )}
       </ScrollView>
 
       {/* Assign Services Modal */}
