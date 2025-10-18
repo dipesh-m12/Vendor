@@ -156,6 +156,9 @@ export default function ManageEmployeePage() {
   });
   const [leaveModalVisible, setLeaveModalVisible] = useState(false);
 
+  const [joinCode, setJoinCode] = useState("");
+  const [isJoining, setIsJoining] = useState(false);
+
   // Filter services based on search
   const filteredServices = mockServices.filter((service) =>
     service.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -598,6 +601,27 @@ export default function ManageEmployeePage() {
     );
   };
 
+  const handleJoinWithCode = () => {
+    if (!joinCode.trim()) {
+      Alert.alert("Error", "Please enter a valid business code");
+      return;
+    }
+
+    setIsJoining(true);
+    // Simulate API call - replace with actual API call
+    setTimeout(() => {
+      setIsConnectedToBusiness(true);
+      setBusinessInfo({
+        name: "Elite Hair Salon", // This should come from API response
+        code: joinCode,
+        joinedDate: new Date().toISOString().split("T")[0],
+      });
+      setJoinCode("");
+      setIsJoining(false);
+      Alert.alert("Success", "Successfully joined the business!");
+    }, 1000);
+  };
+
   return (
     <LinearGradient
       colors={[colors.gradientStart, colors.gradientMid, colors.gradientEnd]}
@@ -927,31 +951,96 @@ export default function ManageEmployeePage() {
                   </View>
                 </>
               ) : (
-                <View style={{ alignItems: "center", paddingVertical: 16 }}>
-                  <Briefcase
-                    size={48}
-                    color={colors.emptyIconColor}
-                    style={{ marginBottom: 12 }}
-                  />
-                  <Text
+                <View style={{ paddingVertical: 8 }}>
+                  <View
                     style={{
-                      fontSize: 16,
-                      fontWeight: "600",
-                      color: colors.textMuted,
-                      marginBottom: 4,
+                      alignItems: "center",
+                      paddingVertical: 16,
+                      marginBottom: 16,
                     }}
                   >
-                    Not Connected
-                  </Text>
-                  <Text
-                    style={{
-                      fontSize: 14,
-                      color: colors.textMuted,
-                      textAlign: "center",
-                    }}
-                  >
-                    You are not connected to any business
-                  </Text>
+                    <Briefcase
+                      size={48}
+                      color={colors.emptyIconColor}
+                      style={{ marginBottom: 12 }}
+                    />
+                    <Text
+                      style={{
+                        fontSize: 16,
+                        fontWeight: "600",
+                        color: colors.textMuted,
+                        marginBottom: 4,
+                      }}
+                    >
+                      Not Connected
+                    </Text>
+                    <Text
+                      style={{
+                        fontSize: 14,
+                        color: colors.textMuted,
+                        textAlign: "center",
+                      }}
+                    >
+                      Enter business code to connect
+                    </Text>
+                  </View>
+
+                  <View style={{ paddingHorizontal: 4 }}>
+                    <Text
+                      style={{
+                        fontSize: 14,
+                        fontWeight: "600",
+                        color: colors.textSecondary,
+                        marginBottom: 8,
+                      }}
+                    >
+                      Business Code
+                    </Text>
+                    <TextInput
+                      value={joinCode}
+                      onChangeText={setJoinCode}
+                      placeholder="Enter code (e.g., SALON2024)"
+                      placeholderTextColor={colors.placeholderColor}
+                      style={{
+                        backgroundColor: colors.inputBg,
+                        borderRadius: 8,
+                        paddingHorizontal: 16,
+                        paddingVertical: 14,
+                        fontSize: 16,
+                        color: colors.inputText,
+                        borderWidth: 1,
+                        borderColor: colors.inputBorder,
+                        marginBottom: 12,
+                      }}
+                      autoCapitalize="characters"
+                      maxLength={20}
+                    />
+                    <TouchableOpacity
+                      onPress={handleJoinWithCode}
+                      disabled={isJoining || !joinCode.trim()}
+                      style={{
+                        backgroundColor:
+                          isJoining || !joinCode.trim() ? "#9CA3AF" : "#3B82F6",
+                        paddingVertical: 14,
+                        borderRadius: 8,
+                        alignItems: "center",
+                        flexDirection: "row",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <UserPlus size={20} color="white" />
+                      <Text
+                        style={{
+                          color: "white",
+                          fontWeight: "600",
+                          fontSize: 16,
+                          marginLeft: 8,
+                        }}
+                      >
+                        {isJoining ? "Connecting..." : "Connect to Business"}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
               )}
             </TouchableOpacity>

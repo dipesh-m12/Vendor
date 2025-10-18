@@ -11,8 +11,10 @@ import "../global.css";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
 
+import { toastConfig } from "@/components/ToastConfig";
 import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
 import useThemeStore from "@/store/themeStore";
+import ToastManager from "toastify-react-native/components/ToastManager";
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -43,6 +45,8 @@ export default function RootLayout() {
           <Stack.Screen name="qrcode" options={{ headerShown: false }} />
           <Stack.Screen name="+not-found" />
         </Stack>
+        {/* Toast provider should be at the root level */}
+        <ToastManager config={toastConfig} />
         <StatusBar style={isDark ? "light" : "auto"} />
       </ThemeProvider>
     </GluestackUIProvider>
