@@ -1,0 +1,132 @@
+{
+  "expo": {
+    "name": "QVuew Business: Queue Manager",
+    "slug": "VendorApp",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "qvuewvendor",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.qvuew.vendorapp",
+      "googleServicesFile": "./GoogleService-Info.plist",
+      "infoPlist": {
+        "NSLocalNetworkUsageDescription": "The app requires access to the local network to connect to WiFi devices and queue systems.",
+        "NSLocationWhenInUseUsageDescription": "This app uses location to detect your business address automatically.",
+        "NSLocationAlwaysUsageDescription": "This app uses location to detect your business address automatically.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "This app uses location to detect your business address automatically.",
+        "NSBluetoothAlwaysUsageDescription": "Allow QVuew Business to connect to bluetooth devices for queue management.",
+        "NSBluetoothPeripheralUsageDescription": "Allow QVuew Business to connect to bluetooth devices for queue management.",
+        "NSMicrophoneUsageDescription": "Allow QVuew Business to use the microphone for voice commands and speech-to-text.",
+        "NSSpeechRecognitionUsageDescription": "Allow QVuew Business to use speech recognition for voice commands.",
+        "UIBackgroundModes": [
+          "location",
+          "bluetooth-central",
+          "remote-notification",
+          "audio"
+        ]
+      },
+      "entitlements": {
+        "com.apple.developer.networking.wifi-info": true
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true,
+      "package": "com.qvuew.vendorapp",
+      "googleServicesFile": "./google-services.json",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "BLUETOOTH",
+        "BLUETOOTH_ADMIN",
+        "BLUETOOTH_CONNECT",
+        "BLUETOOTH_SCAN",
+        "ACCESS_WIFI_STATE",
+        "CHANGE_WIFI_STATE",
+        "RECEIVE_BOOT_COMPLETED",
+        "VIBRATE",
+        "RECORD_AUDIO",
+        "android.permission.RECORD_AUDIO"
+      ]
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#ffffff"
+        }
+      ],
+      "expo-localization",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "This app uses location to detect your business address automatically.",
+          "locationAlwaysPermission": "This app uses location to detect your business address automatically.",
+          "locationWhenInUsePermission": "This app uses location to detect your business address automatically.",
+          "isIosBackgroundLocationEnabled": true,
+          "isAndroidBackgroundLocationEnabled": true
+        }
+      ],
+      "expo-font",
+      "expo-web-browser",
+      [
+        "react-native-ble-plx",
+        {
+          "isBackgroundEnabled": true,
+          "modes": ["peripheral", "central"],
+          "bluetoothAlwaysPermission": "Allow $(PRODUCT_NAME) to connect to bluetooth devices"
+        }
+      ],
+      [
+        "react-native-wifi-reborn",
+        {
+          "fineLocationPermission": true
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/icon.png",
+          "color": "#ffffff"
+        }
+      ],
+      [
+        "expo-speech-recognition",
+        {
+          "microphonePermission": "Allow $(PRODUCT_NAME) to use the microphone for voice commands and speech-to-text.",
+          "speechRecognitionPermission": "Allow $(PRODUCT_NAME) to use speech recognition for voice commands.",
+          "androidSpeechServicePackages": [
+            "com.google.android.googlequicksearchbox"
+          ]
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "78968ac8-b871-43ef-9396-84d9a1db06a1"
+      }
+    }
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "330613395341",
+    "project_id": "qvuew-firebase-dev",
+    "storage_bucket": "qvuew-firebase-dev.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:330613395341:android:aa26c85e2d2ed1c2fdf7c4",
+        "android_client_info": {
+          "package_name": "com.qvuew.vendorapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCYqemiw0ksUSj-G9cYvSseXloD887OgcM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
